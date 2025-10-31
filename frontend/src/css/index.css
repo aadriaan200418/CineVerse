@@ -1,0 +1,70 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities; */
+
+.index-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  color: white;
+  text-align: center;
+}
+
+.index-title {
+  font-size: 3rem; /* equivalente a text-5xl */
+  font-weight: bold;
+  margin-bottom: 3rem;
+  text-shadow: 0 4px 6px rgba(0, 0, 0, 0.8);
+}
+
+@media (min-width: 768px) {
+  .index-title {
+    font-size: 3.75rem;
+  }
+
+  .button-container {
+    flex-direction: row;
+  }
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.button {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: bold;
+  padding: 1.25rem 4rem; /* py-5 px-16 */
+  border-radius: 9999px; /* rounded-full */
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3); /* shadow-lg */
+}
+
+.button:hover {
+  transform: scale(1.05);
+}
+
+/* Botón Registrarse: más azul pero mantiene toque morado */
+.register-btn {
+  background-color: rgba(0, 19, 117); /* azul-violeta */
+}
+
+.register-btn:hover {
+  background-color: rgb(48, 73, 197); /* versión más oscura al pasar el ratón */
+}
+
+/* Botón Iniciar sesión: igual que antes */
+.login-btn {
+  background-color: rgba(117, 12, 115); /* bg-purple-700/80 */
+}
+
+.login-btn:hover {
+  background-color: rgb(192, 41, 189); /* hover:bg-blue-700 */
+}
