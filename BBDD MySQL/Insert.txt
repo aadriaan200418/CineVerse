@@ -1,2 +1,0 @@
-INSERT INTO users(dni, name, username, birth_date, email, password, role) VALUES ("12345678S", "Sofia Rodriguez", "sofiaRodriguez", "2005/10/22", "sofiarodriguez@gmail.com", "sofia1234", "admin");
-INSERT INTO users(dni, name, username, birth_date, email, password, role) VALUES ("87654321A", "Adrian Sanchez", "adrianSanchez", "2004/10/05", "adriansanchez@gmail.com", "adrian1234", "admin");
