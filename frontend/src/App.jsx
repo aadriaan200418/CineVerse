@@ -7,9 +7,10 @@ import React from "react";
 // - Route: define cada ruta y qué componente se renderiza en ella
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-// Importamos los componentes que se mostrarán en las rutas
+// Importamos las páginas que se mostrarán en las rutas
 import Index from "./pages/Index"; // Página principal
 import Register from "./pages/Register"; // Página de registro
+import Login from "./pages/Login"; // Página de inicio de sesión
 
 // Componente principal de la aplicación
 // Aquí definimos la estructura de navegación de la app
@@ -25,6 +26,9 @@ export default function App() {
 
         {/* Ruta "/register" que muestra el formulario de registro */}
         <Route path="/register" element={<Register />} />
+
+        {/* Ruta "/login" que muestra el formulario de inicio de sesión */}
+        <Route path="/login" element={<Login />} />
 
       </Routes>
     </BrowserRouter>
