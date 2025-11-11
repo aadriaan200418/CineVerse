@@ -1,0 +1,2 @@
+comando: (C:\Program Files\MySQL\MySQL Server 8.0\bin>) mysql -h cineverse-cineverse.b.aivencloud.com -P 20319 -u avnadmin -p
+passw:  AVNS_RPJs2yDtZTJGT-9mzWA
