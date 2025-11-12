@@ -69,3 +69,13 @@
 .continue-btn:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
+
+.field-error {
+  color: #d32f2f;       /* Rojo para destacar el error */
+  font-size: 0.85rem;   /* Tamaño más pequeño */
+  margin-top: 4px;      /* Espacio entre el input y el error */
+}
+
+input[aria-invalid="true"] {
+  border: 1px solid #d32f2f; /* Borde rojo si el campo es inválido */
+}
