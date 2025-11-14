@@ -119,10 +119,12 @@ export default function Register() {
       if (data.success) {
         alert("✅ Usuario registrado correctamente");
         navigate("/login"); // Redirigimos al login
-      } else {
+      } 
+      else {
         alert("❌ Error: " + (data.error || "Error al registrar usuario"));
       }
-    } catch {
+    } 
+    catch {
       alert("❌ Error de conexión con el servidor");
     }
   };
