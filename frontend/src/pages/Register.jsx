@@ -78,6 +78,7 @@ export default function Register() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
+    // limpiar error al escribir
     const error = validators[name] ? validators[name](value) : "";
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
@@ -117,15 +118,15 @@ export default function Register() {
 
       // Si el registro fue exitoso
       if (data.success) {
-        alert("✅ Usuario registrado correctamente");
+        alert("Usuario registrado correctamente");
         navigate("/login"); // Redirigimos al login
       } 
       else {
-        alert("❌ Error: " + (data.error || "Error al registrar usuario"));
+        alert("Error: " + (data.error || "Error al registrar usuario"));
       }
     } 
     catch {
-      alert("❌ Error de conexión con el servidor");
+      alert("Error de conexión con el servidor");
     }
   };
 

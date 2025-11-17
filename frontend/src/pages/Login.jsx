@@ -1,9 +1,15 @@
+// Importamos React y useState para manejar el estado del formulario
 import React, { useState } from "react";
+
+// Importamos el hook useNavigate de React Router DOM
+// Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
+
 // Importamos la imagen de fondo y los estilos CSS
 import fondo from "../assets/fondo.png";
 import "../css/login.css";
 
+// Definimos el componente principal de la página de iniciar sesion
 export default function Login() {
   const navigate = useNavigate();
 
@@ -12,18 +18,29 @@ export default function Login() {
     password: ""
   });
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({}); // errores por campo
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    // limpiar error al escribir
+    setErrors({ ...errors, [name]: "" });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    let newErrors = {};
+    if (!formData.username) newErrors.username = "El usuario es obligatorio";
+    if (!formData.password) newErrors.password = "La contraseña es obligatoria";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return; // no enviar si hay errores
+    }
+
     try {
-      // Llamada al backend para comprobar usuario
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -33,25 +50,21 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        // Usuario encontrado y login correcto
-        alert("✅ Bienvenido " + formData.username);
-        navigate("/home"); // Página principal
+        alert("Bienvenido " + formData.username);
+        navigate("/home");
       } else if (data.error === "USER_NOT_FOUND") {
-        // Usuario no existe → redirigir a registro
-        alert("❌ Usuario no encontrado, crea una cuenta");
+        alert("Usuario no encontrado, crea una cuenta");
         navigate("/register");
       } else {
-        // Error de contraseña u otro
-        setError(data.error || "Error al iniciar sesión");
+        setErrors({ general: data.error || "Error al iniciar sesión" });
       }
     } catch {
-      setError("❌ Error de conexión con el servidor");
+      setErrors({ general: "Error de conexión con el servidor" });
     }
   };
 
   return (
-    <div className="login-container"  style={{ backgroundImage: `url(${fondo})` }}>
-      {/* Botón para volver a la página principal */}
+    <div className="login-container" style={{ backgroundImage: `url(${fondo})` }}>
       <button className="back-button" onClick={() => navigate("/")}>←</button>
 
       <h1 className="login-title">Iniciar Sesión</h1>
@@ -64,6 +77,8 @@ export default function Login() {
           value={formData.username}
           onChange={handleChange}
         />
+        {errors.username && <div className="field-error">{errors.username}</div>}
+
         <input
           type="password"
           name="password"
@@ -71,9 +86,12 @@ export default function Login() {
           value={formData.password}
           onChange={handleChange}
         />
-        <button type="submit" class="continue-btn">Entrar</button>
+        {errors.password && <div className="field-error">{errors.password}</div>}
+
+        <button type="submit" className="continue-btn">Entrar</button>
       </form>
-      {error && <div className="field-error">{error}</div>}
+
+      {errors.general && <div className="field-error">{errors.general}</div>}
     </div>
   );
 }
