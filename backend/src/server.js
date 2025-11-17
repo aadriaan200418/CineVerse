@@ -57,6 +57,6 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Arrancar servidor en el puerto 3001 (o el que pongas en .env)
+// Arrancar servidor en el puerto 3001 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Servidor backend en http://localhost:${PORT}`));
