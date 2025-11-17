@@ -2,7 +2,7 @@
 const fs = require('fs');
 const express = require('express');   // Framework para crear el servidor y rutas
 const mysql = require('mysql2');      // Conexión a MySQL
-// const bcrypt = require('bcryptjs');   // Para encriptar contraseñas
+// const bcrypt = require('bcryptjs');   // Para encriptar contraseñas (opcional)
 const cors = require('cors');         // Para permitir peticiones desde el frontend
 require('dotenv').config();           // Para leer variables desde el archivo .env
 
@@ -32,19 +32,18 @@ db.connect((err) => {
   console.log('✅ Conectado a MySQL en Aiven');
 });
 
+// ---------------------- RUTAS ----------------------
+
 // Ruta de registro (POST /api/register)
 app.post('/api/register', async (req, res) => {
-  // Aquí recibimos los datos del frontend
   const { dni, name, username, birth_date, email, password } = req.body;
 
   try {
-    // Encriptamos la contraseña antes de guardarla
-   // const hashedPassword = await bcrypt.hash(password, 10);
+    // Encriptar contraseña si activas bcrypt:
+    // const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Consulta SQL para insertar el usuario
     const sql = 'INSERT INTO users (dni, name, username, birth_date, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)';
     
-    // Ejecutamos la consulta con los valores recibidos
     db.query(sql, [dni, name, username, birth_date, email, password, 'user'], (err) => {
       if (err) {
         console.error('❌ Error al registrar usuario:', err);
@@ -57,6 +56,36 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Arrancar servidor en el puerto 3001 
+// Ruta de login (POST /api/login)
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const sql = 'SELECT * FROM users WHERE username = ?';
+  db.query(sql, [username], (err, results) => {
+    if (err) {
+      console.error('❌ Error al buscar usuario:', err);
+      return res.status(500).json({ error: 'Error en el servidor' });
+    }
+
+    if (results.length === 0) {
+      // Usuario no existe
+      return res.json({ success: false, error: 'USER_NOT_FOUND' });
+    }
+
+    const user = results[0];
+
+    // Comparar contraseña (ejemplo simple, mejor usar bcrypt)
+    if (user.password !== password) {
+      return res.json({ success: false, error: 'Contraseña incorrecta' });
+    }
+
+    // Si todo va bien
+    return res.json({ success: true, message: 'Login correcto' });
+  });
+});
+
+// ---------------------- SERVIDOR ----------------------
+
+// Arrancar servidor en el puerto 3001 (o el que pongas en .env)
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Servidor backend en http://localhost:${PORT}`));

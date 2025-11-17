@@ -1,0 +1,81 @@
+.login-container {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+.back-button {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.back-button:hover {
+  transform: scale(1.2);
+}
+
+.login-title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 80%;
+  max-width: 400px;
+}
+
+.login-form input {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(70, 70, 160, 0.8);
+  color: white;
+  font-size: 1rem;
+  outline: none;
+}
+
+.login-form input::placeholder {
+  color: #d0d0ff;
+}
+
+.continue-btn {
+  margin-top: 10px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.continue-btn:hover {
+  background: linear-gradient(90deg, #c35ff5, #e480ff);
+}
+
+.field-error {
+  color: #d32f2f;       /* Rojo para destacar el error */
+  font-size: 0.85rem;   /* Tamaño más pequeño */
+  margin-top: 4px;      /* Espacio entre el input y el error */
+}
+
+input[aria-invalid="true"] {
+  border: 1px solid #d32f2f; /* Borde rojo si el campo es inválido */
+}
