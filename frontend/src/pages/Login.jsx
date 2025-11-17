@@ -1,40 +1,79 @@
-import React from "react";
-import "../css/register.css"; // Reutilizamos los estilos del registro (puedes renombrarlo luego a "auth.css")
-import fondo from "../assets/fondo.png"; // Fondo usado en todas las pantallas
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+// Importamos la imagen de fondo y los estilos CSS
+import fondo from "../assets/fondo.png";
+import "../css/login.css";
 
 export default function Login() {
-  const navigate = useNavigate(); // Hook para cambiar de página (navegar entre rutas)
+  const navigate = useNavigate();
 
-  // Función que se ejecuta al enviar el formulario
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Evita que la página se recargue al enviar el formulario
-    // Aquí podrías agregar la lógica de validación y conexión con la base de datos
-    console.log("Inicio de sesión enviado");
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  });
+
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Llamada al backend para comprobar usuario
+      const res = await fetch("http://localhost:3001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Usuario encontrado y login correcto
+        alert("✅ Bienvenido " + formData.username);
+        navigate("/home"); // Página principal
+      } else if (data.error === "USER_NOT_FOUND") {
+        // Usuario no existe → redirigir a registro
+        alert("❌ Usuario no encontrado, crea una cuenta");
+        navigate("/register");
+      } else {
+        // Error de contraseña u otro
+        setError(data.error || "Error al iniciar sesión");
+      }
+    } catch {
+      setError("❌ Error de conexión con el servidor");
+    }
   };
 
   return (
-    <div
-      className="register-container" // Reutilizamos el mismo contenedor de Register
-      style={{ backgroundImage: `url(${fondo})` }}
-    >
+    <div className="login-container"  style={{ backgroundImage: `url(${fondo})` }}>
       {/* Botón para volver a la página principal */}
       <button className="back-button" onClick={() => navigate("/")}>←</button>
 
-      {/* Título principal de la página */}
-      <h1 className="register-title">Iniciar sesión</h1>
+      <h1 className="login-title">Iniciar Sesión</h1>
 
-      {/* Formulario de inicio de sesión */}
-      <form className="register-form" onSubmit={handleSubmit}>
-        {/* Campo: nombre de usuario */}
-        <input type="text" placeholder="nombre de usuario" required />
-
-        {/* Campo: contraseña */}
-        <input type="password" placeholder="contraseña" required />
-
-        {/* Botón de enviar */}
-        <button type="submit" className="continue-btn">Continuar</button>
+      <form className="login-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          name="username"
+          placeholder="Usuario"
+          value={formData.username}
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Contraseña"
+          value={formData.password}
+          onChange={handleChange}
+        />
+        <button type="submit" class="continue-btn">Entrar</button>
       </form>
+      {error && <div className="field-error">{error}</div>}
     </div>
   );
 }
