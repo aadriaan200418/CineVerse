@@ -2,7 +2,7 @@
   min-height: 100vh;              /* permite crecer si hay errores */
   background-size: cover;       /* muestra la imagen completa */
   background-repeat: no-repeat;   /* evita que se repita */
-  background-position: center top;/* la centra arriba */
+  background-position: center;/* la centra arriba */
   display: flex;
   flex-direction: column;
   align-items: center;
