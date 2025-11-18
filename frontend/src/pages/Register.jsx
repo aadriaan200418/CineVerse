@@ -1,7 +1,6 @@
 // Importamos React y useState para manejar el estado del formulario
 import React, { useState } from "react";
 
-// Importamos el hook useNavigate de React Router DOM
 // Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
@@ -15,27 +14,12 @@ export default function Register() {
   const navigate = useNavigate();
 
   // Estado para guardar los datos que el usuario escribe en el formulario
-  const [formData, setFormData] = useState({
-    name: "",
-    username: "",
-    dni: "",
-    birth_date: "",
-    email: "",
-    password: ""
-  });
+  const [formData, setFormData] = useState({name: "", username: "", dni: "", birth_date: "", email: "", password: ""});
 
   // Estado para guardar los errores específicos de cada campo
-  const [errors, setErrors] = useState({
-    name: "",
-    username: "",
-    dni: "",
-    birth_date: "",
-    email: "",
-    password: ""
-  });
+  const [errors, setErrors] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: ""});
 
-  // Funciones de validación para cada campo
-  // Incluyen comprobación de si están vacíos y si cumplen formato
+  // Funciones de validación para cada campo, comprueba  si están vacíos y si cumplen formato
   const validators = {
     name: (v) => {
       if (!v.trim()) return "El nombre es obligatorio.";
@@ -73,7 +57,6 @@ export default function Register() {
   };
 
   // Función que se ejecuta cada vez que el usuario escribe en un input
-  // Actualiza el estado y valida el campo en tiempo real
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -133,13 +116,10 @@ export default function Register() {
   // Renderizamos el formulario
   return (
     <div className="register-container" style={{ backgroundImage: `url(${fondo})` }}>
-      {/* Botón para volver a la página principal */}
       <button className="back-button" onClick={() => navigate("/")}>←</button>
 
-      {/* Título del formulario */}
       <h1 className="register-title">Registrarse</h1>
 
-      {/* Formulario con validación */}
       <form className="register-form" onSubmit={handleSubmit} noValidate>
         <input type="text" name="name" placeholder="nombre" value={formData.name} onChange={handleChange} />
         {errors.name && <div className="field-error">{errors.name}</div>}
@@ -159,7 +139,6 @@ export default function Register() {
         <input type="password" name="password" placeholder="contraseña" value={formData.password} onChange={handleChange} />
         {errors.password && <div className="field-error">{errors.password}</div>}
 
-        {/* Botón para enviar el formulario */}
         <button type="submit" className="continue-btn">Continuar</button>
       </form>
     </div>
