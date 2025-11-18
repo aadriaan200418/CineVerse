@@ -1,79 +1,86 @@
+// Importamos React y useState para manejar el estado del formulario
 import React, { useState } from "react";
+
+// Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
+
 // Importamos la imagen de fondo y los estilos CSS
-import fondo from "../assets/fondo.png";
+import fondo from "../assets/fondo-formato-bueno.png";
 import "../css/login.css";
 
+// Definimos el componente principal de la página de iniciar sesión
 export default function Login() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    username: "",
-    password: ""
-  });
+  // Estado para guardar los datos que el usuario escribe en el formulario
+  const [formData, setFormData] = useState({username: "", password: ""});
 
-  const [error, setError] = useState("");
+  // Estado para guardar errores de validación
+  const [errors, setErrors] = useState({});
 
+  // Función que se ejecuta cada vez que el usuario escribe en un input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    setErrors({ ...errors, [name]: "" }); // limpiamos errores al escribir
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Función que se ejecuta al enviar el formulario
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      // Llamada al backend para comprobar usuario
-      const res = await fetch("http://localhost:3001/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
+  try {
+    const res = await fetch("http://localhost:3001/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData) // 👈 aquí mandamos username y password
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (data.success) {
-        // Usuario encontrado y login correcto
-        alert("✅ Bienvenido " + formData.username);
-        navigate("/home"); // Página principal
-      } else if (data.error === "USER_NOT_FOUND") {
-        // Usuario no existe → redirigir a registro
-        alert("❌ Usuario no encontrado, crea una cuenta");
-        navigate("/register");
-      } else {
-        // Error de contraseña u otro
-        setError(data.error || "Error al iniciar sesión");
-      }
-    } catch {
-      setError("❌ Error de conexión con el servidor");
+    // 👇 Depuración: ver qué devuelve el backend
+    console.log("Respuesta del backend en login:", data);
+
+    if (data.success) {
+      // 👇 Depuración: ver qué vamos a guardar
+      console.log("Guardando en localStorage:", data.username);
+
+      // Guardamos el username que devuelve el backend
+      localStorage.setItem("username", data.username);
+
+      // Redirigimos a perfiles
+      navigate("/profiles");
+    } 
+    else if (data.error === "USER_NOT_FOUND") {
+      alert("Usuario no encontrado, crea una cuenta");
+      navigate("/register");
+    } 
+    else {
+      setErrors({ general: data.error || "Error al iniciar sesión" });
     }
-  };
+  } 
+  catch {
+    setErrors({ general: "Error de conexión con el servidor" });
+  }
+};
+
 
   return (
-    <div className="login-container"  style={{ backgroundImage: `url(${fondo})` }}>
-      {/* Botón para volver a la página principal */}
+    <div className="login-container" style={{ backgroundImage: `url(${fondo})` }}>
       <button className="back-button" onClick={() => navigate("/")}>←</button>
-
       <h1 className="login-title">Iniciar Sesión</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Usuario"
-          value={formData.username}
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Contraseña"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <button type="submit" class="continue-btn">Entrar</button>
+        <input type="text" name="username" placeholder="Usuario" value={formData.username} onChange={handleChange}/>
+        {errors.username && <div className="field-error">{errors.username}</div>}
+
+        <input type="password" name="password" placeholder="Contraseña" value={formData.password} onChange={handleChange}/>
+        {errors.password && <div className="field-error">{errors.password}</div>}
+
+        <button type="submit" className="continue-btn">Entrar</button>
       </form>
-      {error && <div className="field-error">{error}</div>}
+
+      {errors.general && <div className="field-error">{errors.general}</div>}
     </div>
   );
 }
