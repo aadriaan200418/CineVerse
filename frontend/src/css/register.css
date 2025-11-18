@@ -1,8 +1,9 @@
+/*Contenedor principal*/
 .register-container {
-  min-height: 100vh;              /* permite crecer si hay errores */
-  background-size: cover;       /* muestra la imagen completa */
-  background-repeat: no-repeat;   /* evita que se repita */
-  background-position: center;/* la centra arriba */
+  min-height: 100vh;            
+  background-size: cover;       
+  background-position: center;
+  background-attachment: fixed; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,23 +15,26 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/*Titulo*/
 .register-title {
   font-size: 2.5rem;
   margin-bottom: 30px;
   text-align: center;
 }
 
+/*Contenedor de formulario*/
 .register-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 80%;
   max-width: 400px;
-  background-color: rgba(0,0,0,0.4); /* fondo para que no se quede “sin fondo” */
+  background-color: rgba(0,0,0,0.4); 
   padding: 20px;
   border-radius: 12px;
 }
 
+/*Flecha para volver atras*/
 .back-button {
   position: absolute;
   top: 25px;
@@ -47,6 +51,7 @@
   transform: scale(1.2);
 }
 
+/*Inputs*/
 .register-form input {
   padding: 12px 20px;
   border: none;
@@ -61,6 +66,7 @@
   color: #d0d0ff;
 }
 
+/*Boton de continuar*/
 .continue-btn {
   margin-top: 10px;
   padding: 12px 20px;
@@ -77,12 +83,9 @@
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
+/*Mensaje de error*/
 .field-error {
-  color: #d32f2f;       /* Rojo para destacar el error */
-  font-size: 0.85rem;   /* Tamaño más pequeño */
-  margin-top: 4px;      /* Espacio entre el input y el error */
-}
-
-input[aria-invalid="true"] {
-  border: 1px solid #d32f2f; /* Borde rojo si el campo es inválido */
+  color: #d32f2f;       
+  font-size: 0.85rem;   
+  margin-top: 4px;      
 }

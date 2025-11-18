@@ -26,10 +26,10 @@ const db = mysql.createConnection({
 // Probar conexión
 db.connect((err) => {
   if (err) {
-    console.error('❌ Error conectando a MySQL:', err);
+    console.error('Error conectando a MySQL:', err);
     return;
   }
-  console.log('✅ Conectado a MySQL en Aiven');
+  console.log('Conectado a MySQL en Aiven');
 });
 
 // ---------------------- RUTAS ----------------------
@@ -46,7 +46,7 @@ app.post('/api/register', async (req, res) => {
     
     db.query(sql, [dni, name, username, birth_date, email, password, 'user'], (err) => {
       if (err) {
-        console.error('❌ Error al registrar usuario:', err);
+        console.error('Error al registrar usuario:', err);
         return res.status(500).json({ error: 'Error al registrar usuario' });
       }
       res.json({ success: true, message: 'Usuario registrado correctamente' });
@@ -63,7 +63,7 @@ app.post('/api/login', (req, res) => {
   const sql = 'SELECT * FROM users WHERE username = ?';
   db.query(sql, [username], (err, results) => {
     if (err) {
-      console.error('❌ Error al buscar usuario:', err);
+      console.error('Error al buscar usuario:', err);
       return res.status(500).json({ error: 'Error en el servidor' });
     }
 

@@ -6,12 +6,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // Importamos la imagen de fondo y los estilos CSS
-import fondo from "../assets/fondo.png";
+import fondo from "../assets/fondo-formato-bueno.png";
 import "../css/register.css";
 
 // Definimos el componente principal de la página de registro
 export default function Register() {
-  // Inicializamos el hook useNavigate para poder redirigir al usuario
+  // Inicializamos el useNavigate para poder redirigir al usuario
   const navigate = useNavigate();
 
   // Estado para guardar los datos que el usuario escribe en el formulario
@@ -95,7 +95,7 @@ export default function Register() {
 
   // Función que se ejecuta al enviar el formulario
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Evita que se recargue la página
+    e.preventDefault();
 
     // Validamos todos los campos antes de enviar
     if (!validateAll()) return;
@@ -116,10 +116,10 @@ export default function Register() {
         return;
       }
 
-      // Si el registro fue exitoso
+      // Si el registro fue exitoso redirige al inicio de sesion
       if (data.success) {
         alert("Usuario registrado correctamente");
-        navigate("/login"); // Redirigimos al login
+        navigate("/login"); 
       } 
       else {
         alert("Error: " + (data.error || "Error al registrar usuario"));

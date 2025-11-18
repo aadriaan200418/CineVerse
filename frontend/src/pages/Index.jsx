@@ -6,7 +6,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 
 // Importamos la imagen de fondo que se usará en esta página
-import fondo from "../assets/fondo.png";
+import fondo from "../assets/fondo-formato-bueno.png";
+import "../css/index.css";
 
 // Componente principal de la página de inicio
 export default function Index() {
@@ -16,7 +17,7 @@ export default function Index() {
   // Estructura visual de la página de inicio
   return (
     // Contenedor principal que agrupa todo el contenido
-    <div className="container">
+    <div className="container" style={{ backgroundImage: `url(${fondo})` }}>
 
       {/* Título principal que aparece centrado en pantalla */}
       <h1 className="title">🎬 ¿Tienes cuenta en CineVerse?</h1>

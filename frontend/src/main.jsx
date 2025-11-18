@@ -7,9 +7,6 @@ import ReactDOM from "react-dom/client";
 // Importamos el componente principal de la aplicación (App.jsx)
 import App from "./App";
 
-// Importamos los estilos globales (afectan a toda la aplicación)
-import "./css/index.css";
-
 // ReactDOM.createRoot() crea el punto de entrada donde React “inyecta” la aplicación en el HTML.
 // document.getElementById("root") hace referencia al <div id="root"></div> del index.html
 ReactDOM.createRoot(document.getElementById("root")).render(
