@@ -4,8 +4,7 @@ import React, { useState } from "react";
 // Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
-// Importamos la imagen de fondo y los estilos CSS
-import fondo from "../assets/fondo-formato-bueno.png";
+// Importamos los estilos CSS
 import "../css/register.css";
 
 // Definimos el componente principal de la página de registro
@@ -115,7 +114,7 @@ export default function Register() {
 
   // Renderizamos el formulario
   return (
-    <div className="register-container" style={{ backgroundImage: `url(${fondo})` }}>
+    <div className="register-container">
       <button className="back-button" onClick={() => navigate("/")}>←</button>
 
       <h1 className="register-title">Registrarse</h1>

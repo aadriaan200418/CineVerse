@@ -4,8 +4,7 @@ import React from "react";
 // Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
-// Importamos la imagen de fondo y el css
-import fondo from "../assets/fondo-formato-bueno.png";
+// Importamos  el css
 import "../css/index.css";
 
 // Componente principal de la página de inicio
@@ -15,7 +14,7 @@ export default function Index() {
 
   // Estructura visual de la página de inicio
   return (
-    <div className="container" style={{ backgroundImage: `url(${fondo})` }}>
+    <div className="container">
       <h1 className="title">🎬 ¿Tienes cuenta en CineVerse?</h1>
 
       <div className="buttons">

@@ -23,15 +23,15 @@ const db = mysql.createPool({
 
 db.query('SELECT 1', (err) => {
   if (err) {
-    console.error('❌ Error conectando a MySQL:', err);
+    console.error('Error conectando a MySQL:', err);
   } else {
-    console.log('✅ Conectado a MySQL en Aiven');
+    console.log('Conectado a MySQL en Aiven');
   }
 });
 
 // ---------------------- RUTAS ----------------------
 
-// 📌 REGISTRO DE USUARIO
+// REGISTRO DE USUARIO
 app.post('/api/register', (req, res) => {
   const { dni, name, username, birth_date, email, password } = req.body;
 
@@ -41,21 +41,21 @@ app.post('/api/register', (req, res) => {
   `;
   db.query(sql, [dni, name, username, birth_date, email, password], (err) => {
     if (err) {
-      console.error('❌ Error al registrar usuario:', err);
+      console.error('Error al registrar usuario:', err);
       return res.status(500).json({ error: 'Error al registrar usuario' });
     }
     res.json({ success: true, message: 'Usuario registrado correctamente' });
   });
 });
 
-// 📌 LOGIN DE USUARIO
+// LOGIN DE USUARIO
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
   const sql = 'SELECT username, password FROM users WHERE username = ?';
   db.query(sql, [username], (err, results) => {
     if (err) {
-      console.error('❌ Error al buscar usuario:', err);
+      console.error('Error al buscar usuario:', err);
       return res.status(500).json({ error: 'Error en el servidor' });
     }
 
@@ -71,13 +71,13 @@ app.post('/api/login', (req, res) => {
       return res.json({ success: false, error: 'Contraseña incorrecta' });
     }
 
-    // ✅ Devolvemos el username correctamente
+    // Devolvemos el username correctamente
     res.json({ success: true, username: user.username });
   });
 });
 
 
-// 📌 OBTENER PERFILES DE UN USUARIO
+// OBTENER PERFILES DE UN USUARIO
 app.get('/api/profiles', (req, res) => {
   const { username } = req.query;
 
@@ -87,7 +87,7 @@ app.get('/api/profiles', (req, res) => {
   const sqlUser = 'SELECT dni FROM users WHERE username = ?';
   db.query(sqlUser, [username], (err, userResults) => {
     if (err) {
-      console.error('❌ Error al buscar usuario:', err);
+      console.error('Error al buscar usuario:', err);
       return res.status(500).json({ error: 'Error al buscar usuario' });
     }
     if (userResults.length === 0) {
@@ -100,7 +100,7 @@ app.get('/api/profiles', (req, res) => {
     const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
     db.query(sqlProfiles, [dni], (err2, profileResults) => {
       if (err2) {
-        console.error('❌ Error al obtener perfiles:', err2);
+        console.error('Error al obtener perfiles:', err2);
         return res.status(500).json({ error: 'Error al obtener perfiles' });
       }
 
@@ -109,7 +109,7 @@ app.get('/api/profiles', (req, res) => {
   });
 });
 
-// 📌 AÑADIR NUEVO PERFIL
+// AÑADIR NUEVO PERFIL
 app.post('/api/addProfile', (req, res) => {
   const { username, nombre } = req.body;
 
@@ -117,11 +117,11 @@ app.post('/api/addProfile', (req, res) => {
     return res.status(400).json({ error: 'Faltan datos: username y nombre son obligatorios' });
   }
 
-  // Buscamos el dni del usuario
+  // Buscar el dni del usuario
   const sqlUser = 'SELECT dni FROM users WHERE username = ?';
   db.query(sqlUser, [username], (err, userResults) => {
     if (err) {
-      console.error('❌ Error al buscar usuario:', err);
+      console.error('Error al buscar usuario:', err);
       return res.status(500).json({ error: 'Error al buscar usuario' });
     }
     if (userResults.length === 0) {
@@ -130,23 +130,38 @@ app.post('/api/addProfile', (req, res) => {
 
     const dni = userResults[0].dni;
 
-    // Insertamos el nuevo perfil
+    // Insertar el nuevo perfil en la tabla profiles
     const sqlInsert = 'INSERT INTO profiles (id_user, name) VALUES (?, ?)';
     db.query(sqlInsert, [dni, nombre], (err2) => {
       if (err2) {
-        console.error('❌ Error al crear perfil:', err2);
+        console.error('Error al crear perfil:', err2);
         return res.status(500).json({ error: 'Error al crear perfil' });
       }
 
-      // Devolvemos la lista actualizada de perfiles
-      const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
-      db.query(sqlProfiles, [dni], (err3, profileResults) => {
+      // Actualizar el campo JSON profile en la tabla users
+      const sqlUpdateJson = `
+        UPDATE users 
+        SET profile = JSON_ARRAY_APPEND(
+          IFNULL(profile, JSON_ARRAY()), '$', ?
+        )
+        WHERE dni = ?
+      `;
+      db.query(sqlUpdateJson, [nombre, dni], (err3) => {
         if (err3) {
-          console.error('❌ Error al obtener perfiles:', err3);
-          return res.status(500).json({ error: 'Error al obtener perfiles' });
+          console.error('Error al actualizar campo JSON profile:', err3);
+          return res.status(500).json({ error: 'Error al actualizar usuario' });
         }
 
-        res.json({ success: true, perfiles: profileResults });
+        // Devolver perfiles actualizados
+        const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
+        db.query(sqlProfiles, [dni], (err4, profileResults) => {
+          if (err4) {
+            console.error('Error al obtener perfiles:', err4);
+            return res.status(500).json({ error: 'Error al obtener perfiles' });
+          }
+
+          res.json({ success: true, perfiles: profileResults });
+        });
       });
     });
   });

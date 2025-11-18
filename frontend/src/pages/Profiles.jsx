@@ -4,9 +4,13 @@ import React, { useEffect, useState } from "react";
 // Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
-// Importamos la imagen de fondo y los estilos CSS
-import fondo from "../assets/fondo-formato-bueno.png";
+// Importamos los estilos CSS
 import "../css/profiles.css";
+
+// Función para generar un color aleatorio en formato HSL
+const getRandomColor = () => {
+    return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
+};
 
 // Componente principal de selección de perfiles
 export default function Profiles() {
@@ -78,7 +82,7 @@ export default function Profiles() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({username, nombre: newProfile.nombre.trim()})
             });
-            
+
             const data = await res.json();
             if (data.success) {
                 setProfiles(data.perfiles || []);
@@ -96,18 +100,17 @@ export default function Profiles() {
 
     if (loading) {
         return (
-            <div className="profiles-container" style={{ backgroundImage: `url(${fondo})` }}>
+            <div className="profiles-container">
                 <div className="profiles-content">
                     <button className="back-button" onClick={() => navigate("/")}>←</button>
                     <h1 className="profiles-title">¿Quién está viendo?</h1>
-                    <p className="profiles-status">Cargando perfiles...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="profiles-container" style={{ backgroundImage: `url(${fondo})` }}>
+        <div className="profiles-container">
             <div className="profiles-content">
                 <button className="back-button" onClick={() => navigate("/")}>←</button>
                 <h1 className="profiles-title">¿Quién está viendo?</h1>
@@ -116,8 +119,8 @@ export default function Profiles() {
                 <div className="profiles-list">
                     {profiles.map((p) => (
                         <div key={p.id} className="profile-row" onClick={() => handleSelectProfile(p.id)}>
-                            <div className="profile-icon">
-                                <span className="profile-initial">{p.name?.[0]?.toUpperCase() || "👤"}</span>
+                            <div className="profile-icon" style={{ backgroundColor: getRandomColor() }}>
+                                <span className="profile-initial">{p.name?.[0]?.toUpperCase()}</span>
                             </div>
                             <span className="profile-name">{p.name}</span>
                         </div>

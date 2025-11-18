@@ -1,6 +1,7 @@
 /* Contenedor principal con el mismo fondo que login */
 .profiles-container {
-  min-height: 100vh;             
+  min-height: 100vh;   
+  background-image: url("../assets/fondo-formato-bueno.png");          
   background-size: cover;
   background-position: center;
   background-attachment: fixed; 
