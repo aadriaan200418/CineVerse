@@ -65,8 +65,7 @@ app.post('/api/login', (req, res) => {
 
     const user = results[0];
 
-    // 👇 Verificamos que el usuario existe y mostramos en consola
-    console.log("Usuario encontrado en DB:", user);
+ 
 
     if (user.password !== password) {
       return res.json({ success: false, error: 'Contraseña incorrecta' });
@@ -160,9 +159,10 @@ const path = require('path');
 app.use(express.static(path.join(__dirname, 'build')));
 
 // Redirigir todas las rutas al index.html
-app.get('*', (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
+
 
 // ---------------------- ARRANCAR SERVIDOR ----------------------
 const PORT = process.env.PORT || 3001;

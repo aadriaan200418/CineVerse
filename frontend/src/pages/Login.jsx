@@ -38,12 +38,10 @@ export default function Login() {
 
     const data = await res.json();
 
-    // 👇 Depuración: ver qué devuelve el backend
-    console.log("Respuesta del backend en login:", data);
+
 
     if (data.success) {
-      // 👇 Depuración: ver qué vamos a guardar
-      console.log("Guardando en localStorage:", data.username);
+  
 
       // Guardamos el username que devuelve el backend
       localStorage.setItem("username", data.username);
