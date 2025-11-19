@@ -16,23 +16,49 @@
   padding: 1rem;
 }
 
-.card {
-  min-width: 200px;
-  flex-shrink: 0;
-  background: #222;
-  border-radius: 8px;
-  padding: 0.5rem;
-  text-align: center;
-  color: white;
+.carousel-card {
+  flex: 0 0 auto;
+  width: 140px;       /* ajusta el ancho */
+  height: 210px;      /* ajusta el alto */
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  position: relative;
 }
 
-.card-image {
+.carousel-card:hover {
+  transform: scale(1.03);
+}
+
+.carousel-card-image {
   width: 100%;
-  border-radius: 6px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.card-info {
-  margin-top: 0.5rem;
+.carousel-card-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  color: white;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.carousel-card-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.carousel-card-genre {
+  font-size: 0.7rem;
+  margin-top: 2px;
+  opacity: 0.8;
 }
 
 .scroll-button {

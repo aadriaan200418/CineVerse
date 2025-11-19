@@ -1,14 +1,7 @@
 [
   { "id_series": 1, "title": "Un Asunto Privado", "genre": "Drama", "image": "asunto_privado.jpg" },
-  { "id_series": 2, "title": "Corazón", "genre": "Romance", "image": "corazon.png" },
-  { "id_series": 3, "title": "Estrella", "genre": "Drama", "image": "estrella.png" },
   { "id_series": 4, "title": "Los 100", "genre": "Ciencia Ficción", "image": "los_100.jpg" },
   { "id_series": 5, "title": "La Que Se Avecina 2", "genre": "Comedia", "image": "lqsa_2.webp" },
-  { "id_series": 6, "title": "La Que Se Avecina E1", "genre": "Comedia", "image": "lqsa_e1.webp" },
-  { "id_series": 7, "title": "La Que Se Avecina E2", "genre": "Comedia", "image": "lqsa_e2.webp" },
-  { "id_series": 8, "title": "La Que Se Avecina E3", "genre": "Comedia", "image": "lqsa_e3.webp" },
-  { "id_series": 9, "title": "La Que Se Avecina E4", "genre": "Comedia", "image": "lqsa_e4.jpg" },
-  { "id_series": 10, "title": "Sola", "genre": "Drama", "image": "sola.jpg" },
   { "id_series": 11, "title": "Outer Banks", "genre": "Aventura", "image": "outer_banks.webp" },
   { "id_series": 12, "title": "Umbrella Academy", "genre": "Ciencia Ficción", "image": "umbrella_academy.jpg" }
 ]

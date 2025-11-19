@@ -20,16 +20,18 @@ export default function Carousel({ title, items, imagePath }) {
 
         <div className="carousel" id={carouselId}>
           {items.map((item) => (
-            <div key={item.id_movie || item.id_series} className="card">
+            <div key={item.id_movie || item.id_series} className="carousel-card">
               <img
                 src={`/${imagePath}/${item.image}`}
                 alt={item.title}
-                className="card-image"
+                className="carousel-card-image"
               />
-              <div className="card-info">
-                <strong>{item.title}</strong>
+              <div className="carousel-card-overlay">
+                <h3 className="carousel-card-title">{item.title}</h3>
+                {item.genre && <p className="carousel-card-genre">{item.genre}</p>}
               </div>
             </div>
+
           ))}
         </div>
 

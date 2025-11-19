@@ -55,7 +55,7 @@ export default function Home() {
 
           {role === "user" && (
             <>
-              <div className="profile-icon"><img src={userIcon} alt="Usuario" class="user-icon" onClick={() => navigate("/profiles")}/></div>
+              <div className="profile-icon"><img src={userIcon} alt="Usuario" class="user-icon" onClick={() => navigate("/profiles")} /></div>
               <div className="back-point" onClick={() => navigate("/profiles")}>
                 {localStorage.getItem("username") || "Usuario"}
               </div>
@@ -76,54 +76,63 @@ export default function Home() {
       {/* Contenido dinámico */}
       {view === "inicio" && (
         <>
-          <h1 className="home-title">Nuevo Estreno: La Ley de Lidia Poët</h1>
 
+          {/* Imagen destacada de estreno */}
+          <div className="featured-banner">
+            <img
+              src="/images-movies/lidia_poet.jpg"
+              alt="La Ley de Lidia Poët"
+              className="featured-image"
+            />
+            <div className="featured-label">NUEVO ESTRENO</div>
+          </div>
+
+
+          {/* Carrusel de Series */}
           <Carousel title="Top Series" items={series} imagePath="images-series" />
-          <Carousel title="Top Películas" items={movies} imagePath="images-movies" />
 
+          {/* Carrusel de Películas */}
+          <Carousel title="Top Películas" items={movies} imagePath="images-movies" />
         </>
       )}
 
 
-      {view === "series" && (
-        <div className="section">
-          <h2>Series</h2>
-          <ul>
-            {filteredSeries.map((serie) => (
-              <li key={serie.id_series} className="card">
-                <img
-                  src={`/images-series/${serie.image}`}
-                  alt={serie.title}
-                  className="card-image"
-                />
-                <div className="card-info">
-                  <strong>{serie.title}</strong> — {serie.genre}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
-      {view === "peliculas" && (
-        <div className="section">
-          <h2>Películas</h2>
-          <ul>
-            {filteredMovies.map((movie) => (
-              <li key={movie.id_movie} className="card">
-                <img
-                  src={`/images-movies/${movie.image}`}
-                  alt={movie.title}
-                  className="card-image"
-                />
-                <div className="card-info">
-                  <strong>{movie.title}</strong> — {movie.genre}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {view === "series" && (
+  <div className="section">
+    <h2>Series</h2>
+    <div className="card-grid">
+      {filteredSeries.map((serie) => (
+        <Card
+          key={serie.id_series}
+          image={serie.image}
+          title={serie.title}
+          genre={serie.genre}
+          type="images-series"
+        />
+      ))}
+    </div>
+  </div>
+)}
+
+{view === "peliculas" && (
+  <div className="section">
+    <h2>Películas</h2>
+    <div className="card-grid">
+      {filteredMovies.map((movie) => (
+        <Card
+          key={movie.id_movie}
+          image={movie.image}
+          title={movie.title}
+          genre={movie.genre}
+          type="images-movies"
+        />
+      ))}
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 }
