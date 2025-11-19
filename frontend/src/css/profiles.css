@@ -35,6 +35,8 @@
   font-size: 2rem;
   color: white;
   cursor: pointer;
+  position: fixed;
+  z-index: 1000; 
   transition: transform 0.2s;
 }
 
@@ -173,4 +175,18 @@
 .btn-secondary {
   background: rgba(70, 70, 160, 0.8);
   color: #fff;
+}
+
+/* Imagen de eliminar perfil */
+.delete-icon {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  margin-left: auto; 
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.delete-icon:hover {
+  transform: scale(1.2);
+  filter: brightness(1.3);
 }

@@ -1,0 +1,61 @@
+.carousel-section {
+  margin-bottom: 2rem;
+}
+
+.carousel-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.card {
+  min-width: 200px;
+  flex-shrink: 0;
+  background: #222;
+  border-radius: 8px;
+  padding: 0.5rem;
+  text-align: center;
+  color: white;
+}
+
+.card-image {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.card-info {
+  margin-top: 0.5rem;
+}
+
+.scroll-button {
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 1;
+  transition: background-color 0.3s;
+}
+
+.scroll-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ocultar scrollbar en navegadores modernos */
+.carousel {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}

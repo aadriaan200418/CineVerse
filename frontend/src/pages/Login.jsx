@@ -1,4 +1,4 @@
-// Importamos React y useState para manejar el estado del formulario
+// Importamos React y hooks para estado y ciclo de vida
 import React, { useState } from "react";
 
 // Nos permite redirigir al usuario a otra ruta desde el código
@@ -7,28 +7,41 @@ import { useNavigate } from "react-router-dom";
 // Importamos los estilos CSS
 import "../css/login.css";
 
-// Definimos el componente principal de la página de iniciar sesión
 export default function Login() {
   const navigate = useNavigate();
 
-  // Estado para guardar los datos que el usuario escribe en el formulario
+  // Estado para guardar los datos del formulario
   const [formData, setFormData] = useState({ username: "", password: "" });
 
-  // Estado para guardar errores de validación
+  // Estado para mostrar errores de validación o del servidor
   const [errors, setErrors] = useState({});
 
-  // Función que se ejecuta cada vez que el usuario escribe en un input
+  // Función para manejar cambios en los inputs
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    setErrors({ ...errors, [name]: "" }); // limpiamos errores al escribir
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Función que se ejecuta al enviar el formulario
+  // Función para manejar el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validación de campos vacíos
+    const newErrors = {};
+    if (!formData.username.trim()) {
+      newErrors.username = "El usuario es obligatorio";
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = "La contraseña es obligatoria";
+    }
+
+    // Si hay errores, los mostramos y no continuamos
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
+      // Llamada al backend para login
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,11 +51,17 @@ export default function Login() {
       const data = await res.json();
 
       if (data.success) {
-        // Guardamos el username que devuelve el backend
+        // Guardamos username y role en localStorage
         localStorage.setItem("username", data.username);
+        localStorage.setItem("role", data.role);
 
-        // Redirigimos a perfiles
-        navigate("/profiles");
+        // Redirigimos según el rol
+        if (data.role === "admin") {
+          navigate("/home");
+        } 
+        else {
+          navigate("/profiles");
+        }
       }
       else if (data.error === "USER_NOT_FOUND") {
         alert("Usuario no encontrado, crea una cuenta");
@@ -60,19 +79,20 @@ export default function Login() {
   return (
     <div className="login-container">
       <button className="back-button" onClick={() => navigate("/")}>←</button>
-      <h1 className="login-title">Iniciar Sesión</h1>
+
+      <h1 className="login-title">Iniciar sesión</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <input type="text" name="username" placeholder="Usuario" value={formData.username} onChange={handleChange} />
-        {errors.username && <div className="field-error">{errors.username}</div>}
+        <input id="username" type="text" name="username" value={formData.username} onChange={handleChange} className="form-input" placeholder="nombre de usuario"/>
+        {errors.username && <span className="error">{errors.username}</span>}
 
-        <input type="password" name="password" placeholder="Contraseña" value={formData.password} onChange={handleChange} />
-        {errors.password && <div className="field-error">{errors.password}</div>}
+        <input id="password" type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="contraseña"/>
+        {errors.password && <span className="error">{errors.password}</span>}
 
-        <button type="submit" className="continue-btn">Entrar</button>
+        {errors.general && <div className="error">{errors.general}</div>}
+
+        <button type="submit" className="continue-btn">Continuar</button>
       </form>
-
-      {errors.general && <div className="field-error">{errors.general}</div>}
     </div>
   );
 }

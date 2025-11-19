@@ -4,6 +4,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config();
+const path = require('path');
 
 // ---------------------- CONFIGURAR EXPRESS ----------------------
 const app = express();
@@ -35,24 +36,48 @@ db.query('SELECT 1', (err) => {
 app.post('/api/register', (req, res) => {
   const { dni, name, username, birth_date, email, password } = req.body;
 
-  const sql = `
-    INSERT INTO users (dni, name, username, birth_date, email, password, role)
-    VALUES (?, ?, ?, ?, ?, ?, 'user')
+  // Primero comprobamos duplicados
+  const checkSql = `
+    SELECT dni, username, email 
+    FROM users 
+    WHERE dni = ? OR username = ? OR email = ?
   `;
-  db.query(sql, [dni, name, username, birth_date, email, password], (err) => {
+  db.query(checkSql, [dni, username, email], (err, results) => {
     if (err) {
-      console.error('Error al registrar usuario:', err);
-      return res.status(500).json({ error: 'Error al registrar usuario' });
+      console.error('Error al comprobar duplicados:', err);
+      return res.status(500).json({ error: 'Error en el servidor' });
     }
-    res.json({ success: true, message: 'Usuario registrado correctamente' });
+
+    if (results.length > 0) {
+      const errors = {};
+      results.forEach(user => {
+        if (user.dni === dni) errors.dni = "El DNI ya está registrado";
+        if (user.username === username) errors.username = "El nombre de usuario ya está en uso";
+        if (user.email === email) errors.email = "El correo ya está registrado";
+      });
+      return res.json({ errors });
+    }
+
+    // Si no hay duplicados, insertamos el usuario
+    const insertSql = `
+      INSERT INTO users (dni, name, username, birth_date, email, password, role)
+      VALUES (?, ?, ?, ?, ?, ?, 'user')
+    `;
+    db.query(insertSql, [dni, name, username, birth_date, email, password], (err) => {
+      if (err) {
+        console.error('Error al registrar usuario:', err);
+        return res.status(500).json({ error: 'Error al registrar usuario' });
+      }
+      res.json({ success: true, message: 'Usuario registrado correctamente' });
+    });
   });
 });
 
-// LOGIN DE USUARIO
+// LOGIN DE USUARIO (devuelve también el rol)
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
-  const sql = 'SELECT username, password FROM users WHERE username = ?';
+  const sql = 'SELECT username, password, role FROM users WHERE username = ?';
   db.query(sql, [username], (err, results) => {
     if (err) {
       console.error('Error al buscar usuario:', err);
@@ -65,17 +90,14 @@ app.post('/api/login', (req, res) => {
 
     const user = results[0];
 
- 
-
     if (user.password !== password) {
       return res.json({ success: false, error: 'Contraseña incorrecta' });
     }
 
-    // Devolvemos el username correctamente
-    res.json({ success: true, username: user.username });
+    // Devolvemos username y role
+    res.json({ success: true, username: user.username, role: user.role });
   });
 });
-
 
 // OBTENER PERFILES DE UN USUARIO
 app.get('/api/profiles', (req, res) => {
@@ -83,7 +105,6 @@ app.get('/api/profiles', (req, res) => {
 
   if (!username) return res.status(400).json({ error: 'Falta username' });
 
-  // Buscamos el dni del usuario
   const sqlUser = 'SELECT dni FROM users WHERE username = ?';
   db.query(sqlUser, [username], (err, userResults) => {
     if (err) {
@@ -96,7 +117,6 @@ app.get('/api/profiles', (req, res) => {
 
     const dni = userResults[0].dni;
 
-    // Buscamos los perfiles asociados a ese dni
     const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
     db.query(sqlProfiles, [dni], (err2, profileResults) => {
       if (err2) {
@@ -117,7 +137,6 @@ app.post('/api/addProfile', (req, res) => {
     return res.status(400).json({ error: 'Faltan datos: username y nombre son obligatorios' });
   }
 
-  // Buscar el dni del usuario
   const sqlUser = 'SELECT dni FROM users WHERE username = ?';
   db.query(sqlUser, [username], (err, userResults) => {
     if (err) {
@@ -130,7 +149,6 @@ app.post('/api/addProfile', (req, res) => {
 
     const dni = userResults[0].dni;
 
-    // Insertar el nuevo perfil en la tabla profiles
     const sqlInsert = 'INSERT INTO profiles (id_user, name) VALUES (?, ?)';
     db.query(sqlInsert, [dni, nombre], (err2) => {
       if (err2) {
@@ -138,7 +156,7 @@ app.post('/api/addProfile', (req, res) => {
         return res.status(500).json({ error: 'Error al crear perfil' });
       }
 
-      // Actualizar el campo JSON profile en la tabla users
+      // Actualizar campo JSON profile en users
       const sqlUpdateJson = `
         UPDATE users 
         SET profile = JSON_ARRAY_APPEND(
@@ -148,11 +166,10 @@ app.post('/api/addProfile', (req, res) => {
       `;
       db.query(sqlUpdateJson, [nombre, dni], (err3) => {
         if (err3) {
-          console.error('Error al actualizar campo JSON profile:', err3);
-          return res.status(500).json({ error: 'Error al actualizar usuario' });
+          console.error(' Error al actualizar campo JSON profile:', err3);
+          // No bloqueamos la creación, solo avisamos
         }
 
-        // Devolver perfiles actualizados
         const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
         db.query(sqlProfiles, [dni], (err4, profileResults) => {
           if (err4) {
@@ -167,20 +184,83 @@ app.post('/api/addProfile', (req, res) => {
   });
 });
 
+// ELIMINAR PERFIL
+app.delete('/api/deleteProfile/:id', (req, res) => {
+  const profileId = req.params.id;
 
-const path = require('path');
+  const sqlGetUserProfile = `
+    SELECT u.dni, p.name 
+    FROM profiles p 
+    JOIN users u ON u.dni = p.id_user 
+    WHERE p.id_profile = ?
+  `;
+  db.query(sqlGetUserProfile, [profileId], (err, results) => {
+    if (err) {
+      console.error('Error al obtener datos del perfil:', err);
+      return res.status(500).json({ error: 'Error al obtener datos del perfil' });
+    }
 
-// Servir archivos estáticos del build de React
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Perfil no encontrado' });
+    }
+
+    const { dni, name } = results[0];
+
+    const sqlDelete = 'DELETE FROM profiles WHERE id_profile = ?';
+    db.query(sqlDelete, [profileId], (err2) => {
+      if (err2) {
+        console.error(' Error al eliminar perfil:', err2);
+        return res.status(500).json({ error: 'Error al eliminar perfil' });
+      }
+
+      const sqlUpdateJson = `
+        UPDATE users 
+        SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?)))
+        WHERE dni = ?
+      `;
+      db.query(sqlUpdateJson, [name, dni], (err3) => {
+        if (err3) {
+          console.error(' Error al actualizar campo JSON profile:', err3);
+          // No bloqueamos la eliminación, solo avisamos
+        }
+
+        res.json({ success: true });
+      });
+    });
+  });
+});
+
+// Obtener películas
+app.get("/api/movies", (req, res) => {
+  const sql = "SELECT * FROM movies ORDER BY release_date DESC";
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener películas:", err);
+      return res.status(500).json({ error: "Error al obtener películas" });
+    }
+    res.json({ success: true, movies: results });
+  });
+});
+
+// Obtener series
+app.get("/api/series", (req, res) => {
+  const sql = "SELECT * FROM series ORDER BY release_date DESC";
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener series:", err);
+      return res.status(500).json({ error: "Error al obtener series" });
+    }
+    res.json({ success: true, series: results });
+  });
+});
+
+
+// ---------------------- SERVIR FRONTEND ----------------------
 app.use(express.static(path.join(__dirname, 'build')));
-
-// Redirigir todas las rutas al index.html
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-
 // ---------------------- ARRANCAR SERVIDOR ----------------------
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Servidor backend en http://localhost:${PORT}`));
-
-

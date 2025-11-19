@@ -16,6 +16,25 @@
   font-family: 'Poppins', sans-serif;
 }
 
+/*Flecha para volver atras*/
+.back-button {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  position: fixed;
+  z-index: 1000; 
+  transition: transform 0.2s;
+}
+
+.back-button:hover {
+  transform: scale(1.2);
+}
+
 /*Titulo*/
 .register-title {
   font-size: 2.5rem;
@@ -30,26 +49,9 @@
   gap: 20px;
   width: 80%;
   max-width: 400px;
-  background-color: rgba(0,0,0,0.4); 
+  background-color: rgba(180, 180, 180, 0.178); 
   padding: 20px;
   border-radius: 12px;
-}
-
-/*Flecha para volver atras*/
-.back-button {
-  position: absolute;
-  top: 25px;
-  left: 25px;
-  background: none;
-  border: none;
-  font-size: 2rem;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.back-button:hover {
-  transform: scale(1.2);
 }
 
 /*Inputs*/
