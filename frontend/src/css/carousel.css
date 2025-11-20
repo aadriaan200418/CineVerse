@@ -1,7 +1,9 @@
+/*Contenedor principal*/
 .carousel-section {
   margin-bottom: 2rem;
 }
 
+/*Carrusales*/
 .carousel-container {
   position: relative;
   display: flex;
@@ -18,9 +20,10 @@
 
 .carousel-card {
   flex: 0 0 auto;
-  width: 140px;       /* ajusta el ancho */
-  height: 210px;      /* ajusta el alto */
+  width: 140px;      
+  height: 210px;      
   border-radius: 10px;
+  border: 1px solid white;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   transition: transform 0.3s ease;
@@ -61,8 +64,9 @@
   opacity: 0.8;
 }
 
+/*Flechas de derecha e izquierda*/
 .scroll-button {
-  background-color: rgba(0, 0, 0, 0.6);
+  background:none;
   color: white;
   border: none;
   font-size: 2rem;
@@ -78,10 +82,10 @@
 
 /* Ocultar scrollbar en navegadores modernos */
 .carousel {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
 }
 
 .carousel::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none; 
 }

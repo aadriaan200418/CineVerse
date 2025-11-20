@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 // Importamos los estilos CSS
 import "../css/create-admin.css";
 
+// Componente principal de la página de create-admin
 export default function AddContent() {
   const navigate = useNavigate();
 
@@ -64,6 +65,7 @@ export default function AddContent() {
             <input type="radio" name="type" value="pelicula" checked={formData.type === "pelicula"} onChange={handleChange}/>
             Película
           </label>
+          
           <label>
             <input type="radio" name="type" value="serie" checked={formData.type === "serie"} onChange={handleChange}/>
             Serie

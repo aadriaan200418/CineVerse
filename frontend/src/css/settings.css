@@ -1,0 +1,137 @@
+/*Contenedor principal*/
+.logout-container {
+  min-height: 100vh;    
+  background-image: url("../assets/fondo-formato-bueno.png");               
+  background-size: cover;       
+  background-position: center;
+  background-attachment: fixed; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 20px;
+  box-sizing: border-box;
+  color: white;
+  position: relative;
+  font-family: 'Poppins', sans-serif;
+}
+
+/*Flecha para volver atras*/
+.back-button {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  position: fixed;
+  z-index: 1000; 
+  transition: transform 0.2s;
+}
+
+.back-button:hover {
+  transform: scale(1.2);
+}
+
+/*Titulo*/
+.logout-title {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+/*Contenedor de botones*/
+.button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 80%;
+  max-width: 400px;
+  background-color: rgba(180, 180, 180, 0.178); 
+  padding: 30px;
+  border-radius: 12px;
+  align-items: center;
+}
+
+/*Botón de cerrar sesión*/
+.logout-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(90deg, rgba(52, 52, 156, 0.8), rgba(70, 70, 160, 0.8));
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.logout-btn:hover {
+  background: linear-gradient(90deg, rgba(52, 52, 156, 0.8), rgba(70, 70, 160, 0.8));
+}
+
+/*Botón de eliminar usuario*/
+.delete-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+.delete-btn:hover {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+}
+
+/* Contenedor de la tabla */
+.users-table {
+  width: 90%;
+  max-width: 1000px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  margin-top: 20px;
+  color: white;
+}
+
+/* Tabla */
+.users-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+/* Encabezados */
+.users-table th {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  padding: 12px;
+  text-align: center;
+  color: black;
+  font-weight: 600;
+  border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+
+/* Filas */
+.users-table td {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Alternar colores en filas */
+.users-table tbody tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.05);
+}
+
+/* Hover en filas */
+.users-table tbody tr:hover {
+  background-color: rgba(255,255,255,0.15);
+  transition: background 0.3s;
+}

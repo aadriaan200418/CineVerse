@@ -1,17 +1,27 @@
+// Importamos React y useState para manejar el estado del formulario
 import React from "react";
+import { useNavigate } from "react-router-dom";
+
+// Importamos los estilos CSS
 import "../css/carousel.css";
 
+// Definimos el componente principal del componenete carrusel
 export default function Carousel({ title, items, imagePath }) {
+  const navigate = useNavigate();
+
+  //Flecha izquierda
   const scrollLeft = (id) => {
     document.getElementById(id).scrollLeft -= 300;
   };
 
+  //Flecha derecha
   const scrollRight = (id) => {
     document.getElementById(id).scrollLeft += 300;
   };
 
   const carouselId = `carousel-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
+  //Carrusel
   return (
     <div className="carousel-section">
       <h2>{title}</h2>
@@ -20,18 +30,18 @@ export default function Carousel({ title, items, imagePath }) {
 
         <div className="carousel" id={carouselId}>
           {items.map((item) => (
-            <div key={item.id_movie || item.id_series} className="carousel-card">
-              <img
-                src={`/${imagePath}/${item.image}`}
-                alt={item.title}
-                className="carousel-card-image"
-              />
+            <div key={item.id_movie || item.id_series} className="carousel-card" onClick={() =>
+              item.id_series
+                ? navigate(`/series/${item.id_series}`)
+                : navigate(`/movies/${item.id_movie}`)
+              }>
+              <img src={`/${imagePath}/${item.image}`} alt={item.title} className="carousel-card-image" />
+
               <div className="carousel-card-overlay">
                 <h3 className="carousel-card-title">{item.title}</h3>
-                {item.genre && <p className="carousel-card-genre">{item.genre}</p>}
+                {item.genre && (<p className="carousel-card-genre">{item.genre}</p>)}
               </div>
             </div>
-
           ))}
         </div>
 

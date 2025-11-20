@@ -13,10 +13,10 @@ export default function Register() {
   const navigate = useNavigate();
 
   // Estado para guardar los datos que el usuario escribe en el formulario
-  const [formData, setFormData] = useState({name: "", username: "", dni: "", birth_date: "", email: "", password: ""});
+  const [formData, setFormData] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "" });
 
   // Estado para guardar los errores específicos de cada campo
-  const [errors, setErrors] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: ""});
+  const [errors, setErrors] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "" });
 
   // Funciones de validación para cada campo, comprueba  si están vacíos y si cumplen formato
   const validators = {
@@ -101,12 +101,12 @@ export default function Register() {
       // Si el registro fue exitoso redirige al inicio de sesion
       if (data.success) {
         alert("Usuario registrado correctamente");
-        navigate("/login"); 
-      } 
+        navigate("/login");
+      }
       else {
         alert("Error: " + (data.error || "Error al registrar usuario"));
       }
-    } 
+    }
     catch {
       alert("Error de conexión con el servidor");
     }

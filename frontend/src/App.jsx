@@ -10,7 +10,10 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profiles from "./pages/Profiles";
 import Home from "./pages/Home";
-import AddContent from "./pages/Create-admin"; // ← nueva página
+import CreateAdmin from "./pages/Create-admin";
+import Settings from "./pages/Settings";
+import DetailSerie from "./pages/DetailSerie";   // 👈 nombre consistente
+import DetailMovie from "./pages/DetailMovie";   // 👈 para películas
 
 // Importamos el componente de ruta protegida
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,18 +22,32 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Rutas públicas */}
         <Route path="/" element={<Index />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profiles" element={<Profiles />} />
         <Route path="/home" element={<Home />} />
 
+        <Route path="/series/:id" element={<DetailSerie />} />
+        <Route path="/movies/:id" element={<DetailMovie />} />
+
+
         {/* Ruta protegida solo para admin */}
         <Route
-          path="/Create-admin"
+          path="/create-admin"
           element={
             <ProtectedRoute>
-              <AddContent />
+              <CreateAdmin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />

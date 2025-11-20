@@ -6,7 +6,8 @@ export default function ProtectedRoute({ children }) {
 
   if (role === "admin") {
     return children;
-  } else {
+  } 
+  else {
     return <Navigate to="/home" replace />;
   }
 }
