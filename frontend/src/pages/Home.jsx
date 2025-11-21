@@ -6,10 +6,9 @@ import { useNavigate } from "react-router-dom";
 import "../css/home.css";
 import userIcon from "../assets/icons/user.png";
 import settingsIcon from "../assets/icons/settings.png";
+import Loading from "../components/Loading";
 
 
-import moviesData from "../data/movies.json";
-import seriesData from "../data/series.json";
 import Carousel from "../components/Carousel";
 
 // Componente principal de la página de home
@@ -20,24 +19,49 @@ export default function Home() {
   const [view, setView] = useState("inicio");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const [loadingMovies, setLoadingMovies] = useState(true);
+const [loadingSeries, setLoadingSeries] = useState(true);
+
 
   useEffect(() => {
-    const storedRole = localStorage.getItem("role");
-    setRole(storedRole);
-    setMovies(moviesData);
-    setSeries(seriesData);
-  }, []);
+  const storedRole = localStorage.getItem("role");
+  setRole(storedRole);
+
+  // Películas
+  fetch("http://localhost:3001/api/movies")
+    .then(res => res.json())
+    .then(data => {
+      setMovies(data.movies);
+      setLoadingMovies(false);
+    })
+    .catch(err => {
+      console.error("Error cargando películas:", err);
+      setLoadingMovies(false);
+    });
+
+  // Series
+  fetch("http://localhost:3001/api/series")
+    .then(res => res.json())
+    .then(data => {
+      setSeries(data.series);
+      setLoadingSeries(false);
+    })
+    .catch(err => {
+      console.error("Error cargando series:", err);
+      setLoadingSeries(false);
+    });
+}, []);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value.toLowerCase());
   };
 
   const filteredMovies = movies.filter((movie) =>
-    movie.title.toLowerCase().includes(searchTerm)
+    movie.title.toLowerCase().startsWith(searchTerm)
   );
 
   const filteredSeries = series.filter((serie) =>
-    serie.title.toLowerCase().includes(searchTerm)
+    serie.title.toLowerCase().startsWith(searchTerm)
   );
 
   return (
@@ -80,56 +104,52 @@ export default function Home() {
       </nav>
 
       {/* Contenido dinámico */}
-      {view === "inicio" && (
-        <>
-          {/* Imagen destacada de estreno */}
-          <div className="featured-banner">
-            <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image" />
+       {view === "inicio" && (
+  <>
+    <div className="featured-banner">
+      <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image" />
+      <div className="featured-label">NUEVO ESTRENO</div>
+    </div>
 
-            <div className="featured-label">NUEVO ESTRENO</div>
-          </div>
+    {loadingSeries ? (
+      <Loading />
+    ) : (
+      <Carousel title="Top Series" items={filteredSeries} imagePath="images-series" />
+    )}
 
-          {/* Carrusel de Series */}
-          <Carousel title="Top Series" items={series} imagePath="images-series" />
+    {loadingMovies ? (
+      <Loading />
+    ) : (
+      <Carousel title="Top Películas" items={filteredMovies} imagePath="images-movies" />
+    )}
+  </>
+)}
 
-          {/* Carrusel de Películas */}
-          <Carousel title="Top Películas" items={movies} imagePath="images-movies" />
-        </>
-      )}
 
-      {view === "series" && (
-        <div className="section">
-          <h2>Series</h2>
-          <div className="card-grid">
-            {filteredSeries.map((serie) => (
-              <Card
-                key={serie.id_series}
-                image={serie.image}
-                title={serie.title}
-                genre={serie.genre}
-                type="images-series"
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
-      {view === "peliculas" && (
-        <div className="section">
-          <h2>Películas</h2>
-          <div className="card-grid">
-            {filteredMovies.map((movie) => (
-              <Card
-                key={movie.id_movie}
-                image={movie.image}
-                title={movie.title}
-                genre={movie.genre}
-                type="images-movies"
-              />
-            ))}
-          </div>
-        </div>
-      )}
+
+
+    {view === "series" && (
+      <div className="section">
+        <h2>Series</h2>
+      {loadingSeries ? (
+  <Loading />
+) : (
+  <Carousel title="Top Series" items={filteredSeries} imagePath="images-series" />
+)}
+      </div>
+    )}
+
+    {view === "peliculas" && (
+      <div className="section">
+        <h2>Películas</h2>
+      {loadingMovies ? (
+  <Loading />
+) : (
+  <Carousel title="Top Películas" items={filteredMovies} imagePath="images-movies" />
+)}
+      </div>
+    )}
     </div>
   );
 }

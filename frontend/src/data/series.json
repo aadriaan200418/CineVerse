@@ -1,9 +1,0 @@
-[
-  { "id_series": 1, "title": "Un Asunto Privado", "genre": "Drama", "image": "asunto_privado.jpg" },
-   { "id_movie": 2, "title": "Días Mejores", "genre": "Comedia", "image": "dias_mejores.jpg" },
-  { "id_series": 3, "title": "Los 100", "genre": "Ciencia Ficción", "image": "los_100.jpg" },
-  { "id_series": 4, "title": "La Que Se Avecina", "genre": "Comedia", "image": "lqsa.jpg" },
-  { "id_series": 5, "title": "La Ley de Lidia Poët", "genre": "Drama", "image": "lidia_poet.jpg" },
-  { "id_series": 6, "title": "Outer Banks", "genre": "Aventura", "image": "outer_banks.webp" },
-  { "id_series": 7, "title": "Umbrella Academy", "genre": "Ciencia Ficción", "image": "umbrella_academy.jpg" }
-]

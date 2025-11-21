@@ -1,0 +1,26 @@
+.loading-screen {
+  height: 100vh;
+  width: 100vw;
+  background-image: url("../assets/fondo-formato-bueno.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(128, 0, 128, 0.2); /* morado translúcido */
+  border-top: 6px solid #800080; /* morado sólido */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

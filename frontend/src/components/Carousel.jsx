@@ -37,10 +37,7 @@ export default function Carousel({ title, items, imagePath }) {
               }>
               <img src={`/${imagePath}/${item.image}`} alt={item.title} className="carousel-card-image" />
 
-              <div className="carousel-card-overlay">
-                <h3 className="carousel-card-title">{item.title}</h3>
-                {item.genre && (<p className="carousel-card-genre">{item.genre}</p>)}
-              </div>
+            
             </div>
           ))}
         </div>

@@ -28,7 +28,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/profiles" element={<Profiles />} />
         <Route path="/home" element={<Home />} />
-
+     <Route path="/settings" element={<Settings />} />
         <Route path="/series/:id" element={<DetailSerie />} />
         <Route path="/movies/:id" element={<DetailMovie />} />
 
@@ -43,14 +43,7 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
+      
       </Routes>
     </BrowserRouter>
   );
