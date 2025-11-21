@@ -119,3 +119,14 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   font-size: 0.85rem;   
   margin-top: 4px;      
 }
+
+/*Quitar scroll*/
+html, body {
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;    
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;         
+}

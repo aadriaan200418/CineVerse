@@ -372,6 +372,31 @@ app.put("/api/movies/:id", (req, res) => {
   });
 });
 
+// Eliminar película por ID (con dependencias)
+app.delete("/api/deleteMovieSelect/:id", (req, res) => {
+  const { id } = req.params;
+
+  // 1. Borrar likes asociados a la película
+  db.query("DELETE FROM likes WHERE id_movie = ?", [id], (err) => {
+    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+
+    // 2. Borrar favoritos asociados a la película
+    db.query("DELETE FROM favorites WHERE id_movie = ?", [id], (err) => {
+      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+
+      // 3. Finalmente borrar la película
+      db.query("DELETE FROM movies WHERE id_movie = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: "Error al eliminar película" });
+
+        if (result.affectedRows > 0) {
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ success: false, error: "Película no encontrada" });
+        }
+      });
+    });
+  });
+});
 
 // ---------------------- SERIES ----------------------
 
@@ -465,33 +490,97 @@ app.put("/api/series/:id", (req, res) => {
 });
 
 
-// ---------------------- FAVORITOS Y LIKES ----------------------
+// Eliminar serie por ID (con dependencias)
+app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
+  const { id } = req.params;
 
-// Añadir a favoritos
-app.post("/api/favorite", (req, res) => {
-  const { id_profile, id_series, id_movie } = req.body;
-  const sql = "INSERT INTO favorites (id_profile, id_series, id_movie) VALUES (?, ?, ?)";
-  db.query(sql, [id_profile, id_series || null, id_movie || null], (err) => {
-    if (err) {
-      console.error("Error al añadir a favoritos:", err);
-      return res.status(500).json({ error: "Error al añadir a favoritos" });
-    }
-    res.json({ success: true });
+  // 1. Borrar likes asociados a la serie
+  db.query("DELETE FROM likes WHERE id_series = ?", [id], (err) => {
+    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+
+    // 2. Borrar favoritos asociados a la serie
+    db.query("DELETE FROM favorites WHERE id_series = ?", [id], (err) => {
+      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+
+      // 3. Finalmente borrar la serie
+      db.query("DELETE FROM series WHERE id_series = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: "Error al eliminar serie" });
+
+        if (result.affectedRows > 0) {
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ success: false, error: "Serie no encontrada" });
+        }
+      });
+    });
   });
 });
 
+// ---------------------- FAVORITOS ----------------------
+// Añadir favorito
+app.post("/api/favorites", (req, res) => {
+  const { id_profile, id_movie, id_series } = req.body;
+  db.query(
+    "INSERT INTO favorites (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+    [id_profile, id_movie || null, id_series || null],
+    (err) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
+    }
+  );
+});
+
+// Obtener favoritos de un perfil
+app.get("/api/favorites/:id_profile", (req, res) => {
+  const { id_profile } = req.params;
+  db.query(
+    `SELECT f.id_favorite, 
+            m.title AS movie_title, m.image AS movie_image, 
+            s.title AS series_title, s.image AS series_image
+     FROM favorites f
+     LEFT JOIN movies m ON f.id_movie = m.id_movie
+     LEFT JOIN series s ON f.id_series = s.id_series
+     WHERE f.id_profile = ?`,
+    [id_profile],
+    (err, rows) => {
+      if (err) return res.status(500).send(err);
+      res.send({ favorites: rows });
+    }
+  );
+});
+// ---------------------- LIKES ----------------------
 // Añadir like
-app.post("/api/like", (req, res) => {
-  const { id_profile, id_series, id_movie } = req.body;
-  const sql = "INSERT INTO likes (id_profile, id_series, id_movie) VALUES (?, ?, ?)";
-  db.query(sql, [id_profile, id_series || null, id_movie || null], (err) => {
-    if (err) {
-      console.error("Error al dar like:", err);
-      return res.status(500).json({ error: "Error al dar like" });
+app.post("/api/likes", (req, res) => {
+  const { id_profile, id_movie, id_series } = req.body;
+  db.query(
+    "INSERT INTO likes (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+    [id_profile, id_movie || null, id_series || null],
+    (err) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
     }
-    res.json({ success: true });
-  });
+  );
 });
+
+// Obtener likes de un perfil
+app.get("/api/likes/:id_profile", (req, res) => {
+  const { id_profile } = req.params;
+  db.query(
+    `SELECT l.id_like, 
+            m.title AS movie_title, m.image AS movie_image, 
+            s.title AS series_title, s.image AS series_image
+     FROM likes l
+     LEFT JOIN movies m ON l.id_movie = m.id_movie
+     LEFT JOIN series s ON l.id_series = s.id_series
+     WHERE l.id_profile = ?`,
+    [id_profile],
+    (err, rows) => {
+      if (err) return res.status(500).send(err);
+      res.send({ likes: rows });
+    }
+  );
+});
+
 
 // ---------------------- SERVIR FRONTEND ----------------------
 app.use(express.static(path.join(__dirname, 'build')));

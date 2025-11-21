@@ -24,3 +24,14 @@
     transform: rotate(360deg);
   }
 }
+
+/*Quitar scroll*/
+html, body {
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;    
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;         
+}

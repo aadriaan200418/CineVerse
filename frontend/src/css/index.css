@@ -39,7 +39,7 @@ html, body, #root {
 }
 
 /* Botones */
-.btn {
+.btnin {
   font-size: 1.5rem;
   font-weight: bold;
   padding: 1rem 3rem;
@@ -50,26 +50,37 @@ html, body, #root {
   transition: background-color 0.2s, transform 0.2s;
 }
 
-.btn:hover {
+.btnin:hover {
   transform: scale(1.05);
 }
 
 /* Botón morado */
-.btn-purple {
+.btnin-purple {
   background-color: #7c3aed;
   color: white;
 }
 
-.btn-purple:hover {
+.btnin-purple:hover {
   background-color: #9d5ff7; 
 }
 
 /* Botón azul */
-.btn-blue {
+.btnin-blue {
   background-color: #3b82f6;
   color: white;
 }
 
-.btn-blue:hover {
+.btnin-blue:hover {
   background-color: #60a5fa; 
+}
+
+/*Quitar scroll*/
+html, body {
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;    
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;         
 }

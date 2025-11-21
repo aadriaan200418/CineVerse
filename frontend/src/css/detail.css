@@ -1,113 +1,118 @@
 /* Fondo general */
 .detail-page {
-  padding: 20px;
-  color: white;
-  background: linear-gradient(to bottom, #0a0a23, #1a1a3d);
   min-height: 100vh;
-  font-family: Arial, sans-serif;
-}
-
-/* Cabecera con imagen + info */
-.detail-header {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.banner-image {
-  width: 300px;
-  height: 450px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-}
-
-.info {
-  flex: 1;
-}
-
-.info h1 {
-  font-size: 2rem;
-  margin-bottom: 10px;
-}
-
-.info p {
-  font-size: 1rem;
-  margin-bottom: 10px;
-  line-height: 1.4;
-}
-
-/* Botones de acción */
-.buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 15px;
-}
-
-.btn1 {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.btn1:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-.btn1.play { background: magenta; color: white; }
-.btn1.fav { background: gold; color: black; }
-.btn1.like { background: dodgerblue; color: white; }
-.btn1.edit { background: darkgreen; color: white; }
-
-/* Sección de capítulos (solo series) */
-.episodes-section {
-  margin-top: 40px;
-}
-
-.episodes-section h2 {
-  margin-bottom: 10px;
-}
-
-.episodes-section select {
-  padding: 6px;
-  margin-bottom: 20px;
-  background: magenta;
+  background-image: url("../assets/fondo-formato-bueno.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  padding: 80px 20px 40px;
+  box-sizing: border-box;
   color: white;
+  font-family: 'Poppins', sans-serif;
+  position: relative;
+}
+
+/*Flecha para volver atras*/
+.back-button {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  background: none;
   border: none;
-  border-radius: 4px;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+  position: fixed;
+  z-index: 1000; 
+  transition: transform 0.2s;
 }
 
-.episode-grid {
+.back-button:hover {
+  transform: scale(1.2);
+}
+
+/*Contenedor de la pagina*/
+.detail {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  align-items: top;
+  flex-direction: row-reverse;
+  margin-left: 20px;
+  margin-right: 20px;
+  justify-content: space-between;
 }
 
-.episode-card {
-  width: 140px;
-  background: #222;
-  padding: 10px;
-  border-radius: 6px;
-  text-align: center;
+/*Imagen de la serie*/
+.banner-image {
+  width: 650px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 20px;
+  margin-left: 50px;
 }
 
-.episode-card p {
-  font-size: 0.9rem;
-  margin: 4px 0;
+/*Datos de cada serie*/
+.info h1 {
+  font-size: 40px;
+  margin-bottom: 20px;
 }
 
-/* Reproductor de vídeo (opcional) */
-.video-player {
-  margin-top: 30px;
+.data {
+  display: flex;
+  flex-direction: row;
 }
 
-.video-player video {
+.row1{
+  margin-right:80px;
+}
+
+/*Botones*/
+.buttons-rep{
+  display: flex;
+  flex-direction: row;
   width: 100%;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  align-items: center;
+  gap: 40px;
+  margin-top: 20px;
+}
+
+/*Boton de reproducir*/
+.btn.play {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  color: #fff;
+  border: none;
+  width: 50%;
+  padding: 10px 30px;
+  border-radius: 20px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/*Iconos*/
+.images{
+  display: flex;
+  flex-direction: row;
+  margin-left: 20px;
+}
+
+.images button{
+  background: none;
+  border: none;
+  height: 100%;
+}
+
+.images button img{
+  cursor: pointer;
+  height: 40px;
+  margin-right: 20px;
+}
+
+/*Quitar scroll*/
+html, body {
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;    
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;         
 }

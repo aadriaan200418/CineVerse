@@ -57,6 +57,30 @@
   cursor: pointer;
 }
 
+/*Desplegable*/
+.dropdown {
+  position: absolute;
+  background: rgba(30, 30, 60, 0.85);
+  margin-top: 200px;
+  padding: 10px;
+}
+
+.dropdown ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown li {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.dropdown li:hover {
+  background-color: rgba(82, 82, 138, 0.85);
+}
+
+
 /*Volver atrás*/
 .back-point {
   cursor: pointer;
@@ -133,6 +157,10 @@
   text-align: center;
 }
 
+.section h2:first-of-type{
+  font-size: 40px;
+}
+
 /* Tarjetas de contenido */
 .featured-banner {
   position: relative;
@@ -164,4 +192,25 @@
   font-size: 1rem;
   margin-top: 24%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Ocultar scrollbar en navegadores modernos */
+.carousel {
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none; 
+}
+
+/*Quitar scroll*/
+html, body {
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;    
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none;         
 }

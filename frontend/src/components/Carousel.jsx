@@ -24,7 +24,7 @@ export default function Carousel({ title, items, imagePath }) {
   //Carrusel
   return (
     <div className="carousel-section">
-      <h2>{title}</h2>
+      <h1>{title}</h1>
       <div className="carousel-container">
         <button className="scroll-button left" onClick={() => scrollLeft(carouselId)}>←</button>
 

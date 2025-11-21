@@ -60,7 +60,7 @@ export default function Profiles() {
     }, []);
 
     // Selección de perfil
-    const handleSelectProfile = (profileId) => {
+    const handleSelectProfile = (profileId, name) => {
         localStorage.setItem("activeProfile", profileId);
         navigate("/home");
     };
