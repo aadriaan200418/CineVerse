@@ -100,7 +100,9 @@ const saveFavorite = () => {
 
               {/* Botón Editar solo para admin */}
               {localStorage.getItem("role") === "admin" && (
-                <img src={pen} alt="Editar" className="pen-image" onClick={() => navigate(`/series/edit/${serie.id_series}`)}/>
+                <button>
+                  <img src={pen} alt="Editar" className="pen-image" onClick={() => navigate(`/series/edit/${serie.id_series}`)}/>
+                </button>
               )}
             </div>
           </div>

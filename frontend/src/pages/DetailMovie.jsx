@@ -9,14 +9,14 @@ import star from "../assets/icons/star.png";
 import pen from "../assets/icons/pen.png";
 import Loading from "../components/Loading";
 
-// Definimos el componente principal de la página de detail serie
+// Definimos el componente principal de la página de detail movie
 export default function DetailMovie({ user }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [movie, setMovie] = useState(null);
   const [error, setError] = useState("");
 
-  // Cargar datos de la serie
+  // Cargar datos de la movie
   useEffect(() => {
     fetch(`http://localhost:3001/api/movies/${id}`)
       .then(res => {
@@ -44,11 +44,11 @@ export default function DetailMovie({ user }) {
         <div className="info">
           <h1>{movie.title}</h1>
 
-          {/*Datos de la serie */}
+          {/*Datos de la movie */}
           <div className="data">
             <div className="row1">
               <p>{movie.genre}</p>
-              <p>{movie.seasons} temporadas</p>
+              <p>{movie.duration_minutes} min</p>
             </div>
 
             <div className="row2">
@@ -64,16 +64,21 @@ export default function DetailMovie({ user }) {
             <button className="btn play">▶ Reproducir</button>
 
             <div className="images">
-              <img src={like} alt="like" className="like-image" />
-              <img src={star} alt="star" className="star-image" />
+              {/* Botón Like */}
+              <button>
+                <img src={like} alt="like" className="like-image" />
+              </button>
 
+              {/* Botón Favorito */}
+              <button>
+                <img src={star} alt="star" className="star-image" />
+              </button>
+
+              {/* Botón Editar solo para admin */}
               {localStorage.getItem("role") === "admin" && (
-                <img
-                  src={pen}
-                  alt="Editar"
-                  className="pen-image"
-                  onClick={() => navigate(`/movies/edit/${movie.id_series}`)}
-                />
+                <button>
+                  <img src={pen} alt="Editar" className="pen-image" onClick={() => navigate(`/movies/edit/${movie.id_series}`)} />
+                </button>
               )}
             </div>
           </div>
