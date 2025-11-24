@@ -124,7 +124,7 @@ export default function Home({ view: initialView = "inicio" }) {
 
           {role === "admin" && (
             <>
-            <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen(!open)} />
+              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen(!open)} />
               {open && (
                 <div className="dropdown">
                   <ul>
@@ -230,44 +230,29 @@ export default function Home({ view: initialView = "inicio" }) {
       )}
 
       {view === "favorites" && (
-        <div>
-          <h2>My Favorites</h2>
-          <table>
-            <thead>
-              <tr><th>Title</th><th>Image</th></tr>
-            </thead>
-            <tbody>
-              {favorites.map(f => (
-                <tr key={f.id_favorite}>
-                  <td>{f.movie_title || f.series_title}</td>
-                  <td><img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} alt="" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <h2>Mis Favoritos</h2>
+          <div className="favorites-likes">
+            {favorites.map(f => (
+              <span className="card" key={f.id_favorite}>
+                <img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} className="card-image" />
+              </span>
+            ))}
+          </div></>
       )}
 
       {view === "likes" && (
-        <div>
-          <h2>My Likes</h2>
-          <table>
-            <thead>
-              <tr><th>Title</th><th>Image</th></tr>
-            </thead>
-            <tbody>
-              {likes.map(l => (
-                <tr key={l.id_like}>
-                  <td>{l.movie_title || l.series_title}</td>
-                  <td><img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} alt="" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <h2>Mis Likes</h2>
+          <div className="favorites-likes">
+            {likes.map(l => (
+              <span className="card" key={l.id_like}>
+                <img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} className="card-image" />
+              </span>
+            ))}
+          </div>
+        </>
       )}
-
-
     </div>
   );
 }

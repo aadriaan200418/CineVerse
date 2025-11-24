@@ -87,7 +87,6 @@ export default function Settings() {
         }
     };
 
-
     // Función para eliminar un usuario seleccionado en la tabla (solo admin)
     const handleDeleteUserSelect = async (dni) => {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
@@ -101,7 +100,7 @@ export default function Settings() {
             const data = await res.json();
             if (data.success) {
                 setUsers((prevUsers) => prevUsers.filter((u) => u.dni !== dni));
-            } 
+            }
             else {
                 setError(data.error || "No se pudo eliminar el usuario");
             }
@@ -115,21 +114,23 @@ export default function Settings() {
         <div className="logout-container">
             <button className="back-button" onClick={() => navigate("/home")}>←</button>
 
-            <h1 className="logout-title">Configuración</h1>
-
             {/*Botones para que el user pueda cerrar sesion o eliminar su cuenta */}
             {role === "user" && (
-                <div className="button-group">
-                    <button className="logout-btn" onClick={handleLogout}>Cerrar sesión</button>
-                    <button className="delete-btn" onClick={handleDeleteUser}>Eliminar usuario</button>
-                </div>
+                <>
+                    <h2>Configuración</h2>
+                    <div className="button-group">
+                        <button className="logout-btn" onClick={handleLogout}>Cerrar sesión</button>
+                        <button className="delete-btn" onClick={handleDeleteUser}>Eliminar usuario</button>
+                    </div>
+                </>
             )}
 
             {/*Tabla para que el admin pueda eliminar cuentas de usuarios */}
-            <div className="table-settings">
-                {role === "admin" && tab === "users" && (
-                    <>
-                        <h1>USUARIOS</h1>
+
+            {role === "admin" && tab === "users" && (
+                <>
+                    <h1>Tabla de usuarios</h1>
+                    <div className="table-settings">
                         <table>
                             <thead>
                                 <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
@@ -149,12 +150,14 @@ export default function Settings() {
                                 ))}
                             </tbody>
                         </table>
-                    </>
-                )}
+                    </div>
+                </>
+            )}
 
-                {role === "admin" && tab === "admins" && (
-                    <>
-                        <h1>ADMINISTRADORES</h1>
+            {role === "admin" && tab === "admins" && (
+                <>
+                    <h1>Tabla de administradores</h1>
+                    <div className="table-settings">
                         <table>
                             <thead>
                                 <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
@@ -168,21 +171,23 @@ export default function Settings() {
                                         <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
                                         <td>{a.email}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(a.dni)} />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                    </>
-                )}
+                    </div>
+                </>
+            )}
 
-                {role === "admin" && tab === "movies" && (
-                    <>
-                        <h1>MOVIES</h1>
+            {role === "admin" && tab === "movies" && (
+                <>
+                    <h1>Tabla de peliculas</h1>
+                    <div className="table-settings">
                         <table>
                             <thead>
-                                <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion en minutos</th><th>Eliminar</th></tr>
+                                <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion</th><th>Eliminar</th></tr>
                             </thead>
                             <tbody>
                                 {movies.map((m) => (
@@ -194,18 +199,20 @@ export default function Settings() {
                                         <td>{m.genre}</td>
                                         <td>{m.duration_minutes}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(m.id_movie)} />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                    </>
-                )}
+                    </div>
+                </>
+            )}
 
-                {role === "admin" && tab === "series" && (
-                    <>
-                        <h1>SERIES</h1>
+            {role === "admin" && tab === "series" && (
+                <>
+                    <h1>Tabla de series</h1>
+                    <div className="table-settings">
                         <table>
                             <thead>
                                 <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
@@ -220,15 +227,15 @@ export default function Settings() {
                                         <td>{s.genre}</td>
                                         <td>{s.seasons}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(s.id_series)} />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

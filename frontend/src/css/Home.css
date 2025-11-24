@@ -61,8 +61,8 @@
 .dropdown {
   position: absolute;
   background: rgba(30, 30, 60, 0.85);
-  margin-top: 200px;
-  padding: 10px;
+  margin-top: 190px;
+  padding: 0;
 }
 
 .dropdown ul {
@@ -74,12 +74,12 @@
 .dropdown li {
   padding: 5px 10px;
   cursor: pointer;
+  border: 1px solid #c35ff5;
 }
 
 .dropdown li:hover {
   background-color: rgba(82, 82, 138, 0.85);
 }
-
 
 /*Volver atrás*/
 .back-point {
@@ -193,6 +193,42 @@
   margin-top: 24%;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
+
+/*Tarjetas en favoritos y like*/
+.favorites-likes {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 1rem;
+  padding: 1rem;
+  flex-wrap: wrap; 
+  gap: 22px; 
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 140px;      
+  height: 210px;      
+  border-radius: 10px;
+  border: 1px solid white;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.card:hover {
+  transform: scale(1.03);
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 
 /* Ocultar scrollbar en navegadores modernos */
 .carousel {

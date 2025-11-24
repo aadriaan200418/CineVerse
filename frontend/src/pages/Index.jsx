@@ -18,8 +18,8 @@ export default function Index() {
       <h1 className="title">🎬 ¿Tienes cuenta en CineVerse?</h1>
 
       <div className="buttons">
-        <button onClick={() => navigate("/register")} className="btnin btnin-purple">Registrarse</button>
-        <button onClick={() => navigate("/login")} className="btnin btnin-blue">Iniciar sesión</button>
+        <button onClick={() => navigate("/register")} className="btn btn-purple">Registrarse</button>
+        <button onClick={() => navigate("/login")} className="btn btn-blue">Iniciar sesión</button>
       </div>
     </div>
   );

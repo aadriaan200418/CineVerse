@@ -39,38 +39,38 @@ html, body, #root {
 }
 
 /* Botones */
-.btnin {
+.btn {
   font-size: 1.5rem;
   font-weight: bold;
   padding: 1rem 3rem;
-  margin-bottom: 30px;
-  border-radius: 9999px;
+  margin-bottom: 20px;
+  border-radius: 60px;
   cursor: pointer;
   border: none;
   transition: background-color 0.2s, transform 0.2s;
 }
 
-.btnin:hover {
+.btn:hover {
   transform: scale(1.05);
 }
 
 /* Botón morado */
-.btnin-purple {
+.btn-purple {
   background-color: #7c3aed;
   color: white;
 }
 
-.btnin-purple:hover {
+.btn-purple:hover {
   background-color: #9d5ff7; 
 }
 
 /* Botón azul */
-.btnin-blue {
+.btn-blue {
   background-color: #3b82f6;
   color: white;
 }
 
-.btnin-blue:hover {
+.btn-blue:hover {
   background-color: #60a5fa; 
 }
 
