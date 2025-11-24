@@ -116,3 +116,12 @@ html, body {
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }
+
+.like-image.active {
+  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+}
+
+.star-image.active {
+  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+}
+

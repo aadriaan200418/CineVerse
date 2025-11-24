@@ -90,7 +90,7 @@
 }
 
 /* Contenedor de la tabla */
-.users-table {
+.table-settings {
   width: 90%;
   max-width: 1000px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -102,14 +102,14 @@
 }
 
 /* Tabla */
-.users-table table {
+.table-settings table {
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
 }
 
 /* Encabezados */
-.users-table th {
+.table-settings th {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   padding: 12px;
   text-align: center;
@@ -119,19 +119,19 @@
 }
 
 /* Filas */
-.users-table td {
+.table-settings td {
   padding: 10px;
   text-align: center;
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 /* Alternar colores en filas */
-.users-table tbody tr:nth-child(even) {
+.table-settings tbody tr:nth-child(even) {
   background-color: rgba(255,255,255,0.05);
 }
 
 /* Hover en filas */
-.users-table tbody tr:hover {
+.table-settings tbody tr:hover {
   background-color: rgba(255,255,255,0.15);
   transition: background 0.3s;
 }

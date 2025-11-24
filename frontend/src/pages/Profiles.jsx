@@ -61,7 +61,7 @@ export default function Profiles() {
 
     // Selección de perfil
     const handleSelectProfile = (profileId, name) => {
-        localStorage.setItem("activeProfile", profileId);
+        localStorage.setItem("id_profile", profileId);
         navigate("/home");
     };
 

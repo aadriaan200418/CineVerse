@@ -1,4 +1,4 @@
-// ---------------------- IMPORTAR LIBRERÍAS ----------------------
+// ------------------------------------------------------------- IMPORTAR LIBRERÍAS -------------------------------------------------------
 const fs = require('fs');
 const express = require('express');
 const mysql = require('mysql2');
@@ -6,12 +6,12 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 
-// ---------------------- CONFIGURAR EXPRESS ----------------------
+// ------------------------------------------------------------- CONFIGURAR EXPRESS ------------------------------------------------------
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ---------------------- CONEXIÓN A MYSQL ----------------------
+// --------------------------------------------------------------- CONEXIÓN A MYSQL ---------------------------------------------------------
 const db = mysql.createPool({
   host: process.env.DB_HOST || 'cineverse-cineverse.b.aivencloud.com',
   port: process.env.DB_PORT || 20319,
@@ -30,18 +30,12 @@ db.query('SELECT 1', (err) => {
   }
 });
 
-// ---------------------- RUTAS ----------------------
-
-// REGISTRO DE USUARIO
+// ------------------------------------------------------------- REGISTRO DE USUARIO ---------------------------------------------------------------
 app.post('/api/register', (req, res) => {
   const { dni, name, username, birth_date, email, password } = req.body;
 
   // Primero comprobamos duplicados
-  const checkSql = `
-    SELECT dni, username, email 
-    FROM users 
-    WHERE dni = ? OR username = ? OR email = ?
-  `;
+  const checkSql = ` SELECT dni, username, email FROM users  WHERE dni = ? OR username = ? OR email = ?`;
   db.query(checkSql, [dni, username, email], (err, results) => {
     if (err) {
       console.error('Error al comprobar duplicados:', err);
@@ -59,10 +53,7 @@ app.post('/api/register', (req, res) => {
     }
 
     // Si no hay duplicados, insertamos el usuario
-    const insertSql = `
-      INSERT INTO users (dni, name, username, birth_date, email, password, role)
-      VALUES (?, ?, ?, ?, ?, ?, 'user')
-    `;
+    const insertSql = ` INSERT INTO users (dni, name, username, birth_date, email, password, role)  VALUES (?, ?, ?, ?, ?, ?, 'user')`;
     db.query(insertSql, [dni, name, username, birth_date, email, password], (err) => {
       if (err) {
         console.error('Error al registrar usuario:', err);
@@ -73,7 +64,7 @@ app.post('/api/register', (req, res) => {
   });
 });
 
-// LOGIN DE USUARIO (devuelve también el rol)
+// ------------------------------------------------------ LOGIN DE USUARIO (devuelve también el rol) ------------------------------------------------------
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -99,7 +90,7 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// OBTENER PERFILES DE UN USUARIO
+// ------------------------------------------------------------- OBTENER PERFILES DE UN USUARIO ------------------------------------------------------------
 app.get('/api/profiles', (req, res) => {
   const { username } = req.query;
 
@@ -129,7 +120,7 @@ app.get('/api/profiles', (req, res) => {
   });
 });
 
-// AÑADIR NUEVO PERFIL
+// ------------------------------------------------------------------- AÑADIR NUEVO PERFIL -----------------------------------------------------------
 app.post('/api/addProfile', (req, res) => {
   const { username, nombre } = req.body;
 
@@ -178,7 +169,7 @@ app.post('/api/addProfile', (req, res) => {
   });
 });
 
-// ELIMINAR PERFIL
+// --------------------------------------------------------------------- ELIMINAR PERFIL ---------------------------------------------------------
 app.delete('/api/deleteProfile/:id', (req, res) => {
   const profileId = req.params.id;
 
@@ -210,7 +201,7 @@ app.delete('/api/deleteProfile/:id', (req, res) => {
   });
 });
 
-// ---------------------- ELIMINAR USUARIO ----------------------
+// ------------------------------------------------------------------ ELIMINAR USUARIO -----------------------------------------------------------------
 app.delete('/api/deleteUser/:username', (req, res) => {
   const username = req.params.username;
 
@@ -250,24 +241,45 @@ app.delete('/api/deleteUser/:username', (req, res) => {
   });
 });
 
-// ---------------------- OBTENER TODOS LOS USUARIOS (ADMIN) ----------------------
-app.get('/api/users', (req, res) => {
-  const role = req.headers['role']; // el frontend debe enviar el rol en headers
-  if (role !== 'admin') {
-    return res.status(403).json({ error: 'Acceso denegado' });
+// -------------------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
+//Obtener los usuarios
+app.get("/api/settings", (req, res) => {
+  const role = req.headers["role"];
+  if (role !== "admin") {
+    return res.status(403).json({ error: "Acceso denegado" });
   }
 
-  const sql = 'SELECT dni, name, username, birth_date, email, role FROM users';
+  const tab = req.query.tab; 
+  let sql;
+
+  switch (tab) {
+    case "users":
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'user'";
+      break;
+    case "admins":
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'admin'";
+      break;
+    case "movies":
+      sql = "SELECT id_movie, title, description, release_date, genre, duration_minutes FROM movies";
+      break;
+    case "series":
+      sql = "SELECT id_series, title, description, release_date, genre, seasons FROM series";
+      break;
+    default:
+      return res.status(400).json({ error: "Parámetro tab inválido" });
+  }
+
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error al obtener usuarios:', err);
-      return res.status(500).json({ error: 'Error al obtener usuarios' });
+      console.error("Error al obtener datos:", err);
+      return res.status(500).json({ error: "Error al obtener datos" });
     }
-    res.json({ success: true, users: results });
+    res.json({ success: true, data: results });
   });
 });
 
-// -------------------------- ELIMINAR USUARIOS DESDE ADMIN -------------------------------
+
+// -------------------------------------------------------------------- ELIMINAR USUARIOS DESDE ADMIN ---------------------------------------------------------
 app.delete("/api/deleteUserSelect/:dni", (req, res) => {
   const { dni } = req.params;
 
@@ -318,8 +330,8 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
     }
   );
 });
-// ---------------------- PELÍCULAS ----------------------
 
+// --------------------------------------------------------------- PELÍCULAS ---------------------------------------------------
 // Obtener todas las películas
 app.get("/api/movies", (req, res) => {
   const sql = "SELECT * FROM movies ORDER BY release_date DESC";
@@ -358,11 +370,7 @@ app.put("/api/movies/:id", (req, res) => {
     return res.status(403).json({ error: "Acceso denegado" });
   }
 
-  const sqlUpdate = `
-    UPDATE movies SET 
-      title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, duration_minutes = ?
-    WHERE id_movie = ?
-  `;
+  const sqlUpdate = `UPDATE movies SET title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, duration_minutes = ? WHERE id_movie = ?`;
   db.query(sqlUpdate, [title, description, genre, image, minimum_age, duration_minutes, id], (err) => {
     if (err) {
       console.error("Error al editar película:", err);
@@ -398,8 +406,7 @@ app.delete("/api/deleteMovieSelect/:id", (req, res) => {
   });
 });
 
-// ---------------------- SERIES ----------------------
-
+// ----------------------------------------------------------------- SERIES --------------------------------------------
 // Obtener todas las series
 app.get("/api/series", (req, res) => {
   const sql = "SELECT * FROM series ORDER BY release_date DESC";
@@ -516,7 +523,7 @@ app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   });
 });
 
-// ---------------------- FAVORITOS ----------------------
+// ----------------------------------------------------------------- FAVORITOS --------------------------------------------------------
 // Añadir favorito
 app.post("/api/favorites", (req, res) => {
   const { id_profile, id_movie, id_series } = req.body;
@@ -548,9 +555,35 @@ app.get("/api/favorites/:id_profile", (req, res) => {
     }
   );
 });
-// ---------------------- LIKES ----------------------
+// Eliminar favorito de película
+app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
+  const { id_profile, id_movie } = req.params;
+  db.query(
+    "DELETE FROM favorites WHERE id_profile = ? AND id_movie = ?",
+    [id_profile, id_movie],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
+    }
+  );
+});
+
+// Eliminar favorito de serie
+app.delete("/api/favorites/:id_profile/:serie", (req, res) => {
+  const { id_profile, id_serie } = req.params;
+  db.query(
+    "DELETE FROM favorites WHERE id_profile = ? AND id_serie = ?",
+    [id_profile, id_serie],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
+    }
+  );
+});
+// -------------------------------------------------------------- LIKES -----------------------------------------------------------------
 // Añadir like
 app.post("/api/likes", (req, res) => {
+  
   const { id_profile, id_movie, id_series } = req.body;
   db.query(
     "INSERT INTO likes (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
@@ -566,13 +599,18 @@ app.post("/api/likes", (req, res) => {
 app.get("/api/likes/:id_profile", (req, res) => {
   const { id_profile } = req.params;
   db.query(
-    `SELECT l.id_like, 
-            m.title AS movie_title, m.image AS movie_image, 
-            s.title AS series_title, s.image AS series_image
-     FROM likes l
-     LEFT JOIN movies m ON l.id_movie = m.id_movie
-     LEFT JOIN series s ON l.id_series = s.id_series
-     WHERE l.id_profile = ?`,
+    `SELECT 
+      likes.id_like, 
+      likes.id_movie, 
+      likes.id_series,
+      movies.title AS movie_title,
+      movies.image AS movie_image,
+      series.title AS series_title,
+      series.image AS series_image
+    FROM likes
+    LEFT JOIN movies ON likes.id_movie = movies.id_movie
+    LEFT JOIN series ON likes.id_series = series.id_series
+    WHERE likes.id_profile = ?`,
     [id_profile],
     (err, rows) => {
       if (err) return res.status(500).send(err);
@@ -581,14 +619,41 @@ app.get("/api/likes/:id_profile", (req, res) => {
   );
 });
 
+ 
+// Eliminar like peli
+app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
+  const { id_profile, id_movie } = req.params;
+  db.query(
+    "DELETE FROM likes WHERE id_profile = ? AND id_movie = ?",
+    [id_profile, id_movie],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
+    }
+  );
+});
 
-// ---------------------- SERVIR FRONTEND ----------------------
+//eliminar like serie
+app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
+  const { id_profile, id_series } = req.params;
+  db.query(
+    "DELETE FROM favorites WHERE id_profile = ? AND id_series = ?",
+    [id_profile, id_series],
+    (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send({ success: true });
+    }
+  );
+});
+
+
+// ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'build')));
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// ---------------------- ARRANCAR SERVIDOR ----------------------
+// ------------------------------------------------------------- ARRANCAR SERVIDOR -----------------------------------------------------------
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Servidor backend en http://localhost:${PORT}`));
 

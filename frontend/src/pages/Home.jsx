@@ -14,14 +14,15 @@ export default function Home({ view: initialView = "inicio" }) {
   const [role, setRole] = useState("");
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
-  const [view, setView] = useState(initialView); 
+  const [view, setView] = useState(initialView);
+  const [view2, setView2] = useState(initialView);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
-const [likes, setLikes] = useState([]);
+  const [likes, setLikes] = useState([]);
 
 
   useEffect(() => {
@@ -53,18 +54,18 @@ const [likes, setLikes] = useState([]);
         setLoadingSeries(false);
       });
 
-       
-  if (!id_profile) return;
 
-  fetch(`http://localhost:3001/api/favorites/${id_profile}`)
-    .then(res => res.json())
-    .then(data => setFavorites(data.favorites))
-    .catch(err => console.error("Error cargando favoritos:", err));
+    if (!id_profile) return;
 
-  fetch(`http://localhost:3001/api/likes/${id_profile}`)
-    .then(res => res.json())
-    .then(data => setLikes(data.likes))
-    .catch(err => console.error("Error cargando likes:", err));
+    fetch(`http://localhost:3001/api/favorites/${id_profile}`)
+      .then(res => res.json())
+      .then(data => setFavorites(data.favorites))
+      .catch(err => console.error("Error cargando favoritos:", err));
+
+    fetch(`http://localhost:3001/api/likes/${id_profile}`)
+      .then(res => res.json())
+      .then(data => setLikes(data.likes))
+      .catch(err => console.error("Error cargando likes:", err));
   }, []);
 
   const handleSearch = (e) => {
@@ -100,7 +101,7 @@ const [likes, setLikes] = useState([]);
               </div>
               <div className="back-point">
                 {localStorage.getItem("") || "Usuario"}
-                </div>
+              </div>
             </>
           )}
         </div>
@@ -115,19 +116,74 @@ const [likes, setLikes] = useState([]);
         </div>
 
         <div className="menu-right">
-          <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen(!open)} />
-          {open && (
-            <div className="dropdown">
-              <ul>
-                <li onClick={() => navigate("/setting-users")}>Usuarios</li>
-                <li onClick={() => navigate("/setting-admins")}>Administradores</li>
-                <li onClick={() => navigate("/setting-movies")}>Películas</li>
-                <li onClick={() => navigate("/setting-series")}>Series</li>
-              </ul>
-            </div>
+          {role === "user" && (
+            <>
+              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
+            </>
+          )}
+
+          {role === "admin" && (
+            <>
+            <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen(!open)} />
+              {open && (
+                <div className="dropdown">
+                  <ul>
+                    <li onClick={() => navigate("/settings?tab=users")}>Usuarios</li>
+                    <li onClick={() => navigate("/settings?tab=admins")}>Administradores</li>
+                    <li onClick={() => navigate("/settings?tab=movies")}>Películas</li>
+                    <li onClick={() => navigate("/settings?tab=series")}>Series</li>
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       </nav>
+
+      {/*  Renderizado condicional de cada pestaña  */}
+      {view2 === "setting-users" && (
+        <div className="section">
+          <h2>Usuarios</h2>
+          {loadingUsers ? (
+            <Loading />
+          ) : (
+            <Carousel title="Todos los Usuarios" items={filteredUsers} imagePath="images-users" />
+          )}
+        </div>
+      )}
+
+      {view2 === "setting-admins" && (
+        <div className="section">
+          <h2>Administradores</h2>
+          {loadingAdmins ? (
+            <Loading />
+          ) : (
+            <Carousel title="Todos los Administradores" items={filteredAdmins} imagePath="images-admins" />
+          )}
+        </div>
+      )}
+
+      {view2 === "setting-movies" && (
+        <div className="section">
+          <h2>Películas</h2>
+          {loadingMovies ? (
+            <Loading />
+          ) : (
+            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
+          )}
+        </div>
+      )}
+
+      {view2 === "setting-series" && (
+        <div className="section">
+          <h2>Series</h2>
+          {loadingSeries ? (
+            <Loading />
+          ) : (
+            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
+          )}
+        </div>
+      )}
 
       {/* Contenido dinámico */}
       {view === "inicio" && (
@@ -174,42 +230,42 @@ const [likes, setLikes] = useState([]);
       )}
 
       {view === "favorites" && (
-  <div>
-    <h2>My Favorites</h2>
-    <table>
-      <thead>
-        <tr><th>Title</th><th>Image</th></tr>
-      </thead>
-      <tbody>
-        {favorites.map(f => (
-          <tr key={f.id_favorite}>
-            <td>{f.movie_title || f.series_title}</td>
-            <td><img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} alt="" /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
+        <div>
+          <h2>My Favorites</h2>
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Image</th></tr>
+            </thead>
+            <tbody>
+              {favorites.map(f => (
+                <tr key={f.id_favorite}>
+                  <td>{f.movie_title || f.series_title}</td>
+                  <td><img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} alt="" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-{view === "likes" && (
-  <div>
-    <h2>My Likes</h2>
-    <table>
-      <thead>
-        <tr><th>Title</th><th>Image</th></tr>
-      </thead>
-      <tbody>
-        {likes.map(l => (
-          <tr key={l.id_like}>
-            <td>{l.movie_title || l.series_title}</td>
-            <td><img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} alt="" /></td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
+      {view === "likes" && (
+        <div>
+          <h2>My Likes</h2>
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Image</th></tr>
+            </thead>
+            <tbody>
+              {likes.map(l => (
+                <tr key={l.id_like}>
+                  <td>{l.movie_title || l.series_title}</td>
+                  <td><img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} alt="" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
 
     </div>
