@@ -240,6 +240,37 @@ app.delete('/api/deleteProfile/:id', (req, res) => {
   });
 });
 
+// ------------------------------------------------------- AÑADIR USUERS/ADMINS/MOVIES/SERIES DESDE ADMIN --------------------------------------------
+app.get("/api/create-admin", (req, res) => {
+  const role = req.headers["role"];
+  if (role !== "admin") {
+    return res.status(403).json({ error: "Acceso denegado" });
+  }
+
+  const form = req.query.tab;
+  let sql;
+
+  switch (form) {
+    case "users":
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'user'";
+      break;
+    case "admins":
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'admin'";
+      break;
+    default:
+      return res.status(400).json({ error: "Parámetro tab inválido" });
+  }
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener datos:", err);
+      return res.status(500).json({ error: "Error al obtener datos" });
+    }
+    res.json({ success: true, data: results });
+  });
+});
+
+
 // -------------------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
 //Obtener los usuarios
 app.get("/api/settings", (req, res) => {
@@ -248,7 +279,7 @@ app.get("/api/settings", (req, res) => {
     return res.status(403).json({ error: "Acceso denegado" });
   }
 
-  const tab = req.query.tab; 
+  const tab = req.query.tab;
   let sql;
 
   switch (tab) {
@@ -276,7 +307,6 @@ app.get("/api/settings", (req, res) => {
     res.json({ success: true, data: results });
   });
 });
-
 
 // -------------------------------------------------------------------- ELIMINAR DATOS DE LAS TABLAS DESDE ADMIN ---------------------------------------------------------
 //Eliminar usuarios
@@ -435,15 +465,71 @@ app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   });
 });
 
-// ----------------------------------------------------------AÑADIR PELICULAS/SERIES (ADMIN) ---------------------------------------------------
-app.post("/api/add-content", (req, res) => {
+// ----------------------------------------------------------AÑADIR DESDE ADMIN ---------------------------------------------------
+//Añadir usuarios o admins
+app.post("/api/add-user-admin", (req, res) => {
+  const { name, username, dni, birth_date, email, password, role } = req.body;
+  let errors = {};
+
+  // Validaciones básicas
+  if (!name) errors.name = "El nombre completo es obligatorio";
+  if (!username) errors.username = "El nombre de usuario es obligatorio";
+  if (!dni) errors.dni = "El DNI es obligatorio";
+  if (!birth_date) errors.birth_date = "La fecha de nacimiento es obligatoria";
+  if (!email) errors.email = "El correo electrónico es obligatorio";
+  if (!password) errors.password = "La contraseña es obligatoria";
+  if (!role) errors.role = "Debe seleccionar usuario o administrador";
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Comprobar duplicados en la tabla users (por username, dni o email)
+  db.query(
+    "SELECT * FROM users WHERE username = ? OR dni = ? OR email = ?",
+    [username, dni, email],
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Error en el servidor" });
+      }
+
+      if (rows.length > 0) {
+        let dupErrors = {};
+        rows.forEach(row => {
+          if (row.username === username) dupErrors.username = "El nombre de usuario ya existe";
+          if (row.dni === dni) dupErrors.dni = "El DNI ya existe";
+          if (row.email === email) dupErrors.email = "El correo electrónico ya existe";
+        });
+        return res.status(400).json({ errors: dupErrors });
+      }
+
+      // Insertar usuario/admin
+      db.query(
+        "INSERT INTO users (name, username, dni, birth_date, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [name, username, dni, birth_date, email, password, role],
+        (err2) => {
+          if (err2) {
+            console.error(err2);
+            return res.status(500).json({ error: "Error en el servidor" });
+          }
+          return res.json({ success: true });
+        }
+      );
+    }
+  );
+});
+
+
+//Añadir peliculas o series
+app.post("/api/add-movie-serie", (req, res) => {
   const { title, description, image, releaseDate, genre, minAge, type, duration, actors, seasons, episodes } = req.body;
   let errors = {};
 
   // Validaciones básicas
   if (!title) errors.title = "El título es obligatorio";
   if (!description) errors.description = "La descripción es obligatoria";
-  if (!image) errors.image = "La imagen es obligatoria"; 
+  if (!image) errors.image = "La imagen es obligatoria";
   if (!releaseDate) errors.releaseDate = "La fecha de estreno es obligatoria";
   if (!genre) errors.genre = "El género es obligatorio";
   if (!minAge) errors.minAge = "La edad mínima es obligatoria";
@@ -452,7 +538,7 @@ app.post("/api/add-content", (req, res) => {
   if (type === "pelicula") {
     if (!duration) errors.duration = "La duración es obligatoria";
     if (!actors) errors.actors = "Debe indicar actores";
-  } 
+  }
   else if (type === "serie") {
     if (!seasons) errors.seasons = "El número de temporadas es obligatorio";
     if (!episodes) errors.episodes = "El número de capítulos es obligatorio";
@@ -746,7 +832,7 @@ app.get("/api/likes/:id_profile", (req, res) => {
     }
   );
 });
- 
+
 // Eliminar like peli
 app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
   const { id_profile, id_movie } = req.params;

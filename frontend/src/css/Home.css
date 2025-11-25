@@ -61,7 +61,7 @@
 .dropdown-settings {
   position: absolute;
   background: rgba(30, 30, 60, 0.85);
-  margin-top: 190px;
+  margin-top: 180px;
   padding: 0;
 }
 
@@ -72,19 +72,19 @@
   padding: 0;
 }
 
-.dropdown-settings, .dropdown-create ul {
+.dropdown-settings ul, .dropdown-create ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.dropdown-settings, .dropdown-create li {
+.dropdown-settings li, .dropdown-create li {
   padding: 5px 10px;
   cursor: pointer;
   border: 1px solid #c35ff5;
 }
 
-.dropdown li:hover {
+.dropdown-settings li:hover, .dropdown-create li:hover {
   background-color: rgba(82, 82, 138, 0.85);
 }
 
