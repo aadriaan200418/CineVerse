@@ -18,7 +18,8 @@ export default function Home({ view: initialView = "inicio" }) {
   const [view2, setView2] = useState(initialView);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [open1, setOpen1] = useState(false);
+  const [open2, setOpen2] = useState(false);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
@@ -87,7 +88,15 @@ export default function Home({ view: initialView = "inicio" }) {
         <div className="menu-left">
           {role === "admin" && (
             <>
-              <button className="add-button" onClick={() => navigate("/create-admin")}>＋</button>
+              <button className="add-button" onClick={() => setOpen1(!open1)}>＋</button>
+              {open1 && (
+                <div className="dropdown-create">
+                  <ul>
+                    <li onClick={() => navigate("/create-admin?form=users-admin")}>Usuario / Admin</li>
+                    <li onClick={() => navigate("/create-admin?form=movies-series")}>Pelicula / Serie</li>
+                  </ul>
+                </div>
+              )}
               <div className="back-point" onClick={() => navigate("/login")}>
                 {localStorage.getItem("username") || "Usuario"}
               </div>
@@ -124,9 +133,9 @@ export default function Home({ view: initialView = "inicio" }) {
 
           {role === "admin" && (
             <>
-              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen(!open)} />
-              {open && (
-                <div className="dropdown">
+              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen2(!open2)} />
+              {open2 && (
+                <div className="dropdown-settings">
                   <ul>
                     <li onClick={() => navigate("/settings?tab=users")}>Usuarios</li>
                     <li onClick={() => navigate("/settings?tab=admins")}>Administradores</li>

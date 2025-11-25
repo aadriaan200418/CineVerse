@@ -58,20 +58,27 @@
 }
 
 /*Desplegable*/
-.dropdown {
+.dropdown-settings {
   position: absolute;
   background: rgba(30, 30, 60, 0.85);
   margin-top: 190px;
   padding: 0;
 }
 
-.dropdown ul {
+.dropdown-create{
+  position: absolute;
+  background: rgba(30, 30, 60, 0.85);
+  margin-top: 120px;
+  padding: 0;
+}
+
+.dropdown-settings, .dropdown-create ul {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.dropdown li {
+.dropdown-settings, .dropdown-create li {
   padding: 5px 10px;
   cursor: pointer;
   border: 1px solid #c35ff5;

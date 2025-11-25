@@ -32,27 +32,95 @@ export default function Settings() {
         navigate("/login");
     };
 
-    // Función para eliminar usuario
-    const handleDeleteUser = async () => {
-        const username = localStorage.getItem("username");
-        if (!window.confirm("¿Seguro que quieres eliminar tu usuario?")) return;
+    // Función para eliminar un usuario seleccionada en la tabla (solo admin)
+    const handleDeleteUserSelect = async (dni) => {
+        const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
+        if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteUser/${username}`, {
-                method: "DELETE",
+            const res = await fetch(`http://localhost:3001/api/deleteUserSelect/${dni}`, {
+                method: "DELETE"
             });
-            if (!res.ok) {
-                throw new Error("Respuesta no OK del servidor");
-            }
+            if (!res.ok) throw new Error("Respuesta no OK del servidor");
 
             const data = await res.json();
             if (data.success) {
-                alert("Usuario eliminado correctamente");
-                localStorage.removeItem("username");
-                navigate("/login");
-            } else {
-                alert("Error: " + (data.error || "No se pudo eliminar el usuario"));
+                setUsers((prevUsers) => prevUsers.filter((u) => u.dni !== dni));
             }
-        } catch (err) {
+            else {
+                setError(data.error || "No se pudo eliminar el usuario");
+            }
+        }
+        catch (err) {
+            console.error("Error en fetch:", err);
+            alert("Error de conexión con el servidor");
+        }
+    };
+
+    // Función para eliminar administradores seleccionada en la tabla (solo admin)
+    const handleDeleteAdminSelect = async (dni) => {
+        const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
+        if (!confirmDelete) return;
+        try {
+            const res = await fetch(`http://localhost:3001/api/deleteAdminSelect/${dni}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) throw new Error("Respuesta no OK del servidor");
+
+            const data = await res.json();
+            if (data.success) {
+                setAdmins((prevAdmins) => prevAdmins.filter((a) => a.dni !== dni));
+            }
+            else {
+                setError(data.error || "No se pudo eliminar el usuario");
+            }
+        }
+        catch (err) {
+            console.error("Error en fetch:", err);
+            alert("Error de conexión con el servidor");
+        }
+    };
+
+    // Función para eliminar una película seleccionada en la tabla (solo admin)
+    const handleDeleteMovieSelect = async (id_movie) => {
+        const confirmDelete = window.confirm("¿Seguro que quieres eliminar esta película?");
+        if (!confirmDelete) return;
+        try {
+            const res = await fetch(`http://localhost:3001/api/deleteMovieSelect/${id_movie}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) throw new Error("Respuesta no OK del servidor");
+
+            const data = await res.json();
+            if (data.success) {
+                setMovies((prevMovies) => prevMovies.filter((m) => m.id_movie !== id_movie));
+            } else {
+                setError(data.error || "No se pudo eliminar la película");
+            }
+        } 
+        catch (err) {
+            console.error("Error en fetch:", err);
+            alert("Error de conexión con el servidor");
+        }
+    };
+
+    // Función para eliminar una serie seleccionada en la tabla (solo admin)
+    const handleDeleteSeriesSelect = async (id_series) => {
+        const confirmDelete = window.confirm("¿Seguro que quieres eliminar esta película?");
+        if (!confirmDelete) return;
+        try {
+            const res = await fetch(`http://localhost:3001/api/deleteSeriesSelect/${id_series}`, {
+                method: "DELETE"
+            });
+            if (!res.ok) throw new Error("Respuesta no OK del servidor");
+
+            const data = await res.json();
+            if (data.success) {
+                setSeries((prevSeries) => prevSeries.filter((s) => s.id_series !== id_series));
+            } else {
+                setError(data.error || "No se pudo eliminar la película");
+            }
+        } 
+        catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
         }
@@ -84,29 +152,6 @@ export default function Settings() {
         catch (err) {
             console.error("Error al cargar datos:", err);
             alert("Error al cargar datos");
-        }
-    };
-
-    // Función para eliminar un usuario seleccionado en la tabla (solo admin)
-    const handleDeleteUserSelect = async (dni) => {
-        const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
-        if (!confirmDelete) return;
-        try {
-            const res = await fetch(`http://localhost:3001/api/deleteUserSelect/${dni}`, {
-                method: "DELETE"
-            });
-            if (!res.ok) throw new Error("Respuesta no OK del servidor");
-
-            const data = await res.json();
-            if (data.success) {
-                setUsers((prevUsers) => prevUsers.filter((u) => u.dni !== dni));
-            }
-            else {
-                setError(data.error || "No se pudo eliminar el usuario");
-            }
-        } catch (err) {
-            console.error("Error en fetch:", err);
-            alert("Error de conexión con el servidor");
         }
     };
 
@@ -171,7 +216,7 @@ export default function Settings() {
                                         <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
                                         <td>{a.email}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(a.dni)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)} />
                                         </td>
                                     </tr>
                                 ))}
@@ -199,7 +244,7 @@ export default function Settings() {
                                         <td>{m.genre}</td>
                                         <td>{m.duration_minutes}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(m.id_movie)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)} />
                                         </td>
                                     </tr>
                                 ))}
@@ -227,7 +272,7 @@ export default function Settings() {
                                         <td>{s.genre}</td>
                                         <td>{s.seasons}</td>
                                         <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(s.id_series)} />
+                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)} />
                                         </td>
                                     </tr>
                                 ))}

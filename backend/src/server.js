@@ -278,7 +278,8 @@ app.get("/api/settings", (req, res) => {
 });
 
 
-// -------------------------------------------------------------------- ELIMINAR USUARIOS DESDE ADMIN ---------------------------------------------------------
+// -------------------------------------------------------------------- ELIMINAR DATOS DE LAS TABLAS DESDE ADMIN ---------------------------------------------------------
+//Eliminar usuarios
 app.delete("/api/deleteUserSelect/:dni", (req, res) => {
   const { dni } = req.params;
 
@@ -328,6 +329,110 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
       );
     }
   );
+});
+
+//Eliminar admins
+app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
+  const { dni } = req.params;
+
+  // 1. Borrar likes asociados a los perfiles del usuario
+  db.query(
+    "DELETE FROM likes WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
+    [dni],
+    (err) => {
+      if (err) {
+        console.error("Error SQL (likes):", err);
+        return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+      }
+
+      // 2. Borrar favoritos asociados a los perfiles del usuario
+      db.query(
+        "DELETE FROM favorites WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
+        [dni],
+        (err) => {
+          if (err) {
+            console.error("Error SQL (favorites):", err);
+            return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+          }
+
+          // 3. Borrar perfiles del usuario
+          db.query("DELETE FROM profiles WHERE id_user = ?", [dni], (err) => {
+            if (err) {
+              console.error("Error SQL (profiles):", err);
+              return res.status(500).json({ success: false, error: "Error al eliminar perfiles" });
+            }
+
+            // 4. Finalmente borrar el usuario
+            db.query("DELETE FROM users WHERE dni = ?", [dni], (err, result) => {
+              if (err) {
+                console.error("Error SQL (users):", err);
+                return res.status(500).json({ success: false, error: "Error al eliminar usuario" });
+              }
+
+              if (result.affectedRows > 0) {
+                res.json({ success: true });
+              }
+              else {
+                res.status(404).json({ success: false, error: "Usuario no encontrado" });
+              }
+            });
+          });
+        }
+      );
+    }
+  );
+});
+
+// Eliminar película por ID (con dependencias)
+app.delete("/api/deleteMovieSelect/:id", (req, res) => {
+  const { id } = req.params;
+
+  // 1. Borrar likes asociados a la película
+  db.query("DELETE FROM likes WHERE id_movie = ?", [id], (err) => {
+    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+
+    // 2. Borrar favoritos asociados a la película
+    db.query("DELETE FROM favorites WHERE id_movie = ?", [id], (err) => {
+      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+
+      // 3. Finalmente borrar la película
+      db.query("DELETE FROM movies WHERE id_movie = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: "Error al eliminar película" });
+
+        if (result.affectedRows > 0) {
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ success: false, error: "Película no encontrada" });
+        }
+      });
+    });
+  });
+});
+
+// Eliminar serie por ID (con dependencias)
+app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
+  const { id } = req.params;
+
+  // 1. Borrar likes asociados a la serie
+  db.query("DELETE FROM likes WHERE id_series = ?", [id], (err) => {
+    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+
+    // 2. Borrar favoritos asociados a la serie
+    db.query("DELETE FROM favorites WHERE id_series = ?", [id], (err) => {
+      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+
+      // 3. Finalmente borrar la serie
+      db.query("DELETE FROM series WHERE id_series = ?", [id], (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: "Error al eliminar serie" });
+
+        if (result.affectedRows > 0) {
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ success: false, error: "Serie no encontrada" });
+        }
+      });
+    });
+  });
 });
 
 // ----------------------------------------------------------AÑADIR PELICULAS/SERIES (ADMIN) ---------------------------------------------------
@@ -451,32 +556,6 @@ app.put("/api/movies/:id", (req, res) => {
   });
 });
 
-// Eliminar película por ID (con dependencias)
-app.delete("/api/deleteMovieSelect/:id", (req, res) => {
-  const { id } = req.params;
-
-  // 1. Borrar likes asociados a la película
-  db.query("DELETE FROM likes WHERE id_movie = ?", [id], (err) => {
-    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
-
-    // 2. Borrar favoritos asociados a la película
-    db.query("DELETE FROM favorites WHERE id_movie = ?", [id], (err) => {
-      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
-
-      // 3. Finalmente borrar la película
-      db.query("DELETE FROM movies WHERE id_movie = ?", [id], (err, result) => {
-        if (err) return res.status(500).json({ success: false, error: "Error al eliminar película" });
-
-        if (result.affectedRows > 0) {
-          res.json({ success: true });
-        } else {
-          res.status(404).json({ success: false, error: "Película no encontrada" });
-        }
-      });
-    });
-  });
-});
-
 // ----------------------------------------------------------------- SERIES --------------------------------------------
 // Obtener todas las series
 app.get("/api/series", (req, res) => {
@@ -563,35 +642,7 @@ app.put("/api/series/:id", (req, res) => {
   });
 });
 
-
-// Eliminar serie por ID (con dependencias)
-app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
-  const { id } = req.params;
-
-  // 1. Borrar likes asociados a la serie
-  db.query("DELETE FROM likes WHERE id_series = ?", [id], (err) => {
-    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
-
-    // 2. Borrar favoritos asociados a la serie
-    db.query("DELETE FROM favorites WHERE id_series = ?", [id], (err) => {
-      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
-
-      // 3. Finalmente borrar la serie
-      db.query("DELETE FROM series WHERE id_series = ?", [id], (err, result) => {
-        if (err) return res.status(500).json({ success: false, error: "Error al eliminar serie" });
-
-        if (result.affectedRows > 0) {
-          res.json({ success: true });
-        } else {
-          res.status(404).json({ success: false, error: "Serie no encontrada" });
-        }
-      });
-    });
-  });
-});
-
 // -------------------------------------------------------------- FAVORITES -----------------------------------------------------------------
-
 // Añadir favorito (película o serie)
 app.post("/api/favorites", (req, res) => {
   const { id_profile, id_movie, id_series } = req.body;
@@ -620,18 +671,8 @@ app.get("/api/favorites/:id_profile", (req, res) => {
   const { id_profile } = req.params;
 
   db.query(
-    `SELECT 
-      favorites.id_favorite, 
-      favorites.id_movie, 
-      favorites.id_series,
-      movies.title AS movie_title,
-      movies.image AS movie_image,
-      series.title AS series_title,
-      series.image AS series_image
-    FROM favorites
-    LEFT JOIN movies ON favorites.id_movie = movies.id_movie
-    LEFT JOIN series ON favorites.id_series = series.id_series
-    WHERE favorites.id_profile = ?`,
+    `SELECT favorites.id_favorite, favorites.id_movie, favorites.id_series, movies.title AS movie_title, movies.image AS movie_image, series.title AS series_title, series.image AS series_image
+     FROM favorites LEFT JOIN movies ON favorites.id_movie = movies.id_movie LEFT JOIN series ON favorites.id_series = series.id_series WHERE favorites.id_profile = ?`,
     [id_profile],
     (err, rows) => {
       if (err) return res.status(500).send(err);
@@ -667,7 +708,6 @@ app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
     }
   );
 });
-
 
 // -------------------------------------------------------------- LIKES -----------------------------------------------------------------
 // Añadir like
