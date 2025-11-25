@@ -90,117 +90,6 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-// ------------------------------------------------------------- OBTENER PERFILES DE UN USUARIO ------------------------------------------------------------
-app.get('/api/profiles', (req, res) => {
-  const { username } = req.query;
-
-  if (!username) return res.status(400).json({ error: 'Falta username' });
-
-  const sqlUser = 'SELECT dni FROM users WHERE username = ?';
-  db.query(sqlUser, [username], (err, userResults) => {
-    if (err) {
-      console.error('Error al buscar usuario:', err);
-      return res.status(500).json({ error: 'Error al buscar usuario' });
-    }
-    if (userResults.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
-    const dni = userResults[0].dni;
-
-    const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
-    db.query(sqlProfiles, [dni], (err2, profileResults) => {
-      if (err2) {
-        console.error('Error al obtener perfiles:', err2);
-        return res.status(500).json({ error: 'Error al obtener perfiles' });
-      }
-
-      res.json({ success: true, perfiles: profileResults });
-    });
-  });
-});
-
-// ------------------------------------------------------------------- AÑADIR NUEVO PERFIL -----------------------------------------------------------
-app.post('/api/addProfile', (req, res) => {
-  const { username, nombre } = req.body;
-
-  if (!username || !nombre) {
-    return res.status(400).json({ error: 'Faltan datos: username y nombre son obligatorios' });
-  }
-
-  const sqlUser = 'SELECT dni FROM users WHERE username = ?';
-  db.query(sqlUser, [username], (err, userResults) => {
-    if (err) {
-      console.error('Error al buscar usuario:', err);
-      return res.status(500).json({ error: 'Error al buscar usuario' });
-    }
-    if (userResults.length === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
-
-    const dni = userResults[0].dni;
-
-    const sqlInsert = 'INSERT INTO profiles (id_user, name) VALUES (?, ?)';
-    db.query(sqlInsert, [dni, nombre], (err2) => {
-      if (err2) {
-        console.error('Error al crear perfil:', err2);
-        return res.status(500).json({ error: 'Error al crear perfil' });
-      }
-
-      // Actualizar campo JSON profile en users
-      const sqlUpdateJson = ` UPDATE users   SET profile = JSON_ARRAY_APPEND(IFNULL(profile, JSON_ARRAY()), '$', ?) WHERE dni = ?`;
-      db.query(sqlUpdateJson, [nombre, dni], (err3) => {
-        if (err3) {
-          console.error(' Error al actualizar campo JSON profile:', err3);
-          // No bloqueamos la creación, solo avisamos
-        }
-
-        const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
-        db.query(sqlProfiles, [dni], (err4, profileResults) => {
-          if (err4) {
-            console.error('Error al obtener perfiles:', err4);
-            return res.status(500).json({ error: 'Error al obtener perfiles' });
-          }
-
-          res.json({ success: true, perfiles: profileResults });
-        });
-      });
-    });
-  });
-});
-
-// --------------------------------------------------------------------- ELIMINAR PERFIL ---------------------------------------------------------
-app.delete('/api/deleteProfile/:id', (req, res) => {
-  const profileId = req.params.id;
-
-  const sqlGetUserProfile = ` SELECT u.dni, p.name FROM profiles p JOIN users u ON u.dni = p.id_user WHERE p.id_profile = ?`;
-  db.query(sqlGetUserProfile, [profileId], (err, results) => {
-    if (err) {
-      console.error('Error al obtener datos del perfil:', err);
-      return res.status(500).json({ error: 'Error al obtener datos del perfil' });
-    }
-
-    const { dni, name } = results[0];
-
-    const sqlDelete = 'DELETE FROM profiles WHERE id_profile = ?';
-    db.query(sqlDelete, [profileId], (err2) => {
-      if (err2) {
-        console.error(' Error al eliminar perfil:', err2);
-        return res.status(500).json({ error: 'Error al eliminar perfil' });
-      }
-
-      const sqlUpdateJson = `UPDATE users SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) WHERE dni = ?`;
-      db.query(sqlUpdateJson, [name, dni], (err3) => {
-        if (err3) {
-          console.error(' Error al actualizar campo JSON profile:', err3);
-        }
-
-        res.json({ success: true });
-      });
-    });
-  });
-});
-
 // ------------------------------------------------------------------ ELIMINAR USUARIO -----------------------------------------------------------------
 app.delete('/api/deleteUser/:username', (req, res) => {
   const username = req.params.username;
@@ -233,6 +122,116 @@ app.delete('/api/deleteUser/:username', (req, res) => {
         if (err3) {
           console.error('Error al eliminar usuario:', err3);
           return res.status(500).json({ error: 'Error al eliminar usuario' });
+        }
+
+        res.json({ success: true });
+      });
+    });
+  });
+});
+
+// ------------------------------------------------------------- PERFILES DE UN USUARIO ------------------------------------------------------------
+//Obtener perfiles de un usuario
+app.get('/api/profiles', (req, res) => {
+  const { username } = req.query;
+
+  if (!username) return res.status(400).json({ error: 'Falta username' });
+
+  const sqlUser = 'SELECT dni FROM users WHERE username = ?';
+  db.query(sqlUser, [username], (err, userResults) => {
+    if (err) {
+      console.error('Error al buscar usuario:', err);
+      return res.status(500).json({ error: 'Error al buscar usuario' });
+    }
+    if (userResults.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const dni = userResults[0].dni;
+
+    const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
+    db.query(sqlProfiles, [dni], (err2, profileResults) => {
+      if (err2) {
+        console.error('Error al obtener perfiles:', err2);
+        return res.status(500).json({ error: 'Error al obtener perfiles' });
+      }
+
+      res.json({ success: true, perfiles: profileResults });
+    });
+  });
+});
+
+// Añadir/crear un nuevo perfil
+app.post('/api/addProfile', (req, res) => {
+  const { username, nombre } = req.body;
+
+  if (!username || !nombre) {
+    return res.status(400).json({ error: 'Faltan datos: username y nombre son obligatorios' });
+  }
+
+  const sqlUser = 'SELECT dni FROM users WHERE username = ?';
+  db.query(sqlUser, [username], (err, userResults) => {
+    if (err) {
+      console.error('Error al buscar usuario:', err);
+      return res.status(500).json({ error: 'Error al buscar usuario' });
+    }
+    if (userResults.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    const dni = userResults[0].dni;
+    const sqlInsert = 'INSERT INTO profiles (id_user, name) VALUES (?, ?)';
+    db.query(sqlInsert, [dni, nombre], (err2) => {
+      if (err2) {
+        console.error('Error al crear perfil:', err2);
+        return res.status(500).json({ error: 'Error al crear perfil' });
+      }
+
+      // Actualizar campo JSON profile en users
+      const sqlUpdateJson = ` UPDATE users   SET profile = JSON_ARRAY_APPEND(IFNULL(profile, JSON_ARRAY()), '$', ?) WHERE dni = ?`;
+      db.query(sqlUpdateJson, [nombre, dni], (err3) => {
+        if (err3) {
+          console.error(' Error al actualizar campo JSON profile:', err3);
+          // No bloqueamos la creación, solo avisamos
+        }
+
+        const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
+        db.query(sqlProfiles, [dni], (err4, profileResults) => {
+          if (err4) {
+            console.error('Error al obtener perfiles:', err4);
+            return res.status(500).json({ error: 'Error al obtener perfiles' });
+          }
+
+          res.json({ success: true, perfiles: profileResults });
+        });
+      });
+    });
+  });
+});
+
+// Eliminar un perfil
+app.delete('/api/deleteProfile/:id', (req, res) => {
+  const profileId = req.params.id;
+  const sqlGetUserProfile = ` SELECT u.dni, p.name FROM profiles p JOIN users u ON u.dni = p.id_user WHERE p.id_profile = ?`;
+  db.query(sqlGetUserProfile, [profileId], (err, results) => {
+    if (err) {
+      console.error('Error al obtener datos del perfil:', err);
+      return res.status(500).json({ error: 'Error al obtener datos del perfil' });
+    }
+
+    const { dni, name } = results[0];
+
+    const sqlDelete = 'DELETE FROM profiles WHERE id_profile = ?';
+    db.query(sqlDelete, [profileId], (err2) => {
+      if (err2) {
+        console.error(' Error al eliminar perfil:', err2);
+        return res.status(500).json({ error: 'Error al eliminar perfil' });
+      }
+
+      const sqlUpdateJson = `UPDATE users SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) WHERE dni = ?`;
+      db.query(sqlUpdateJson, [name, dni], (err3) => {
+        if (err3) {
+          console.error(' Error al actualizar campo JSON profile:', err3);
         }
 
         res.json({ success: true });
@@ -327,6 +326,78 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
           });
         }
       );
+    }
+  );
+});
+
+// ----------------------------------------------------------AÑADIR PELICULAS/SERIES (ADMIN) ---------------------------------------------------
+app.post("/api/add-content", (req, res) => {
+  const { title, description, image, releaseDate, genre, minAge, type, duration, actors, seasons, episodes } = req.body;
+  let errors = {};
+
+  // Validaciones básicas
+  if (!title) errors.title = "El título es obligatorio";
+  if (!description) errors.description = "La descripción es obligatoria";
+  if (!image) errors.image = "La imagen es obligatoria"; 
+  if (!releaseDate) errors.releaseDate = "La fecha de estreno es obligatoria";
+  if (!genre) errors.genre = "El género es obligatorio";
+  if (!minAge) errors.minAge = "La edad mínima es obligatoria";
+  if (!type) errors.type = "Debe seleccionar película o serie";
+
+  if (type === "pelicula") {
+    if (!duration) errors.duration = "La duración es obligatoria";
+    if (!actors) errors.actors = "Debe indicar actores";
+  } 
+  else if (type === "serie") {
+    if (!seasons) errors.seasons = "El número de temporadas es obligatorio";
+    if (!episodes) errors.episodes = "El número de capítulos es obligatorio";
+    if (!actors) errors.actors = "Debe indicar actores";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return res.json({ errors });
+  }
+
+  // Comprobar duplicado en ambas tablas
+  db.query(
+    "SELECT * FROM movies WHERE title = ? UNION SELECT * FROM series WHERE title = ?",
+    [title, title],
+    (err, rows) => {
+      if (err) {
+        console.error(err);
+        return res.json({ error: "Error en el servidor" });
+      }
+
+      if (rows.length > 0) {
+        return res.json({ errors: { title: "El título ya existe en la base de datos" } });
+      }
+
+      // Insertar según tipo
+      if (type === "pelicula") {
+        db.query(
+          "INSERT INTO movies (title, image, description, release_date, genre, minimum_age, duration_minutes, actors) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [title, image, description, releaseDate, genre, minAge, duration, JSON.stringify(actors.split(","))],
+          (err2) => {
+            if (err2) {
+              console.error(err2);
+              return res.json({ error: "Error en el servidor" });
+            }
+            return res.json({ success: true });
+          }
+        );
+      } else {
+        db.query(
+          "INSERT INTO series (title, image, description, release_date, genre, minimum_age, seasons, actors) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [title, image, description, releaseDate, genre, minAge, seasons, JSON.stringify(actors.split(","))],
+          (err3) => {
+            if (err3) {
+              console.error(err3);
+              return res.json({ error: "Error en el servidor" });
+            }
+            return res.json({ success: true });
+          }
+        );
+      }
     }
   );
 });
@@ -482,11 +553,7 @@ app.put("/api/series/:id", (req, res) => {
     return res.status(403).json({ error: "Acceso denegado" });
   }
 
-  const sqlUpdate = `
-    UPDATE series SET 
-      title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, seasons = ?
-    WHERE id_series = ?
-  `;
+  const sqlUpdate = ` UPDATE series SET title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, seasons = ? WHERE id_series = ?`;
   db.query(sqlUpdate, [title, description, genre, image, minimum_age, seasons, id], (err) => {
     if (err) {
       console.error("Error al editar serie:", err);
@@ -523,16 +590,27 @@ app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   });
 });
 
-// ----------------------------------------------------------------- FAVORITOS --------------------------------------------------------
-// Añadir favorito
+// -------------------------------------------------------------- FAVORITES -----------------------------------------------------------------
+
+// Añadir favorito (película o serie)
 app.post("/api/favorites", (req, res) => {
   const { id_profile, id_movie, id_series } = req.body;
+
   db.query(
-    "INSERT INTO favorites (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+    "SELECT * FROM favorites WHERE id_profile = ? AND id_movie <=> ? AND id_series <=> ?",
     [id_profile, id_movie || null, id_series || null],
-    (err) => {
+    (err, rows) => {
       if (err) return res.status(500).send(err);
-      res.send({ success: true });
+      if (rows.length > 0) return res.send({ success: false, message: "Ya existe el favorito" });
+
+      db.query(
+        "INSERT INTO favorites (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+        [id_profile, id_movie || null, id_series || null],
+        (err2) => {
+          if (err2) return res.status(500).send(err2);
+          res.send({ success: true });
+        }
+      );
     }
   );
 });
@@ -540,14 +618,20 @@ app.post("/api/favorites", (req, res) => {
 // Obtener favoritos de un perfil
 app.get("/api/favorites/:id_profile", (req, res) => {
   const { id_profile } = req.params;
+
   db.query(
-    `SELECT f.id_favorite, 
-            m.title AS movie_title, m.image AS movie_image, 
-            s.title AS series_title, s.image AS series_image
-     FROM favorites f
-     LEFT JOIN movies m ON f.id_movie = m.id_movie
-     LEFT JOIN series s ON f.id_series = s.id_series
-     WHERE f.id_profile = ?`,
+    `SELECT 
+      favorites.id_favorite, 
+      favorites.id_movie, 
+      favorites.id_series,
+      movies.title AS movie_title,
+      movies.image AS movie_image,
+      series.title AS series_title,
+      series.image AS series_image
+    FROM favorites
+    LEFT JOIN movies ON favorites.id_movie = movies.id_movie
+    LEFT JOIN series ON favorites.id_series = series.id_series
+    WHERE favorites.id_profile = ?`,
     [id_profile],
     (err, rows) => {
       if (err) return res.status(500).send(err);
@@ -555,9 +639,11 @@ app.get("/api/favorites/:id_profile", (req, res) => {
     }
   );
 });
+
 // Eliminar favorito de película
 app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
   const { id_profile, id_movie } = req.params;
+
   db.query(
     "DELETE FROM favorites WHERE id_profile = ? AND id_movie = ?",
     [id_profile, id_movie],
@@ -569,28 +655,40 @@ app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
 });
 
 // Eliminar favorito de serie
-app.delete("/api/favorites/:id_profile/:serie", (req, res) => {
-  const { id_profile, id_serie } = req.params;
+app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
+  const { id_profile, id_series } = req.params;
+
   db.query(
-    "DELETE FROM favorites WHERE id_profile = ? AND id_serie = ?",
-    [id_profile, id_serie],
+    "DELETE FROM favorites WHERE id_profile = ? AND id_series = ?",
+    [id_profile, id_series],
     (err, result) => {
       if (err) return res.status(500).send(err);
       res.send({ success: true });
     }
   );
 });
+
+
 // -------------------------------------------------------------- LIKES -----------------------------------------------------------------
 // Añadir like
 app.post("/api/likes", (req, res) => {
-  
   const { id_profile, id_movie, id_series } = req.body;
+
   db.query(
-    "INSERT INTO likes (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+    "SELECT * FROM likes WHERE id_profile = ? AND id_movie <=> ? AND id_series <=> ?",
     [id_profile, id_movie || null, id_series || null],
-    (err) => {
+    (err, rows) => {
       if (err) return res.status(500).send(err);
-      res.send({ success: true });
+      if (rows.length > 0) return res.send({ success: false, message: "Ya existe el like" });
+
+      db.query(
+        "INSERT INTO likes (id_profile, id_movie, id_series) VALUES (?, ?, ?)",
+        [id_profile, id_movie || null, id_series || null],
+        (err2) => {
+          if (err2) return res.status(500).send(err2);
+          res.send({ success: true });
+        }
+      );
     }
   );
 });
@@ -599,18 +697,8 @@ app.post("/api/likes", (req, res) => {
 app.get("/api/likes/:id_profile", (req, res) => {
   const { id_profile } = req.params;
   db.query(
-    `SELECT 
-      likes.id_like, 
-      likes.id_movie, 
-      likes.id_series,
-      movies.title AS movie_title,
-      movies.image AS movie_image,
-      series.title AS series_title,
-      series.image AS series_image
-    FROM likes
-    LEFT JOIN movies ON likes.id_movie = movies.id_movie
-    LEFT JOIN series ON likes.id_series = series.id_series
-    WHERE likes.id_profile = ?`,
+    `SELECT likes.id_like, likes.id_movie, likes.id_series, movies.title AS movie_title, movies.image AS movie_image, series.title AS series_title, series.image AS series_image
+     FROM likes LEFT JOIN movies ON likes.id_movie = movies.id_movie LEFT JOIN series ON likes.id_series = series.id_series WHERE likes.id_profile = ?`,
     [id_profile],
     (err, rows) => {
       if (err) return res.status(500).send(err);
@@ -618,7 +706,6 @@ app.get("/api/likes/:id_profile", (req, res) => {
     }
   );
 });
-
  
 // Eliminar like peli
 app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
@@ -645,7 +732,6 @@ app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
     }
   );
 });
-
 
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'build')));

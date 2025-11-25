@@ -48,39 +48,43 @@ export default function DetailSerie() {
     }
   }, [id]);
 
-  const toggleLike = () => {
-    const id_profile = localStorage.getItem("id_profile");
-    if (!id_profile || !serie?.id_series) return;
+ const toggleLike = () => {
+  const id_profile = localStorage.getItem("id_profile");
+  if (!id_profile || !serie?.id_series) return;
 
-    if (!isLiked) {
-      fetch("http://localhost:3001/api/likes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_profile, id_series: serie.id_series })
-      }).then(() => setIsLiked(true));
-    } else {
-      fetch(`http://localhost:3001/api/likes/${id_profile}/series/${serie.id_series}`, {
-        method: "DELETE"
-      }).then(() => setIsLiked(false));
-    }
-  };
+  if (!isLiked) {
+    // Añadir like de serie
+    fetch("http://localhost:3001/api/likes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_profile, id_series: serie.id_series })
+    }).then(() => setIsLiked(true));
+  } else {
+    // Eliminar like de serie
+    fetch(`http://localhost:3001/api/likes/${id_profile}/${serie.id_series}`, {
+      method: "DELETE"
+    }).then(() => setIsLiked(false));
+  }
+};
 
-  const toggleFavorite = () => {
-    const id_profile = localStorage.getItem("id_profile");
-    if (!id_profile || !serie?.id_series) return;
+const toggleFavorite = () => {
+  const id_profile = localStorage.getItem("id_profile");
+  if (!id_profile || !serie?.id_series) return;
 
-    if (!isFavorite) {
-      fetch("http://localhost:3001/api/favorites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_profile, id_series: serie.id_series })
-      }).then(() => setIsFavorite(true));
-    } else {
-      fetch(`http://localhost:3001/api/favorites/${id_profile}/series/${serie.id_series}`, {
-        method: "DELETE"
-      }).then(() => setIsFavorite(false));
-    }
-  };
+  if (!isFavorite) {
+    // Añadir favorito de serie
+    fetch("http://localhost:3001/api/favorites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id_profile, id_series: serie.id_series })
+    }).then(() => setIsFavorite(true));
+  } else {
+    // Eliminar favorito de serie
+    fetch(`http://localhost:3001/api/favorites/${id_profile}/${serie.id_series}`, {
+      method: "DELETE"
+    }).then(() => setIsFavorite(false));
+  }
+};
 
   if (error) return <p>{error}</p>;
   if (!serie) return <Loading />;
