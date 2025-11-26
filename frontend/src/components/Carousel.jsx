@@ -35,9 +35,8 @@ export default function Carousel({ title, items, imagePath }) {
                 ? navigate(`/series/${item.id_series}`)
                 : navigate(`/movies/${item.id_movie}`)
               }>
+                
               <img src={`/${imagePath}/${item.image}`} alt={item.title} className="carousel-card-image" />
-
-            
             </div>
           ))}
         </div>

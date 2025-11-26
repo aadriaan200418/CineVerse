@@ -18,6 +18,12 @@
   padding: 1rem;
 }
 
+/*Titulo de cada tipo (top 10...)*/
+.carousel-section h1{
+  text-align: left;
+}
+
+/*Tarjetas de las series/pelis*/
 .carousel-card {
   flex: 0 0 auto;
   width: 140px;      
@@ -42,28 +48,6 @@
   display: block;
 }
 
-.carousel-card-overlay {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  color: white;
-  padding: 6px;
-  box-sizing: border-box;
-}
-
-.carousel-card-title {
-  font-size: 0.8rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.carousel-card-genre {
-  font-size: 0.7rem;
-  margin-top: 2px;
-  opacity: 0.8;
-}
-
 /*Flechas de derecha e izquierda*/
 .scroll-button {
   background:none;
@@ -80,7 +64,7 @@
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-/*Quitar scroll*/
+/*Quitar scroll (barras)*/
 html, body {
   height: 100%;
   overflow-y: scroll;    

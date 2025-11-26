@@ -106,6 +106,72 @@
   margin-right: 20px;
 }
 
+.like-image.active {
+  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+}
+
+.star-image.active {
+  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+}
+
+/*Formulario / contenedor de los datos*/
+.info {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.info h1{
+  text-align: left;
+}
+
+/*Inputs y textarea*/
+.detail form input, .detail form textarea {
+  width: 92%;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(70, 70, 160, 0.8);
+  color: white;
+  font-size: 1rem;
+}
+
+.detail form input:focus, .detail form textarea:focus {
+  background-color: #c35ff5;
+  outline: none;
+}
+
+.detail form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Botones de guardar y cancelar */
+.btns{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.btn {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  margin-top: 10px;
+  padding: 10px;
+  color: white;
+  border: none;
+  width: 40%;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: linear-gradient(90deg, #c35ff5, #e480ff);
+}
+
 /*Quitar scroll*/
 html, body {
   height: 100%;
@@ -116,12 +182,3 @@ html, body {
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }
-
-.like-image.active {
-  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
-}
-
-.star-image.active {
-  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
-}
-

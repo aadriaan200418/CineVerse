@@ -36,11 +36,19 @@ export default function Register() {
       return "";
     },
     birth_date: (v) => {
-      if (!v) return "La fecha de nacimiento es obligatoria.";
-      const d = new Date(v);
-      if (Number.isNaN(d.getTime())) return "Fecha de nacimiento no válida.";
-      const hoy = new Date();
-      if (d > hoy) return "La fecha de nacimiento no puede ser futura.";
+      if (!v.trim()) return "La fecha de nacimiento es obligatoria.";
+      const date = new Date(v);
+      if (isNaN(date.getTime())) return "Debe ser una fecha válida.";
+
+      const today = new Date();
+      let age = today.getFullYear() - date.getFullYear();
+      const m = today.getMonth() - date.getMonth();
+
+      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+        age--;
+      }
+
+      if (age < 18) return "Debe ser mayor de 18 años.";
       return "";
     },
     email: (v) => {

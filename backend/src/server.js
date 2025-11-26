@@ -622,24 +622,34 @@ app.get("/api/movies/:id", (req, res) => {
   });
 });
 
-// Editar una película (solo admin)
+// -------------------------------------------------------------- EDITAR PELÍCULA SOLO ADMIN-----------------------------------------------------------------
 app.put("/api/movies/:id", (req, res) => {
   const { id } = req.params;
-  const { title, description, genre, image, minimum_age, duration_minutes } = req.body;
-  const role = req.headers["role"];
+  const { title, image, description, release_date, genre, minimum_age, duration_minutes, actors } = req.body;
 
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Acceso denegado" });
-  }
-
-  const sqlUpdate = `UPDATE movies SET title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, duration_minutes = ? WHERE id_movie = ?`;
-  db.query(sqlUpdate, [title, description, genre, image, minimum_age, duration_minutes, id], (err) => {
-    if (err) {
-      console.error("Error al editar película:", err);
-      return res.status(500).json({ error: "Error al editar película" });
+  db.query(
+    `UPDATE movies 
+     SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, duration_minutes = ?, actors = ?
+     WHERE id_movie = ?`,
+    [
+      title,
+      image,
+      description,
+      release_date,
+      genre,
+      minimum_age,
+      duration_minutes,
+      JSON.stringify(actors || []),
+      id
+    ],
+    (err) => {
+      if (err) {
+        console.error("Error al actualizar película:", err);
+        return res.status(500).send({ error: "Error al actualizar la película" });
+      }
+      res.send({ success: true, message: "Película actualizada correctamente" });
     }
-    res.json({ success: true, message: "Película actualizada correctamente" });
-  });
+  );
 });
 
 // ----------------------------------------------------------------- SERIES --------------------------------------------
@@ -708,24 +718,35 @@ app.get("/api/series/:id/season/:seasonNumber/chapters", (req, res) => {
   });
 });
 
-// Editar una serie (solo admin)
+
+// -------------------------------------------------------------- EDITAR SERIE SOLO ADMIN----------------------------------------------------------------
 app.put("/api/series/:id", (req, res) => {
   const { id } = req.params;
-  const { title, description, genre, image, minimum_age, seasons } = req.body;
-  const role = req.headers["role"];
+  const { title, image, description, release_date, genre, minimum_age, seasons, actors } = req.body;
 
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Acceso denegado" });
-  }
-
-  const sqlUpdate = ` UPDATE series SET title = ?, description = ?, genre = ?, image = ?, minimum_age = ?, seasons = ? WHERE id_series = ?`;
-  db.query(sqlUpdate, [title, description, genre, image, minimum_age, seasons, id], (err) => {
-    if (err) {
-      console.error("Error al editar serie:", err);
-      return res.status(500).json({ error: "Error al editar serie" });
+  db.query(
+    `UPDATE series 
+     SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, seasons = ?, actors = ?
+     WHERE id_series = ?`,
+    [
+      title,
+      image,
+      description,
+      release_date,
+      genre,
+      minimum_age,
+      seasons,
+      JSON.stringify(actors || []), // se guarda como JSON
+      id
+    ],
+    (err, result) => {
+      if (err) {
+        console.error("Error al actualizar serie:", err);
+        return res.status(500).send({ error: "Error al actualizar la serie" });
+      }
+      res.send({ success: true, message: "Serie actualizada correctamente" });
     }
-    res.json({ success: true, message: "Serie actualizada correctamente" });
-  });
+  );
 });
 
 // -------------------------------------------------------------- FAVORITES -----------------------------------------------------------------

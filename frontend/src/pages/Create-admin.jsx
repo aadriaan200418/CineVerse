@@ -10,6 +10,8 @@ export default function AddContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const form = searchParams.get("form");
+
+  //Formulario de usuario/admin 
   const [formData2, setFormData2] = useState({
     name: "",
     username: "",
@@ -29,6 +31,7 @@ export default function AddContent() {
     role: "",
   });
 
+  //Formulario de serie/pelicula
   const [formData1, setFormData1] = useState({
     title: "",
     description: "",
@@ -56,8 +59,8 @@ export default function AddContent() {
     episodes: ""
   });
 
-  // Validadores por campo
-  const validators = {
+  // Validadores por campo de series/peliculas
+  const validators1 = {
     title: (v) => {
       if (!v.trim()) return "El título es obligatorio.";
       if (v.trim().length < 2) return "Debe tener al menos 2 caracteres.";
@@ -121,22 +124,89 @@ export default function AddContent() {
     }
   };
 
+  // Validadores por campo de user/admin
+  const validators2 = {
+    name: (v) => {
+      if (!v.trim()) return "El nombre completo es obligatorio.";
+      if (v.length < 3) return "Debe tener al menos 3 caracteres.";
+      return "";
+    },
+    username: (v) => {
+      if (!v.trim()) return "El nombre de usuario es obligatorio.";
+      if (v.length < 4) return "Debe tener al menos 4 caracteres.";
+      return "";
+    },
+    dni: (v) => {
+      if (!v.trim()) return "El DNI es obligatorio.";
+      if (!/^\d{8}[A-Za-z]$/.test(v)) return "Debe tener 8 números y una letra.";
+      return "";
+    },
+    birth_date: (v) => {
+      if (!v.trim()) return "La fecha de nacimiento es obligatoria.";
+      const date = new Date(v);
+      if (isNaN(date.getTime())) return "Debe ser una fecha válida.";
+
+      const today = new Date();
+      let age = today.getFullYear() - date.getFullYear();
+      const m = today.getMonth() - date.getMonth();
+
+      if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
+        age--;
+      }
+
+      if (age < 18) return "Debe ser mayor de 18 años.";
+      return "";
+    },
+    email: (v) => {
+      if (!v.trim()) return "El correo electrónico es obligatorio.";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "Debe ser un correo válido.";
+      return "";
+    },
+    password: (v) => {
+      if (!v.trim()) return "La contraseña es obligatoria.";
+      if (v.length < 6) return "Debe tener al menos 6 caracteres.";
+      return "";
+    },
+    role: (v) => {
+      if (!v.trim()) return "El rol es obligatorio.";
+      if (!["user", "admin"].includes(v)) return "El rol debe ser 'Usuario' o 'Administrador'.";
+      return "";
+    },
+  };
+
   // Manejo de cambios en inputs
-  const handleChange = (e) => {
+  const handleChange1 = (e) => {
     const { name, value } = e.target;
     setFormData1({ ...formData1, [name]: value });
 
-    const error = validators[name] ? validators[name](value) : "";
+    const error = validators1[name] ? validators1[name](value) : "";
     setErrors1((prev) => ({ ...prev, [name]: error }));
   };
 
+  const handleChange2 = (e) => {
+    const { name, value } = e.target;
+    setFormData2({ ...formData2, [name]: value });
+
+    const error = validators2[name] ? validators2[name](value) : "";
+    setErrors2((prev) => ({ ...prev, [name]: error }));
+  };
+
   // Validar todos los campos antes de enviar
-  const validateAll = () => {
+  const validateAll1 = () => {
     const newErrors = Object.keys(formData1).reduce((acc, key) => {
-      acc[key] = validators[key] ? validators[key](formData1[key]) : "";
+      acc[key] = validators1[key] ? validators1[key](formData1[key]) : "";
       return acc;
     }, {});
     setErrors1(newErrors);
+    return Object.values(newErrors).every((e) => e === "");
+  };
+
+  const validateAll2 = () => {
+    const newErrors = Object.keys(formData2).reduce((acc, key) => {
+      acc[key] = validators2[key] ? validators2[key](formData2[key]) : "";
+      return acc;
+    }, {});
+    setErrors2(newErrors);
     return Object.values(newErrors).every((e) => e === "");
   };
 
@@ -144,7 +214,7 @@ export default function AddContent() {
   const handleSubmit1 = async (e) => {
     e.preventDefault();
 
-    if (!validateAll()) return;
+    if (!validateAll1()) return;
 
     try {
       const res = await fetch("http://localhost:3001/api/add-movie-serie", {
@@ -177,19 +247,19 @@ export default function AddContent() {
   const handleSubmit2 = async (e) => {
     e.preventDefault();
 
-    if (!validateAll()) return;
+    if (!validateAll2()) return;
 
     try {
       const res = await fetch("http://localhost:3001/api/add-user-admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData1)
+        body: JSON.stringify(formData2)
       });
 
       const data = await res.json();
 
-      if (data.errors1) {
-        setErrors2((prev) => ({ ...prev, ...data.errors1 }));
+      if (data.errors2) {
+        setErrors2((prev) => ({ ...prev, ...data.errors2 }));
         return;
       }
 
@@ -217,31 +287,31 @@ export default function AddContent() {
           <h1 className="add-title">Añadir Serie/Película</h1>
 
           <form className="add-form" onSubmit={handleSubmit1} noValidate>
-            <input type="text" name="title" placeholder="Nombre de serie/película" value={formData1.title} onChange={handleChange} />
+            <input type="text" name="title" placeholder="Nombre de serie/película" value={formData1.title} onChange={handleChange1} />
             {errors1.title && <div className="field-error">{errors1.title}</div>}
 
-            <textarea name="description" placeholder="Descripción" value={formData1.description} onChange={handleChange} />
+            <textarea name="description" placeholder="Descripción" value={formData1.description} onChange={handleChange1} />
             {errors1.description && <div className="field-error">{errors1.description}</div>}
 
-            <input type="text" name="image" placeholder="Imagen" value={formData1.image} onChange={handleChange} />
+            <input type="text" name="image" placeholder="Imagen" value={formData1.image} onChange={handleChange1} />
             {errors1.image && <div className="field-error">{errors1.image}</div>}
 
-            <input type="date" name="releaseDate" value={formData1.releaseDate} onChange={handleChange} />
+            <input type="date" name="releaseDate" value={formData1.releaseDate} onChange={handleChange1} />
             {errors1.releaseDate && <div className="field-error">{errors1.releaseDate}</div>}
 
-            <input type="text" name="genre" placeholder="Género" value={formData1.genre} onChange={handleChange} />
+            <input type="text" name="genre" placeholder="Género" value={formData1.genre} onChange={handleChange1} />
             {errors1.genre && <div className="field-error">{errors1.genre}</div>}
 
-            <input type="number" name="minAge" placeholder="Edad mínima" value={formData1.minAge} onChange={handleChange} />
+            <input type="number" name="minAge" placeholder="Edad mínima" value={formData1.minAge} onChange={handleChange1} />
             {errors1.minAge && <div className="field-error">{errors1.minAge}</div>}
 
             <div className="type-selector">
               <label>
-                <input type="radio" name="type" value="pelicula" checked={formData1.type === "pelicula"} onChange={handleChange} />
+                <input type="radio" name="type" value="pelicula" checked={formData1.type === "pelicula"} onChange={handleChange1} />
                 Película
               </label>
               <label>
-                <input type="radio" name="type" value="serie" checked={formData1.type === "serie"} onChange={handleChange} />
+                <input type="radio" name="type" value="serie" checked={formData1.type === "serie"} onChange={handleChange1} />
                 Serie
               </label>
             </div>
@@ -249,23 +319,23 @@ export default function AddContent() {
 
             {formData1.type === "pelicula" && (
               <>
-                <input type="number" name="duration" placeholder="Duración en minutos" value={formData1.duration} onChange={handleChange} />
+                <input type="number" name="duration" placeholder="Duración en minutos" value={formData1.duration} onChange={handleChange1} />
                 {errors1.duration && <div className="field-error">{errors1.duration}</div>}
 
-                <input type="text" name="actors" placeholder="Actores (actor1 , actor2)" value={formData1.actors} onChange={handleChange} />
+                <input type="text" name="actors" placeholder="Actores (actor1 , actor2)" value={formData1.actors} onChange={handleChange1} />
                 {errors1.actors && <div className="field-error">{errors1.actors}</div>}
               </>
             )}
 
             {formData1.type === "serie" && (
               <>
-                <input type="number" name="seasons" placeholder="Número de temporadas" value={formData1.seasons} onChange={handleChange} />
+                <input type="number" name="seasons" placeholder="Número de temporadas" value={formData1.seasons} onChange={handleChange1} />
                 {errors1.seasons && <div className="field-error">{errors1.seasons}</div>}
 
-                <input type="number" name="episodes" placeholder="Número de capítulos" value={formData1.episodes} onChange={handleChange} />
+                <input type="number" name="episodes" placeholder="Número de capítulos" value={formData1.episodes} onChange={handleChange1} />
                 {errors1.episodes && <div className="field-error">{errors1.episodes}</div>}
 
-                <input type="text" name="actors" placeholder="Actores" value={formData1.actors} onChange={handleChange} />
+                <input type="text" name="actors" placeholder="Actores" value={formData1.actors} onChange={handleChange1} />
                 {errors1.actors && <div className="field-error">{errors1.actors}</div>}
               </>
             )}
@@ -281,32 +351,32 @@ export default function AddContent() {
           <h1 className="add-title">Añadir Usuario / Administrador</h1>
 
           <form className="add-form" onSubmit={handleSubmit2} noValidate>
-            <input type="text" name="name" placeholder="Nombre completo" value={formData2.name} onChange={handleChange} />
+            <input type="text" name="name" placeholder="Nombre completo" value={formData2.name} onChange={handleChange2} />
             {errors2.name && <div className="field-error">{errors2.name}</div>}
 
-            <input type="text" name="username" placeholder="Nombre de usuario" value={formData2.username} onChange={handleChange} />
+            <input type="text" name="username" placeholder="Nombre de usuario" value={formData2.username} onChange={handleChange2} />
             {errors2.username && <div className="field-error">{errors2.username}</div>}
 
-            <input type="text" name="dni" placeholder="DNI" value={formData2.dni} onChange={handleChange} />
+            <input type="text" name="dni" placeholder="DNI" value={formData2.dni} onChange={handleChange2} />
             {errors2.dni && <div className="field-error">{errors2.dni}</div>}
 
-            <input type="date" name="birth_date" value={formData2.birth_date} onChange={handleChange} />
+            <input type="date" name="birth_date" value={formData2.birth_date} onChange={handleChange2} />
             {errors2.birth_date && <div className="field-error">{errors2.birth_date}</div>}
 
-            <input type="email" name="email" placeholder="Correo electrónico" value={formData2.email} onChange={handleChange} />
+            <input type="email" name="email" placeholder="Correo electrónico" value={formData2.email} onChange={handleChange2} />
             {errors2.email && <div className="field-error">{errors2.email}</div>}
 
-            <input type="password" name="password" placeholder="Contraseña" value={formData2.password} onChange={handleChange} />
+            <input type="password" name="password" placeholder="Contraseña" value={formData2.password} onChange={handleChange2} />
             {errors2.password && <div className="field-error">{errors2.password}</div>}
 
-            <div className="role-selector">
+            <div className="type-selector">
               <label>
-                <input type="radio" name="role" value="user" checked={formData2.role === "user"} onChange={handleChange} />
+                <input type="radio" name="role" value="user" checked={formData2.role === "user"} onChange={handleChange2} />
                 Usuario
               </label>
 
               <label>
-                <input type="radio" name="role" value="admin" checked={formData2.role === "admin"} onChange={handleChange} />
+                <input type="radio" name="role" value="admin" checked={formData2.role === "admin"} onChange={handleChange2} />
                 Administrador
               </label>
             </div>
