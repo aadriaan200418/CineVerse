@@ -1,6 +1,7 @@
 // ------------------------------------------------------------- IMPORTAR LIBRERÍAS -------------------------------------------------------
 const fs = require('fs');
 const express = require('express');
+const jwt = require("jsonwebtoken");
 const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config();
@@ -68,7 +69,7 @@ app.post('/api/register', (req, res) => {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
-  const sql = 'SELECT username, password, role FROM users WHERE username = ?';
+  const sql = 'SELECT dni, username, password, role FROM users WHERE username = ?';
   db.query(sql, [username], (err, results) => {
     if (err) {
       console.error('Error al buscar usuario:', err);
@@ -85,11 +86,27 @@ app.post('/api/login', (req, res) => {
       return res.json({ success: false, error: 'Contraseña incorrecta' });
     }
 
-    // Devolvemos username y role
-    res.json({ success: true, username: user.username, role: user.role });
+    // 🔑 Generar token JWT usando `dni` como ID
+    const token = jwt.sign(
+      {
+        id: user.dni,          
+        username: user.username,
+        role: user.role
+      },
+      'mi_secreto_para_dev_1234567890',
+      { expiresIn: '24h' }
+    );
+
+    // ✅ Responder con los datos correctos
+    res.json({
+      success: true,
+      username: user.username,
+      role: user.role,
+      id_profile: user.dni,   
+      token
+    });
   });
 });
-
 // ------------------------------------------------------------------ ELIMINAR USUARIO -----------------------------------------------------------------
 app.delete('/api/deleteUser/:username', (req, res) => {
   const username = req.params.username;
@@ -271,7 +288,7 @@ app.get("/api/create-admin", (req, res) => {
 });
 
 
-// -------------------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
+// ---------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
 //Obtener los usuarios
 app.get("/api/settings", (req, res) => {
   const role = req.headers["role"];

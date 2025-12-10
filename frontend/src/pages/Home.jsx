@@ -20,6 +20,7 @@ export default function Home({ view: initialView = "inicio" }) {
   const navigate = useNavigate();
   const [open1, setOpen1] = useState(false);
   const [open2, setOpen2] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
@@ -83,185 +84,186 @@ export default function Home({ view: initialView = "inicio" }) {
 
   return (
     <div className="home-container">
-      {/* Menu de navegacion y buscador */}
-      <nav className="top-menu">
-        <div className="menu-left">
-          {role === "admin" && (
-            <>
-              <button className="add-button" onClick={() => setOpen1(!open1)}>＋</button>
-              {open1 && (
-                <div className="dropdown-create">
-                  <ul>
-                    <li onClick={() => navigate("/create-admin?form=users-admin")}>Usuario / Admin</li>
-                    <li onClick={() => navigate("/create-admin?form=movies-series")}>Pelicula / Serie</li>
-                  </ul>
-                </div>
+          {/* Menu de navegacion y buscador */}
+          <nav className="top-menu">
+            <div className="menu-left">
+              {role === "admin" && (
+                <>
+                  <button className="add-button" onClick={() => setOpen1(!open1)}>＋</button>
+                  {open1 && (
+                    <div className="dropdown-create">
+                      <ul>
+                        <li onClick={() => navigate("/create-admin?form=users-admin")}>Usuario / Admin</li>
+ 
+                        <li onClick={() => navigate("/create-admin?form=movies-series")}>Pelicula / Serie</li>
+                      </ul>
+                    </div>
+                  )}
+                  <div className="back-point" onClick={() => navigate("/login")}>
+                    {localStorage.getItem("username") || "Usuario"}
+                  </div>
+                </>
               )}
-              <div className="back-point" onClick={() => navigate("/login")}>
-                {localStorage.getItem("username") || "Usuario"}
-              </div>
-            </>
+
+              {role === "user" && (
+                <>
+                  <div className="profile-icon">
+                    <img src={userIcon} alt="Usuario" className="user-icon" onClick={() => navigate("/profiles")} />
+                  </div>
+                  <div className="back-point">
+                    {localStorage.getItem("") || "Usuario"}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="menu-center">
+              <button onClick={() => setView("inicio")}>INICIO</button>
+              <button onClick={() => setView("series")}>SERIES</button>
+              <button onClick={() => setView("movies")}>PELÍCULAS</button>
+              <button onClick={() => setView("favorites")}>FAVORITOS</button>
+              <button onClick={() => setView("likes")}>ME GUSTA</button>
+              <input type="text" placeholder="Buscar..." className="search-input" onChange={handleSearch} />
+            </div>
+
+            <div className="menu-right">
+              {role === "user" && (
+                <>
+                  <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
+                </>
+              )}
+
+              {role === "admin" && (
+                <>
+                  <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen2(!open2)} />
+                  {open2 && (
+                    <div className="dropdown-settings">
+                      <ul>
+                        <li onClick={() => navigate("/settings?tab=users")}>Usuarios</li>
+                        <li onClick={() => navigate("/settings?tab=admins")}>Administradores</li>
+                        <li onClick={() => navigate("/settings?tab=movies")}>Películas</li>
+                        <li onClick={() => navigate("/settings?tab=series")}>Series</li>
+                      </ul>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </nav>
+
+          {/*  Renderizado condicional de cada pestaña  */}
+          {view2 === "setting-users" && (
+            <div className="section">
+              <h2>Usuarios</h2>
+              {loadingUsers ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todos los Usuarios" items={filteredUsers} imagePath="images-users" />
+              )}
+            </div>
           )}
 
-          {role === "user" && (
-            <>
-              <div className="profile-icon">
-                <img src={userIcon} alt="Usuario" className="user-icon" onClick={() => navigate("/profiles")} />
-              </div>
-              <div className="back-point">
-                {localStorage.getItem("") || "Usuario"}
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="menu-center">
-          <button onClick={() => setView("inicio")}>INICIO</button>
-          <button onClick={() => setView("series")}>SERIES</button>
-          <button onClick={() => setView("movies")}>PELÍCULAS</button>
-          <button onClick={() => setView("favorites")}>FAVORITOS</button>
-          <button onClick={() => setView("likes")}>ME GUSTA</button>
-          <input type="text" placeholder="Buscar..." className="search-input" onChange={handleSearch} />
-        </div>
-
-        <div className="menu-right">
-          {role === "user" && (
-            <>
-              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
-            </>
+          {view2 === "setting-admins" && (
+            <div className="section">
+              <h2>Administradores</h2>
+              {loadingAdmins ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todos los Administradores" items={filteredAdmins} imagePath="images-admins" />
+              )}
+            </div>
           )}
 
-          {role === "admin" && (
+          {view2 === "setting-movies" && (
+            <div className="section">
+              <h2>Películas</h2>
+              {loadingMovies ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
+              )}
+            </div>
+          )}
+
+          {view2 === "setting-series" && (
+            <div className="section">
+              <h2>Series</h2>
+              {loadingSeries ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
+              )}
+            </div>
+          )}
+
+          {/* Contenido dinámico */}
+          {view === "inicio" && (
             <>
-              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen2(!open2)} />
-              {open2 && (
-                <div className="dropdown-settings">
-                  <ul>
-                    <li onClick={() => navigate("/settings?tab=users")}>Usuarios</li>
-                    <li onClick={() => navigate("/settings?tab=admins")}>Administradores</li>
-                    <li onClick={() => navigate("/settings?tab=movies")}>Películas</li>
-                    <li onClick={() => navigate("/settings?tab=series")}>Series</li>
-                  </ul>
-                </div>
+              <div className="featured-banner">
+                <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image" />
+                <div className="featured-label">NUEVO ESTRENO</div>
+              </div>
+
+              {loadingSeries ? (
+                <Loading />
+              ) : (
+                <Carousel title="Top Series" items={filteredSeries} imagePath="images-series" />
+              )}
+
+              {loadingMovies ? (
+                <Loading />
+              ) : (
+                <Carousel title="Top Películas" items={filteredMovies} imagePath="images-movies" />
               )}
             </>
           )}
-        </div>
-      </nav>
 
-      {/*  Renderizado condicional de cada pestaña  */}
-      {view2 === "setting-users" && (
-        <div className="section">
-          <h2>Usuarios</h2>
-          {loadingUsers ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todos los Usuarios" items={filteredUsers} imagePath="images-users" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-admins" && (
-        <div className="section">
-          <h2>Administradores</h2>
-          {loadingAdmins ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todos los Administradores" items={filteredAdmins} imagePath="images-admins" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-movies" && (
-        <div className="section">
-          <h2>Películas</h2>
-          {loadingMovies ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-series" && (
-        <div className="section">
-          <h2>Series</h2>
-          {loadingSeries ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
-          )}
-        </div>
-      )}
-
-      {/* Contenido dinámico */}
-      {view === "inicio" && (
-        <>
-          <div className="featured-banner">
-            <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image" />
-            <div className="featured-label">NUEVO ESTRENO</div>
-          </div>
-
-          {loadingSeries ? (
-            <Loading />
-          ) : (
-            <Carousel title="Top Series" items={filteredSeries} imagePath="images-series" />
+          {view === "series" && (
+            <div className="section">
+              <h2>Series</h2>
+              {loadingSeries ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
+              )}
+            </div>
           )}
 
-          {loadingMovies ? (
-            <Loading />
-          ) : (
-            <Carousel title="Top Películas" items={filteredMovies} imagePath="images-movies" />
+          {view === "movies" && (
+            <div className="section">
+              <h2>Películas</h2>
+              {loadingMovies ? (
+                <Loading />
+              ) : (
+                <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
+              )}
+            </div>
           )}
-        </>
-      )}
 
-      {view === "series" && (
-        <div className="section">
-          <h2>Series</h2>
-          {loadingSeries ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
+          {view === "favorites" && (
+            <>
+              <h2>Mis Favoritos</h2>
+              <div className="favorites-likes">
+                {favorites.map(f => (
+                  <span className="card" key={f.id_favorite}>
+                    <img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} className="card-image" />
+                  </span>
+                ))}
+              </div></>
           )}
-        </div>
-      )}
 
-      {view === "movies" && (
-        <div className="section">
-          <h2>Películas</h2>
-          {loadingMovies ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
+          {view === "likes" && (
+            <>
+              <h2>Mis Likes</h2>
+              <div className="favorites-likes">
+                {likes.map(l => (
+                  <span className="card" key={l.id_like}>
+                    <img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} className="card-image" />
+                  </span>
+                ))}
+              </div>
+            </>
           )}
-        </div>
-      )}
-
-      {view === "favorites" && (
-        <>
-          <h2>Mis Favoritos</h2>
-          <div className="favorites-likes">
-            {favorites.map(f => (
-              <span className="card" key={f.id_favorite}>
-                <img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} className="card-image" />
-              </span>
-            ))}
-          </div></>
-      )}
-
-      {view === "likes" && (
-        <>
-          <h2>Mis Likes</h2>
-          <div className="favorites-likes">
-            {likes.map(l => (
-              <span className="card" key={l.id_like}>
-                <img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} className="card-image" />
-              </span>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }

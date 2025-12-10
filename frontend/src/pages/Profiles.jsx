@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 // Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
-// Importamos los estilos CSS y la imagen de la papelera
+// Importamos los estilos CSS, la imagen de la papelera y el componente loading
 import "../css/profiles.css";
 import binIcon from "../assets/icons/bin.png";
+import Loading from "../components/Loading";
 
 // Función para generar un color aleatorio en formato HSL
 const getRandomColor = () => {
@@ -124,7 +125,11 @@ export default function Profiles() {
     };
 
     return (
-        <div className="profiles-container">
+    <div className="profiles-container">
+        {/* Si está cargando, mostramos el componente Loading */}
+        {loading ? (
+            <Loading />
+        ) : (
             <div className="profiles-content">
                 <button className="back-button" onClick={() => navigate("/login")}>←</button>
 
@@ -172,6 +177,8 @@ export default function Profiles() {
                     </form>
                 )}
             </div>
-        </div>
-    );
+        )}
+    </div>
+);
+
 }

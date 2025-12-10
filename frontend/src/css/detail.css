@@ -156,7 +156,7 @@
   justify-content: space-between;
 }
 
-.btn {
+.btn-edit {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   margin-top: 10px;
   padding: 10px;
@@ -168,7 +168,7 @@
   cursor: pointer;
 }
 
-.btn:hover {
+.btn-edit:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
@@ -181,4 +181,11 @@ html, body {
 
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
+}
+.error {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }

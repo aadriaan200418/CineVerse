@@ -13,8 +13,8 @@ import Home from "./pages/Home";
 
 import CreateAdmin from "./pages/Create-admin";
 import Settings from "./pages/Settings";
-import DetailSerie from "./pages/DetailSerie";   // 👈 nombre consistente
-import DetailMovie from "./pages/DetailMovie";   // 👈 para películas
+import DetailSerie from "./pages/DetailSerie";
+import DetailMovie from "./pages/DetailMovie";
 
 // Importamos el componente de ruta protegida
 import ProtectedRoute from "./components/ProtectedRoute";

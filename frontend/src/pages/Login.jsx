@@ -49,12 +49,11 @@ export default function Login() {
       });
 
       const data = await res.json();
-
       if (data.success) {
         // Guardamos username y role en localStorage
         localStorage.setItem("username", data.username);
         localStorage.setItem("role", data.role);
-
+ localStorage.setItem("token", data.token); 
         // Redirigimos según el rol
         if (data.role === "admin") {
           navigate("/home");

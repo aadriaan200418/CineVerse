@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-// Importamos los estilos CSS y la imagen de la papelera
+// Importamos los estilos CSS, la imagen de la papelera y el componenete loading
 import "../css/settings.css";
 import binIcon from "../assets/icons/bin.png";
+import Loading from "../components/Loading";
+
 
 // Componente principal de selección de settings
 export default function Settings() {
@@ -16,15 +18,21 @@ export default function Settings() {
     const [series, setSeries] = useState([]);
     const [error, setError] = useState(null);
     const [searchParams] = useSearchParams();
+    const [loading, setLoading] = useState(true);
     const tab = searchParams.get("tab");
 
     useEffect(() => {
         const storedRole = localStorage.getItem("role");
         setRole(storedRole);
         if (storedRole === "admin") {
-            fetchData(tab);
+            setLoading(true);
+            fetchData(tab).finally(() => setLoading(false));
+        }
+        else {
+            setLoading(false);
         }
     }, []);
+
 
     // Función para cerrar sesión
     const handleLogout = () => {
@@ -96,7 +104,7 @@ export default function Settings() {
             } else {
                 setError(data.error || "No se pudo eliminar la película");
             }
-        } 
+        }
         catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
@@ -119,7 +127,7 @@ export default function Settings() {
             } else {
                 setError(data.error || "No se pudo eliminar la película");
             }
-        } 
+        }
         catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
@@ -157,128 +165,134 @@ export default function Settings() {
 
     return (
         <div className="logout-container">
-            <button className="back-button" onClick={() => navigate("/home")}>←</button>
-
-            {/*Botones para que el user pueda cerrar sesion o eliminar su cuenta */}
-            {role === "user" && (
+            {loading ? (
+                <Loading />
+            ) : (
                 <>
-                    <h2>Configuración</h2>
-                    <div className="button-group">
-                        <button className="logout-btn" onClick={handleLogout}>Cerrar sesión</button>
-                        <button className="delete-btn" onClick={handleDeleteUser}>Eliminar usuario</button>
-                    </div>
-                </>
-            )}
+                    <button className="back-button" onClick={() => navigate("/home")}>←</button>
 
-            {/*Tabla para que el admin pueda eliminar cuentas de usuarios */}
+                    {/*Botones para que el user pueda cerrar sesion o eliminar su cuenta */}
+                    {role === "user" && (
+                        <>
+                            <h2>Configuración</h2>
+                            <div className="button-group">
+                                <button className="logout-btn" onClick={handleLogout}>Cerrar sesión</button>
+                                <button className="delete-btn" onClick={handleDeleteUser}>Eliminar usuario</button>
+                            </div>
+                        </>
+                    )}
 
-            {role === "admin" && tab === "users" && (
-                <>
-                    <h1>Tabla de usuarios</h1>
-                    <div className="table-settings">
-                        <table>
-                            <thead>
-                                <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
-                            </thead>
-                            <tbody>
-                                {users.map((u) => (
-                                    <tr key={u.dni}>
-                                        <td>{u.dni}</td>
-                                        <td>{u.name}</td>
-                                        <td>{u.username}</td>
-                                        <td>{new Date(u.birth_date).toLocaleDateString("es-ES")}</td>
-                                        <td>{u.email}</td>
-                                        <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
+                    {/*Tabla para que el admin pueda eliminar cuentas de usuarios */}
 
-            {role === "admin" && tab === "admins" && (
-                <>
-                    <h1>Tabla de administradores</h1>
-                    <div className="table-settings">
-                        <table>
-                            <thead>
-                                <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
-                            </thead>
-                            <tbody>
-                                {admins.map((a) => (
-                                    <tr key={a.dni}>
-                                        <td>{a.dni}</td>
-                                        <td>{a.name}</td>
-                                        <td>{a.username}</td>
-                                        <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
-                                        <td>{a.email}</td>
-                                        <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
+                    {role === "admin" && tab === "users" && (
+                        <>
+                            <h1>Tabla de usuarios</h1>
+                            <div className="table-settings">
+                                <table>
+                                    <thead>
+                                        <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {users.map((u) => (
+                                            <tr key={u.dni}>
+                                                <td>{u.dni}</td>
+                                                <td>{u.name}</td>
+                                                <td>{u.username}</td>
+                                                <td>{new Date(u.birth_date).toLocaleDateString("es-ES")}</td>
+                                                <td>{u.email}</td>
+                                                <td>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
 
-            {role === "admin" && tab === "movies" && (
-                <>
-                    <h1>Tabla de peliculas</h1>
-                    <div className="table-settings">
-                        <table>
-                            <thead>
-                                <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion</th><th>Eliminar</th></tr>
-                            </thead>
-                            <tbody>
-                                {movies.map((m) => (
-                                    <tr key={m.id_movie}>
-                                        <td>{m.id_movie}</td>
-                                        <td>{m.title}</td>
-                                        <td>{m.description}</td>
-                                        <td>{new Date(m.release_date).toLocaleDateString("es-ES")}</td>
-                                        <td>{m.genre}</td>
-                                        <td>{m.duration_minutes}</td>
-                                        <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </>
-            )}
+                    {role === "admin" && tab === "admins" && (
+                        <>
+                            <h1>Tabla de administradores</h1>
+                            <div className="table-settings">
+                                <table>
+                                    <thead>
+                                        <tr><th>DNI</th><th>Nombre</th><th>Usuario</th><th>Fecha nacimiento</th><th>Email</th><th>Eliminar</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {admins.map((a) => (
+                                            <tr key={a.dni}>
+                                                <td>{a.dni}</td>
+                                                <td>{a.name}</td>
+                                                <td>{a.username}</td>
+                                                <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
+                                                <td>{a.email}</td>
+                                                <td>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
 
-            {role === "admin" && tab === "series" && (
-                <>
-                    <h1>Tabla de series</h1>
-                    <div className="table-settings">
-                        <table>
-                            <thead>
-                                <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
-                            </thead>
-                            <tbody>
-                                {series.map((s) => (
-                                    <tr key={s.id_series}>
-                                        <td>{s.id_series}</td>
-                                        <td>{s.title}</td>
-                                        <td>{s.description}</td>
-                                        <td>{new Date(s.release_date).toLocaleDateString("es-ES")}</td>
-                                        <td>{s.genre}</td>
-                                        <td>{s.seasons}</td>
-                                        <td>
-                                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    {role === "admin" && tab === "movies" && (
+                        <>
+                            <h1>Tabla de peliculas</h1>
+                            <div className="table-settings">
+                                <table>
+                                    <thead>
+                                        <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion</th><th>Eliminar</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {movies.map((m) => (
+                                            <tr key={m.id_movie}>
+                                                <td>{m.id_movie}</td>
+                                                <td>{m.title}</td>
+                                                <td>{m.description}</td>
+                                                <td>{new Date(m.release_date).toLocaleDateString("es-ES")}</td>
+                                                <td>{m.genre}</td>
+                                                <td>{m.duration_minutes}</td>
+                                                <td>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
+
+                    {role === "admin" && tab === "series" && (
+                        <>
+                            <h1>Tabla de series</h1>
+                            <div className="table-settings">
+                                <table>
+                                    <thead>
+                                        <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        {series.map((s) => (
+                                            <tr key={s.id_series}>
+                                                <td>{s.id_series}</td>
+                                                <td>{s.title}</td>
+                                                <td>{s.description}</td>
+                                                <td>{new Date(s.release_date).toLocaleDateString("es-ES")}</td>
+                                                <td>{s.genre}</td>
+                                                <td>{s.seasons}</td>
+                                                <td>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)} />
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </>
+                    )}
                 </>
             )}
         </div>
