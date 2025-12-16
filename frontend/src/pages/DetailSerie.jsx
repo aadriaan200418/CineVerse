@@ -16,12 +16,13 @@ export default function DetailSerie() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [serie, setSerie] = useState(null);
-  const [originalSerie, setOriginalSerie] = useState(null); // 👈 para restaurar al cancelar
+  const [originalSerie, setOriginalSerie] = useState(null);
   const [error, setError] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [loading, setLoading] = useState(true); // 👈 nuevo estado de carga
 
   // Validadores adaptados a tus campos reales
   const validators = {
@@ -60,7 +61,14 @@ export default function DetailSerie() {
   };
 
   useEffect(() => {
-    // Cargar la serie
+    // Reiniciar estados al cambiar de serie
+    setLoading(true);
+    setError("");
+    setSerie(null);
+    setIsLiked(false);
+    setIsFavorite(false);
+
+    // 1. Cargar la serie (bloquea el loading principal)
     fetch(`http://localhost:3001/api/series/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("No se pudo cargar la serie");
@@ -68,19 +76,21 @@ export default function DetailSerie() {
       })
       .then(data => {
         setSerie(data.series);
-        setOriginalSerie(data.series); // 👈 guarda el original al cargar
+        setOriginalSerie(data.series);
       })
       .catch(err => {
         console.error("Error al cargar serie:", err);
         setError("Serie no encontrada");
+      })
+      .finally(() => {
+        setLoading(false); // 👈 siempre se desactiva
       });
 
-    // Cargar likes y favoritos si hay perfil
+    // 2. Cargar likes y favoritos (en segundo plano)
     const id_profile = localStorage.getItem("id_profile");
     if (id_profile) {
       const numericId = Number(id);
 
-      // Likes
       fetch(`http://localhost:3001/api/likes/${id_profile}`)
         .then(res => res.json())
         .then(data => {
@@ -89,7 +99,6 @@ export default function DetailSerie() {
         })
         .catch(err => console.error("Error cargando likes:", err));
 
-      // Favoritos
       fetch(`http://localhost:3001/api/favorites/${id_profile}`)
         .then(res => res.json())
         .then(data => {
@@ -148,7 +157,7 @@ export default function DetailSerie() {
   };
 
   const startEditing = () => {
-    setOriginalSerie({ ...serie }); 
+    setOriginalSerie({ ...serie });
     setIsEditing(true);
     setFieldErrors({});
     setError("");
@@ -156,7 +165,7 @@ export default function DetailSerie() {
 
   const handleCancel = () => {
     if (originalSerie) {
-      setSerie(originalSerie); 
+      setSerie(originalSerie);
     }
     setIsEditing(false);
     setError("");
@@ -167,7 +176,6 @@ export default function DetailSerie() {
     e.preventDefault();
     if (!serie) return;
 
-    // Validación
     const errors = {};
     for (const field in validators) {
       const value = serie[field];
@@ -216,7 +224,6 @@ export default function DetailSerie() {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData.error || errData.message || `Error ${res.status}`);
         }
-        // Éxito: actualizamos originalSerie para que el próximo cancelar use el nuevo estado
         setOriginalSerie({ ...serie });
         setIsEditing(false);
         setError("");
@@ -227,8 +234,18 @@ export default function DetailSerie() {
       });
   };
 
-  if (error) return <p className="error-message">{error}</p>;
-  if (!serie) return <Loading />;
+  // 👇 Manejo de estados iniciales
+  if (loading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <p className="error-message">{error}</p>;
+  }
+
+  if (!serie) {
+    return <Loading />; // fallback de seguridad
+  }
 
   const releaseDateValue =
     typeof serie.release_date === "string"
@@ -249,7 +266,7 @@ export default function DetailSerie() {
 
         <div className="info">
           {isEditing ? (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <input
                 name="title"
                 value={serie.title ?? ""}
