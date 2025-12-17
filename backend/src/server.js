@@ -307,10 +307,10 @@ app.get("/api/settings", (req, res) => {
       sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'admin'";
       break;
     case "movies":
-      sql = "SELECT id_movie, title, description, release_date, genre, duration_minutes FROM movies";
+      sql = "SELECT id_movie, title, image, description, release_date, genre, duration_minutes FROM movies";
       break;
     case "series":
-      sql = "SELECT id_series, title, description, release_date, genre, seasons FROM series";
+      sql = "SELECT id_series, title, image, description, release_date, genre, seasons FROM series";
       break;
     default:
       return res.status(400).json({ error: "Parámetro tab inválido" });

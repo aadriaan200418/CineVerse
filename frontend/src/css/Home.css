@@ -236,6 +236,33 @@
   display: block;
 }
 
+/*Tarjetas de generos*/
+.genre-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 20px;
+  justify-items: center;
+}
+
+.genre-button {
+  background-color: #c35ff559; 
+  color: white;
+  border: none;
+  font-size: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 100%; 
+  height: 80px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+}
+
+.genre-button:hover {
+  transform: scale(1.05);
+}
 
 /* Ocultar scrollbar en navegadores modernos */
 .carousel {

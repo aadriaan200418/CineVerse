@@ -244,13 +244,14 @@ export default function Settings() {
                             <div className="table-settings">
                                 <table>
                                     <thead>
-                                        <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion</th><th>Eliminar</th></tr>
+                                        <tr><th>ID</th><th>Titulo</th><th>Imagen</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Duracion</th><th>Eliminar</th></tr>
                                     </thead>
                                     <tbody>
                                         {movies.map((m) => (
                                             <tr key={m.id_movie}>
                                                 <td>{m.id_movie}</td>
                                                 <td>{m.title}</td>
+                                                <td>{m.image}</td>
                                                 <td>{m.description}</td>
                                                 <td>{new Date(m.release_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{m.genre}</td>
@@ -272,13 +273,14 @@ export default function Settings() {
                             <div className="table-settings">
                                 <table>
                                     <thead>
-                                        <tr><th>ID</th><th>Titulo</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
+                                        <tr><th>ID</th><th>Titulo</th><th>Imagen</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
                                     </thead>
                                     <tbody>
                                         {series.map((s) => (
                                             <tr key={s.id_series}>
                                                 <td>{s.id_series}</td>
                                                 <td>{s.title}</td>
+                                                <td>{s.image}</td>
                                                 <td>{s.description}</td>
                                                 <td>{new Date(s.release_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{s.genre}</td>
