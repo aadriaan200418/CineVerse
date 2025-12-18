@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import "../css/settings.css";
 import binIcon from "../assets/icons/bin.png";
 import Loading from "../components/Loading";
+import pen from "../assets/icons/pen.png";
 
 
 // Componente principal de selección de settings
@@ -14,12 +15,52 @@ export default function Settings() {
     const [role, setRole] = useState(null);
     const [users, setUsers] = useState([]);
     const [admins, setAdmins] = useState([]);
-    const [movies, setMovies] = useState([]);
-    const [series, setSeries] = useState([]);
+    const [editingMovieId, setEditingMovieId] = useState(null);
+    const [editingSerieId, setEditingSerieId] = useState(null);
+    const [movies, setMovies] = useState({});
+    const [series, setSeries] = useState({});
     const [error, setError] = useState(null);
     const [searchParams] = useSearchParams();
+    const [isEditing, setIsEditing] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState({});
     const [loading, setLoading] = useState(true);
     const tab = searchParams.get("tab");
+
+    // Validadores adaptados a tus campos reales
+    const validators = {
+        title: (v) => {
+            if (!v?.trim()) return "El título es obligatorio.";
+            if (v.trim().length < 2) return "Debe tener al menos 2 caracteres.";
+            return "";
+        },
+        description: (v) => {
+            if (!v?.trim()) return "La descripción es obligatoria.";
+            if (v.trim().length < 10) return "Debe tener al menos 10 caracteres.";
+            return "";
+        },
+        genre: (v) => {
+            if (!v?.trim()) return "El género es obligatorio.";
+            return "";
+        },
+        seasons: (v) => {
+            const num = parseInt(v, 10);
+            if (v === "" || isNaN(num)) return "El número de temporadas es obligatorio.";
+            if (num <= 0) return "Debe ser mayor que 0.";
+            return "";
+        },
+        release_date: (v) => {
+            if (!v) return "La fecha de estreno es obligatoria.";
+            const d = new Date(v);
+            if (isNaN(d.getTime())) return "Fecha no válida.";
+            return "";
+        },
+        minimum_age: (v) => {
+            const num = parseInt(v, 10);
+            if (v === "" || isNaN(num)) return "La edad mínima es obligatoria.";
+            if (num < 0) return "Debe ser un número positivo.";
+            return "";
+        }
+    }
 
     useEffect(() => {
         const storedRole = localStorage.getItem("role");
@@ -38,6 +79,18 @@ export default function Settings() {
     const handleLogout = () => {
         localStorage.clear();
         navigate("/login");
+    };
+
+    const startEditingMovie = (movie) => {
+        setMovies({ ...movie });
+        setEditingMovieId(movie.id_movie);
+        setFieldErrors({}); setError("");
+    };
+
+    const startEditingSerie = (series) => {
+        setSeries({ ...series });
+        setEditingSerieId(series.id_series);
+        setFieldErrors({}); setError("");
     };
 
     // Función para eliminar un usuario seleccionada en la tabla (solo admin)
@@ -111,7 +164,7 @@ export default function Settings() {
         }
     };
 
-    // Función para eliminar una serie seleccionada en la tabla (solo admin)
+    // Función para eliminar una series seleccionada en la tabla (solo admin)
     const handleDeleteSeriesSelect = async (id_series) => {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar esta película?");
         if (!confirmDelete) return;
@@ -163,6 +216,87 @@ export default function Settings() {
         }
     };
 
+    const handleChange = e => {
+        const { name, value } = e.target;
+        setSerie(prev => ({ ...prev, [name]: value }));
+    };
+
+    const releaseDateValue =
+        series && series.release_date
+            ? series.release_date.slice(0, 10)
+            : "";
+
+    const handleCancel = () => {
+        if (originalSerie) {
+            setSerie(originalSerie);
+        }
+        setIsEditing(false);
+        setError("");
+        setFieldErrors({});
+    };
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        if (!series) return;
+
+        const errors = {};
+        for (const field in validators) {
+            const value = series[field];
+            const errorMsg = validators[field](value);
+            if (errorMsg) errors[field] = errorMsg;
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors);
+            return;
+        }
+
+        setFieldErrors({});
+
+        const token = localStorage.getItem("token");
+        const role = localStorage.getItem("role");
+
+        if (!token) {
+            setError("❌ No estás autenticado. Por favor, inicia sesión.");
+            return;
+        }
+
+        if (role !== "admin") {
+            setError("❌ No tienes permisos para editar esta series.");
+            return;
+        }
+
+        const payload = {
+            ...series,
+            release_date:
+                typeof series.release_date === "string"
+                    ? series.release_date.slice(0, 10)
+                    : new Date(series.release_date).toISOString().slice(0, 10)
+        };
+
+        fetch(`http://localhost:3001/api/series/${series.id_series}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || errData.message || `Error ${res.status}`);
+                }
+                setOriginalSerie({ ...series });
+                setIsEditing(false);
+                setError("");
+            })
+            .catch(err => {
+                console.error("Error en actualización:", err);
+                setError(`No se pudo actualizar: ${err.message}`);
+            });
+    };
+
     return (
         <div className="logout-container">
             {loading ? (
@@ -183,7 +317,6 @@ export default function Settings() {
                     )}
 
                     {/*Tabla para que el admin pueda eliminar cuentas de usuarios */}
-
                     {role === "admin" && tab === "users" && (
                         <>
                             <h1>Tabla de usuarios</h1>
@@ -211,6 +344,7 @@ export default function Settings() {
                         </>
                     )}
 
+                    {/*Tabla para que el admin pueda eliminar cuentas de administradores */}
                     {role === "admin" && tab === "admins" && (
                         <>
                             <h1>Tabla de administradores</h1>
@@ -238,6 +372,7 @@ export default function Settings() {
                         </>
                     )}
 
+                    {/*Tabla para que el admin pueda eliminar peliculas */}
                     {role === "admin" && tab === "movies" && (
                         <>
                             <h1>Tabla de peliculas</h1>
@@ -259,6 +394,9 @@ export default function Settings() {
                                                 <td>
                                                     <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)} />
                                                 </td>
+                                                <td>
+                                                    <img src={pen} alt="Editar" className="pen-image" onClick={setEditingMovieId(m.id_movie)} />
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -267,13 +405,14 @@ export default function Settings() {
                         </>
                     )}
 
+                    {/*Tabla para que el admin pueda eliminar series */}
                     {role === "admin" && tab === "series" && (
                         <>
                             <h1>Tabla de series</h1>
                             <div className="table-settings">
                                 <table>
                                     <thead>
-                                        <tr><th>ID</th><th>Titulo</th><th>Imagen</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Eliminar</th></tr>
+                                        <tr><th>ID</th><th>Titulo</th><th>Imagen</th><th>Descripcion</th><th>Fecha de estreno</th><th>Genero</th><th>Temporadas</th><th>Editar</th><th>Eliminar</th></tr>
                                     </thead>
                                     <tbody>
                                         {series.map((s) => (
@@ -286,6 +425,9 @@ export default function Settings() {
                                                 <td>{s.genre}</td>
                                                 <td>{s.seasons}</td>
                                                 <td>
+                                                    <img src={pen} alt="Editar" className="delete-icon" onClick={() => setEditingSerieId(s.id_series)} />
+                                                </td>
+                                                <td>
                                                     <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)} />
                                                 </td>
                                             </tr>
@@ -293,6 +435,77 @@ export default function Settings() {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* 🔹 Formulario de edición */}
+                            {editingSerieId && (
+
+                                <form onSubmit={handleSubmit} noValidate>
+                                    <input
+                                        name="title"
+                                        value={series.title ?? ""}
+                                        onChange={handleChange}
+                                        placeholder="Título"
+                                    />
+                                    {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
+
+                                    <textarea
+                                        name="description"
+                                        value={series.description ?? ""}
+                                        onChange={handleChange}
+                                        placeholder="Descripción"
+                                        rows="4"
+                                    />
+                                    {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
+
+                                    <input
+                                        name="genre"
+                                        value={series.genre ?? ""}
+                                        onChange={handleChange}
+                                        placeholder="Género"
+                                    />
+                                    {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
+
+                                    <input
+                                        name="seasons"
+                                        type="number"
+                                        value={series.seasons ?? ""}
+                                        onChange={handleChange}
+                                        min="0"
+                                        placeholder="Temporadas"
+                                    />
+                                    {fieldErrors.seasons && <span className="error">{fieldErrors.seasons}</span>}
+
+                                    <input
+                                        name="release_date"
+                                        type="date"
+                                        value={releaseDateValue}
+                                        onChange={handleChange}
+                                    />
+                                    {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
+
+                                    <input
+                                        name="minimum_age"
+                                        type="number"
+                                        value={series.minimum_age ?? ""}
+                                        onChange={handleChange}
+                                        min="0"
+                                        placeholder="Edad mínima"
+                                    />
+                                    {fieldErrors.minimum_age && <span className="error">{fieldErrors.minimum_age}</span>}
+
+                                    <div className="btns">
+                                        <button type="submit" className="btn-edit">Guardar</button>
+                                        <button
+                                            type="button"
+                                            className="btn-edit cancel"
+                                            onClick={handleCancel}
+                                        >
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                    {error && <p className="error-message" style={{ marginTop: "10px" }}>{error}</p>}
+                                </form>
+                            )}
                         </>
                     )}
                 </>

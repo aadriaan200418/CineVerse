@@ -20,19 +20,20 @@ export default function Home({ view: initialView = "inicio" }) {
   const navigate = useNavigate();
   const [open1, setOpen1] = useState(false);
   const [open2, setOpen2] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [loadingMovies, setLoadingMovies] = useState(true);
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [likes, setLikes] = useState([]);
-
+  // Estados para géneros seleccionados
+  const [selectedSeriesGenre, setSelectedSeriesGenre] = useState(null);
+  const [selectedMovieGenre, setSelectedMovieGenre] = useState(null);
 
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
     const id_profile = localStorage.getItem("id_profile");
     setRole(storedRole);
 
-    // Películas
+    // Cargar películas — SIN modificar genre
     fetch("http://localhost:3001/api/movies")
       .then(res => res.json())
       .then(data => {
@@ -44,7 +45,7 @@ export default function Home({ view: initialView = "inicio" }) {
         setLoadingMovies(false);
       });
 
-    // Series
+    // Cargar series — SIN modificar genre
     fetch("http://localhost:3001/api/series")
       .then(res => res.json())
       .then(data => {
@@ -55,7 +56,6 @@ export default function Home({ view: initialView = "inicio" }) {
         console.error("Error cargando series:", err);
         setLoadingSeries(false);
       });
-
 
     if (!id_profile) return;
 
@@ -74,17 +74,31 @@ export default function Home({ view: initialView = "inicio" }) {
     setSearchTerm(e.target.value.toLowerCase());
   };
 
-  const filteredMovies = movies.filter((movie) =>
-    movie.title.toLowerCase().startsWith(searchTerm)
-  );
+  // ✅ Géneros únicos de películas y series
+  const uniqueMovieGenres = [...new Set(movies.map(m => m.genre).filter(Boolean))];
+  const uniqueSeriesGenres = [...new Set(series.map(s => s.genre).filter(Boolean))];
 
-  const filteredSeries = series.filter((serie) =>
-    serie.title.toLowerCase().startsWith(searchTerm)
-  );
+  // ✅ Filtrado de películas: por búsqueda + género
+  const filteredMovies = movies.filter((movie) => {
+    const matchesSearch = movie.title.toLowerCase().startsWith(searchTerm);
+    const matchesGenre = selectedMovieGenre !== null
+      ? movie.genre === selectedMovieGenre
+      : true;
+    return matchesSearch && matchesGenre;
+  });
+
+  // ✅ Filtrado de series: por búsqueda + género
+  const filteredSeries = series.filter((serie) => {
+    const matchesSearch = serie.title.toLowerCase().startsWith(searchTerm);
+    const matchesGenre = selectedSeriesGenre !== null
+      ? serie.genre === selectedSeriesGenre
+      : true;
+    return matchesSearch && matchesGenre;
+  });
 
   return (
     <div className="home-container">
-      {/* Menu de navegacion y buscador */}
+      {/* Menú de navegación y buscador */}
       <nav className="top-menu">
         <div className="menu-left">
           {role === "admin" && (
@@ -94,7 +108,6 @@ export default function Home({ view: initialView = "inicio" }) {
                 <div className="dropdown-create">
                   <ul>
                     <li onClick={() => navigate("/create-admin?form=users-admin")}>Usuario / Admin</li>
-
                     <li onClick={() => navigate("/create-admin?form=movies-series")}>Pelicula / Serie</li>
                   </ul>
                 </div>
@@ -111,7 +124,7 @@ export default function Home({ view: initialView = "inicio" }) {
                 <img src={userIcon} alt="Usuario" className="user-icon" onClick={() => navigate("/profiles")} />
               </div>
               <div className="back-point">
-                {localStorage.getItem("") || "Usuario"}
+                {localStorage.getItem("username") || "Usuario"}
               </div>
             </>
           )}
@@ -128,9 +141,7 @@ export default function Home({ view: initialView = "inicio" }) {
 
         <div className="menu-right">
           {role === "user" && (
-            <>
-              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
-            </>
+            <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
           )}
 
           {role === "admin" && (
@@ -151,52 +162,7 @@ export default function Home({ view: initialView = "inicio" }) {
         </div>
       </nav>
 
-      {/*  Renderizado condicional de cada pestaña  */}
-      {view2 === "setting-users" && (
-        <div className="section">
-          <h2>Usuarios</h2>
-          {loadingUsers ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todos los Usuarios" items={filteredUsers} imagePath="images-users" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-admins" && (
-        <div className="section">
-          <h2>Administradores</h2>
-          {loadingAdmins ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todos los Administradores" items={filteredAdmins} imagePath="images-admins" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-movies" && (
-        <div className="section">
-          <h2>Películas</h2>
-          {loadingMovies ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
-          )}
-        </div>
-      )}
-
-      {view2 === "setting-series" && (
-        <div className="section">
-          <h2>Series</h2>
-          {loadingSeries ? (
-            <Loading />
-          ) : (
-            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
-          )}
-        </div>
-      )}
-
-      {/* Contenido dinámico */}
+      {/* Vista: Inicio */}
       {view === "inicio" && (
         <>
           <div className="featured-banner">
@@ -218,6 +184,7 @@ export default function Home({ view: initialView = "inicio" }) {
         </>
       )}
 
+      {/* Vista: Series con filtro por género real */}
       {view === "series" && (
         <div className="section">
           <h2>Series</h2>
@@ -227,14 +194,19 @@ export default function Home({ view: initialView = "inicio" }) {
             <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
           )}
 
-          {/* Cuadraditos de géneros */}
           <div className="genre-grid">
-            {[
-              "Drama", "Acción", "Aventura", "Musical", "Thriller", "Animación",
-              "Romance", "Ciencia Ficción", "Crimen", "Fantasía", "Comedia",
-              "Misterio", "Histórica", "Terror", "Western", "Deporte"
-            ].map((genre) => (
-              <button key={genre} className="genre-button">
+            <button
+              className={`genre-button ${selectedSeriesGenre === null ? "active" : ""}`}
+              onClick={() => setSelectedSeriesGenre(null)}
+            >
+              TODAS
+            </button>
+            {uniqueSeriesGenres.map((genre) => (
+              <button
+                key={genre}
+                className={`genre-button ${selectedSeriesGenre === genre ? "active" : ""}`}
+                onClick={() => setSelectedSeriesGenre(genre)}
+              >
                 {genre.toUpperCase()}
               </button>
             ))}
@@ -242,6 +214,7 @@ export default function Home({ view: initialView = "inicio" }) {
         </div>
       )}
 
+      {/* Vista: Películas con filtro por género real */}
       {view === "movies" && (
         <div className="section">
           <h2>Películas</h2>
@@ -251,14 +224,19 @@ export default function Home({ view: initialView = "inicio" }) {
             <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
           )}
 
-          {/* Cuadraditos de géneros */}
           <div className="genre-grid">
-            {[
-              "Drama", "Acción", "Aventura", "Musical", "Thriller", "Animación",
-              "Romance", "Ciencia Ficción", "Crimen", "Fantasía", "Comedia",
-              "Misterio", "Histórica", "Terror", "Western", "Deporte"
-            ].map((genre) => (
-              <button key={genre} className="genre-button">
+            <button
+              className={`genre-button ${selectedMovieGenre === null ? "active" : ""}`}
+              onClick={() => setSelectedMovieGenre(null)}
+            >
+              TODAS
+            </button>
+            {uniqueMovieGenres.map((genre) => (
+              <button
+                key={genre}
+                className={`genre-button ${selectedMovieGenre === genre ? "active" : ""}`}
+                onClick={() => setSelectedMovieGenre(genre)}
+              >
                 {genre.toUpperCase()}
               </button>
             ))}
@@ -266,25 +244,36 @@ export default function Home({ view: initialView = "inicio" }) {
         </div>
       )}
 
+      {/* Favoritos */}
       {view === "favorites" && (
         <>
           <h2>Mis Favoritos</h2>
           <div className="favorites-likes">
             {favorites.map(f => (
               <span className="card" key={f.id_favorite}>
-                <img src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`} className="card-image" />
+                <img
+                  src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`}
+                  className="card-image"
+                  alt={f.movie_title || f.series_title}
+                />
               </span>
             ))}
-          </div></>
+          </div>
+        </>
       )}
 
+      {/* Likes */}
       {view === "likes" && (
         <>
           <h2>Mis Likes</h2>
           <div className="favorites-likes">
             {likes.map(l => (
               <span className="card" key={l.id_like}>
-                <img src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`} className="card-image" />
+                <img
+                  src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`}
+                  className="card-image"
+                  alt={l.movie_title || l.series_title}
+                />
               </span>
             ))}
           </div>

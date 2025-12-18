@@ -22,7 +22,7 @@ export default function DetailSerie() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [loading, setLoading] = useState(true); // 👈 nuevo estado de carga
+  const [loading, setLoading] = useState(true); 
 
   // Validadores adaptados a tus campos reales
   const validators = {
@@ -83,7 +83,7 @@ export default function DetailSerie() {
         setError("Serie no encontrada");
       })
       .finally(() => {
-        setLoading(false); // 👈 siempre se desactiva
+        setLoading(false); 
       });
 
     // 2. Cargar likes y favoritos (en segundo plano)

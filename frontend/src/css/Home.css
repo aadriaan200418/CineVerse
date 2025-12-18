@@ -284,3 +284,8 @@ html, body {
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }
+
+.genre-button.active {
+  background-color: #7511a859;
+  color: white;
+}

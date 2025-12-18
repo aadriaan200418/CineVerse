@@ -86,7 +86,7 @@ app.post('/api/login', (req, res) => {
       return res.json({ success: false, error: 'Contraseña incorrecta' });
     }
 
-    // 🔑 Generar token JWT usando `dni` como ID
+    // Generar token JWT usando `dni` como ID
     const token = jwt.sign(
       {
         id: user.dni,          
@@ -97,7 +97,7 @@ app.post('/api/login', (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // ✅ Responder con los datos correctos
+    // Responder con los datos correctos
     res.json({
       success: true,
       username: user.username,
@@ -107,6 +107,7 @@ app.post('/api/login', (req, res) => {
     });
   });
 });
+
 // ------------------------------------------------------------------ ELIMINAR USUARIO -----------------------------------------------------------------
 app.delete('/api/deleteUser/:username', (req, res) => {
   const username = req.params.username;
@@ -289,7 +290,7 @@ app.get("/api/create-admin", (req, res) => {
 
 
 // ---------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
-//Obtener los usuarios
+// Endpoint principal de settings
 app.get("/api/settings", (req, res) => {
   const role = req.headers["role"];
   if (role !== "admin") {
@@ -324,6 +325,47 @@ app.get("/api/settings", (req, res) => {
     res.json({ success: true, data: results });
   });
 });
+
+// Actualizar película
+app.put("/api/movies/:id", (req, res) => {
+  const id = req.params.id;
+  const { title, description, genre, duration_minutes, release_date, minimum_age } = req.body;
+
+  const sql = `
+    UPDATE movies 
+    SET title = ?, description = ?, genre = ?, duration_minutes = ?, release_date = ?, minimum_age = ?
+    WHERE id_movie = ?
+  `;
+
+  db.query(sql, [title, description, genre, duration_minutes, release_date, minimum_age, id], (err, result) => {
+    if (err) {
+      console.error("Error al actualizar película:", err);
+      return res.status(500).json({ error: "Error al actualizar película" });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Actualizar serie
+app.put("/api/series/:id", (req, res) => {
+  const id = req.params.id;
+  const { title, description, genre, release_date, seasons } = req.body;
+
+  const sql = `
+    UPDATE series 
+    SET title = ?, description = ?, genre = ?, release_date = ?, seasons = ?
+    WHERE id_series = ?
+  `;
+
+  db.query(sql, [title, description, genre, release_date, seasons, id], (err, result) => {
+    if (err) {
+      console.error("Error al actualizar serie:", err);
+      return res.status(500).json({ error: "Error al actualizar serie" });
+    }
+    res.json({ success: true });
+  });
+});
+
 
 // -------------------------------------------------------------------- ELIMINAR DATOS DE LAS TABLAS DESDE ADMIN ---------------------------------------------------------
 //Eliminar usuarios
@@ -536,7 +578,6 @@ app.post("/api/add-user-admin", (req, res) => {
     }
   );
 });
-
 
 //Añadir peliculas o series
 app.post("/api/add-movie-serie", (req, res) => {

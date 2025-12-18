@@ -18,7 +18,7 @@ export default function DetailMovie() {
   const [isLiked, setIsLiked] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true); // 👈 nuevo estado de carga
+  const [loading, setLoading] = useState(true); 
 
   const validators = {
     title: (v) => {
@@ -190,12 +190,12 @@ export default function DetailMovie() {
     const role = localStorage.getItem("role");
 
     if (!token) {
-      setError("❌ No estás autenticado. Por favor, inicia sesión.");
+      setError(" No estás autenticado. Por favor, inicia sesión.");
       return;
     }
 
     if (role !== "admin") {
-      setError("❌ No tienes permisos para editar esta película.");
+      setError(" No tienes permisos para editar esta película.");
       return;
     }
 
@@ -230,7 +230,7 @@ export default function DetailMovie() {
       });
   };
 
-  // 👇 Manejo de loading y errores al inicio
+  //  Manejo de loading y errores al inicio
   if (loading) {
     return <Loading />;
   }
