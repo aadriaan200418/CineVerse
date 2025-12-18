@@ -308,10 +308,10 @@ app.get("/api/settings", (req, res) => {
       sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'admin'";
       break;
     case "movies":
-      sql = "SELECT id_movie, title, image, description, release_date, genre, duration_minutes FROM movies";
+      sql = "SELECT id_movie, title, image, description, release_date, genre, duration_minutes, minimum_age FROM movies";
       break;
     case "series":
-      sql = "SELECT id_series, title, image, description, release_date, genre, seasons FROM series";
+      sql = "SELECT id_series, title, image, description, release_date, genre, seasons, minimum_age FROM series";
       break;
     default:
       return res.status(400).json({ error: "Parámetro tab inválido" });
@@ -326,43 +326,152 @@ app.get("/api/settings", (req, res) => {
   });
 });
 
-// Actualizar película
+// Editar película 
 app.put("/api/movies/:id", (req, res) => {
-  const id = req.params.id;
-  const { title, description, genre, duration_minutes, release_date, minimum_age } = req.body;
+  const role = req.headers["role"];
+  if (role !== "admin") {
+    return res.status(403).json({ error: "Acceso denegado: solo administradores" });
+  }
 
-  const sql = `
-    UPDATE movies 
-    SET title = ?, description = ?, genre = ?, duration_minutes = ?, release_date = ?, minimum_age = ?
-    WHERE id_movie = ?
-  `;
+  const { id } = req.params;
+  const { title, description, genre, release_date, duration_minutes, minimum_age, image } = req.body;
 
-  db.query(sql, [title, description, genre, duration_minutes, release_date, minimum_age, id], (err, result) => {
-    if (err) {
-      console.error("Error al actualizar película:", err);
-      return res.status(500).json({ error: "Error al actualizar película" });
+  // Validación mínima
+  if (!title || !description || !genre || !release_date || !duration_minutes || minimum_age == null) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  const sql = `UPDATE movies SET title = ?, description = ?, genre = ?, release_date = ?, duration_minutes = ?, minimum_age = ?, image = ?WHERE id_movie = ?`;
+
+  db.query(
+    sql,
+    [title, description, genre, release_date, duration_minutes, minimum_age, image, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error al actualizar película:", err);
+        return res.status(500).json({ error: "Error en la base de datos" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Película no encontrada" });
+      }
+
+      res.json({ success: true, message: "Película actualizada correctamente" });
     }
-    res.json({ success: true });
+  );
+});
+
+// Editar serie 
+app.put("/api/series/:id", (req, res) => {
+  const role = req.headers["role"];
+  if (role !== "admin") {
+    return res.status(403).json({ error: "Acceso denegado: solo administradores" });
+  }
+
+  const { id } = req.params;
+  const { title, description, genre, release_date, seasons, minimum_age, image } = req.body;
+
+  if (!title || !description || !genre || !release_date || !seasons || minimum_age == null) {
+    return res.status(400).json({ error: "Faltan campos obligatorios" });
+  }
+
+  const sql = `UPDATE series  SET title = ?, description = ?, genre = ?, release_date = ?,  seasons = ?, minimum_age = ?, image = ? WHERE id_series = ?`;
+
+  db.query(
+    sql,
+    [title, description, genre, release_date, seasons, minimum_age, image, id],
+    (err, result) => {
+      if (err) {
+        console.error("Error al actualizar serie:", err);
+        return res.status(500).json({ error: "Error en la base de datos" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Serie no encontrada" });
+      }
+
+      res.json({ success: true, message: "Serie actualizada correctamente" });
+    }
+  );
+});
+
+// Eliminar película 
+app.delete("/api/deleteMovieSelect/:id", (req, res) => {
+  const { id } = req.params;
+
+  const sql = "DELETE FROM movies WHERE id_movie = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("Error al eliminar película:", err);
+      return res.status(500).json({ error: "Error al eliminar película" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Película no encontrada" });
+    }
+
+    res.json({ success: true, message: "Película eliminada correctamente" });
   });
 });
 
-// Actualizar serie
-app.put("/api/series/:id", (req, res) => {
-  const id = req.params.id;
-  const { title, description, genre, release_date, seasons } = req.body;
+// Eliminar serie 
+app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
+  const { id } = req.params;
 
-  const sql = `
-    UPDATE series 
-    SET title = ?, description = ?, genre = ?, release_date = ?, seasons = ?
-    WHERE id_series = ?
-  `;
+  const sql = "DELETE FROM series WHERE id_series = ?";
 
-  db.query(sql, [title, description, genre, release_date, seasons, id], (err, result) => {
+  db.query(sql, [id], (err, result) => {
     if (err) {
-      console.error("Error al actualizar serie:", err);
-      return res.status(500).json({ error: "Error al actualizar serie" });
+      console.error("Error al eliminar serie:", err);
+      return res.status(500).json({ error: "Error al eliminar serie" });
     }
-    res.json({ success: true });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Serie no encontrada" });
+    }
+
+    res.json({ success: true, message: "Serie eliminada correctamente" });
+  });
+});
+
+// Eliminar usuario 
+app.delete("/api/deleteUserSelect/:dni", (req, res) => {
+  const { dni } = req.params;
+
+  const sql = "DELETE FROM users WHERE dni = ? AND role = 'user'";
+
+  db.query(sql, [dni], (err, result) => {
+    if (err) {
+      console.error("Error al eliminar usuario:", err);
+      return res.status(500).json({ error: "Error al eliminar usuario" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Usuario no encontrado o ya eliminado" });
+    }
+
+    res.json({ success: true, message: "Usuario eliminado correctamente" });
+  });
+});
+
+// Eliminar administrador
+app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
+  const { dni } = req.params;
+
+  const sql = "DELETE FROM users WHERE dni = ? AND role = 'admin'";
+
+  db.query(sql, [dni], (err, result) => {
+    if (err) {
+      console.error("Error al eliminar administrador:", err);
+      return res.status(500).json({ error: "Error al eliminar administrador" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Administrador no encontrado o ya eliminado" });
+    }
+
+    res.json({ success: true, message: "Administrador eliminado correctamente" });
   });
 });
 
@@ -947,4 +1056,3 @@ app.use((req, res) => {
 // ------------------------------------------------------------- ARRANCAR SERVIDOR -----------------------------------------------------------
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`🚀 Servidor backend en http://localhost:${PORT}`));
-
