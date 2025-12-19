@@ -328,11 +328,6 @@ app.get("/api/settings", (req, res) => {
 
 // Editar película 
 app.put("/api/movies/:id", (req, res) => {
-  const role = req.headers["role"];
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Acceso denegado: solo administradores" });
-  }
-
   const { id } = req.params;
   const { title, description, genre, release_date, duration_minutes, minimum_age, image } = req.body;
 
@@ -363,11 +358,6 @@ app.put("/api/movies/:id", (req, res) => {
 
 // Editar serie 
 app.put("/api/series/:id", (req, res) => {
-  const role = req.headers["role"];
-  if (role !== "admin") {
-    return res.status(403).json({ error: "Acceso denegado: solo administradores" });
-  }
-
   const { id } = req.params;
   const { title, description, genre, release_date, seasons, minimum_age, image } = req.body;
 

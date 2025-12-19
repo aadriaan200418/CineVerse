@@ -22,7 +22,7 @@ export default function DetailSerie() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   // Validadores adaptados a tus campos reales
   const validators = {
@@ -83,7 +83,7 @@ export default function DetailSerie() {
         setError("Serie no encontrada");
       })
       .finally(() => {
-        setLoading(false); 
+        setLoading(false);
       });
 
     // 2. Cargar likes y favoritos (en segundo plano)
@@ -234,7 +234,6 @@ export default function DetailSerie() {
       });
   };
 
-  // 👇 Manejo de estados iniciales
   if (loading) {
     return <Loading />;
   }
@@ -244,7 +243,7 @@ export default function DetailSerie() {
   }
 
   if (!serie) {
-    return <Loading />; // fallback de seguridad
+    return <Loading />;
   }
 
   const releaseDateValue =
@@ -267,6 +266,7 @@ export default function DetailSerie() {
         <div className="info">
           {isEditing ? (
             <form onSubmit={handleSubmit} noValidate>
+              <label className="label-edit">Título</label>
               <input
                 name="title"
                 value={serie.title ?? ""}
@@ -275,6 +275,7 @@ export default function DetailSerie() {
               />
               {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
 
+              <label className="label-edit">Descripción</label>
               <textarea
                 name="description"
                 value={serie.description ?? ""}
@@ -284,6 +285,7 @@ export default function DetailSerie() {
               />
               {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
 
+              <label className="label-edit">Género</label>
               <input
                 name="genre"
                 value={serie.genre ?? ""}
@@ -292,6 +294,7 @@ export default function DetailSerie() {
               />
               {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
 
+              <label className="label-edit">Temporadas</label>
               <input
                 name="seasons"
                 type="number"
@@ -302,6 +305,7 @@ export default function DetailSerie() {
               />
               {fieldErrors.seasons && <span className="error">{fieldErrors.seasons}</span>}
 
+              <label className="label-edit">Fecha de estreno</label>
               <input
                 name="release_date"
                 type="date"
@@ -310,6 +314,7 @@ export default function DetailSerie() {
               />
               {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
 
+              <label className="label-edit">Edad mínima</label>
               <input
                 name="minimum_age"
                 type="number"
@@ -324,7 +329,7 @@ export default function DetailSerie() {
                 <button type="submit" className="btn-edit">Guardar</button>
                 <button
                   type="button"
-                  className="btn-edit cancel"
+                  className="btn-edit"
                   onClick={handleCancel}
                 >
                   Cancelar

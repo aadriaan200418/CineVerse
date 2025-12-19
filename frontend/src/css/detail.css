@@ -130,7 +130,7 @@
 /*Inputs y textarea*/
 .detail form input, .detail form textarea {
   width: 92%;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   padding: 10px 20px;
   border: none;
   border-radius: 20px;
@@ -188,4 +188,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: block;
   margin-top: 4px;
   margin-bottom: 8px;
+}
+/* Etiquetas en formularios de edición */
+.label-edit {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+  font-size: 0.95rem;
+}
+
+/* El primer label no necesita margen superior */
+.label-edit:first-of-type {
+  margin-top: 0;
 }

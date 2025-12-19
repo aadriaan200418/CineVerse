@@ -88,14 +88,12 @@ h1{
   color: white;
 }
 
-/* Tabla */
 .table-settings table {
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
 }
 
-/* Encabezados */
 .table-settings th {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   padding: 12px;
@@ -105,7 +103,6 @@ h1{
   border-bottom: 2px solid rgba(255,255,255,0.2);
 }
 
-/* Filas */
 .table-settings td {
   padding: 10px;
   font-size: 15px;
@@ -124,6 +121,97 @@ h1{
 /*Iconos de editar y eliminar*/
 .actions-icon{
   height: 30px;
+  cursor: pointer;
+}
+
+/*Formulario de editar*/
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  max-height: 90vh; 
+  overflow-y: auto; 
+  padding: 20px;
+  border-radius: 12px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(0, 0, 0);
+  z-index: 999;
+  height: 100%;
+  overflow-y: scroll;    
+  scrollbar-width: none;  
+}
+
+.edit-form h3{
+  text-align: center;
+}
+
+/*Inputs y textarea*/
+form input, form textarea {
+  width: 92%;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(70, 70, 160, 0.8);
+  color: white;
+  font-size: 1rem;
+}
+
+form input:focus, form textarea:focus {
+  background-color: #c35ff5;
+  outline: none;
+}
+
+form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Botones de guardar y cancelar */
+.btns-sett{
+  width: 90%;
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.btn-edit-sett {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  margin-top: 10px;
+  padding: 10px 70px;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.btn-edit-sett:hover {
+  background: linear-gradient(90deg, #c35ff5, #e480ff);
+}
+
+/* Etiquetas en formularios de edición */
+.label-sett {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+  font-size: 0.95rem;
+}
+
+/* El primer label no necesita margen superior */
+.label-sett:first-of-type {
+  margin-top: 0;
+}
+.error {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 8px;
 }
 
 /*Quitar scroll*/

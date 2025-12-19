@@ -118,14 +118,14 @@ export default function Settings() {
         }
     };
 
-    //  Iniciar edición de película
+    // Iniciar edición de película
     const startEditingMovie = (movie) => {
         setEditingMovie(movie);
         setFieldErrors({});
         setError("");
     };
 
-    //  Iniciar edición de serie
+    // Iniciar edición de serie
     const startEditingSerie = (serie) => {
         setEditingSeries(serie);
         setFieldErrors({});
@@ -247,13 +247,13 @@ export default function Settings() {
         }
     };
 
-    //  handleChange para series
+    // handleChange para series
     const handleChange = (e) => {
         const { name, value } = e.target;
         setEditingSeries((prev) => ({ ...prev, [name]: value }));
     };
 
-    //  handleChange para películas
+    // handleChange para películas
     const handleChangeMovie = (e) => {
         const { name, value } = e.target;
         setEditingMovie((prev) => ({ ...prev, [name]: value }));
@@ -284,7 +284,7 @@ export default function Settings() {
         setError("");
     };
 
-    //  Guardar cambios en serie
+    // Guardar cambios en serie
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!editingSeries || !editingSeries.id_series) return;
@@ -351,7 +351,7 @@ export default function Settings() {
             });
     };
 
-    //  Guardar cambios en película
+    // Guardar cambios en película
     const handleSubmitMovie = (e) => {
         e.preventDefault();
         if (!editingMovie || !editingMovie.id_movie) return;
@@ -470,7 +470,7 @@ export default function Settings() {
                                                 </td>
                                                 <td>{u.email}</td>
                                                 <td>
-                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)}/>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteUserSelect(u.dni)} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -507,7 +507,7 @@ export default function Settings() {
                                                 </td>
                                                 <td>{a.email}</td>
                                                 <td>
-                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)}/>
+                                                    <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -549,12 +549,12 @@ export default function Settings() {
                                                 </td>
                                                 <td>{m.genre}</td>
                                                 <td>{m.duration_minutes} min</td>
-                                                <td>{m.minimum_age} min</td>
+                                                <td>{m.minimum_age}</td>
                                                 <td>
-                                                    <img src={pen} alt="Editar" className="actions-icon" onClick={() => startEditingMovie(m)}/>
+                                                    <img src={pen} alt="Editar" className="actions-icon" onClick={() => startEditingMovie(m)} />
                                                 </td>
                                                 <td>
-                                                    <img src={binIcon} alt="Eliminar película" className="actions-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)}/>
+                                                    <img src={binIcon} alt="Eliminar película" className="actions-icon" onClick={() => handleDeleteMovieSelect(m.id_movie)} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -564,32 +564,39 @@ export default function Settings() {
 
                             {/* Formulario de edición de película */}
                             {editingMovie && (
-                                <form onSubmit={handleSubmitMovie} noValidate className="edit-series-form">
+                                <form onSubmit={handleSubmitMovie} noValidate className="edit-form">
                                     <h3>Editar película: {editingMovie.title}</h3>
 
-                                    <input name="title" value={editingMovie.title ?? ""} onChange={handleChangeMovie} placeholder="Título"/>
+                                    <label className= "label-sett">Título</label>
+                                    <input name="title" value={editingMovie.title ?? ""} onChange={handleChangeMovie} placeholder="Título" />
                                     {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
 
-                                    <textarea name="description" value={editingMovie.description ?? ""} onChange={handleChangeMovie} placeholder="Descripción" rows="4"/>
+                                    <label className= "label-sett">Descripción</label>
+                                    <textarea name="description" value={editingMovie.description ?? ""} onChange={handleChangeMovie} placeholder="Descripción" rows="4" />
                                     {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
 
-                                    <input name="genre" value={editingMovie.genre ?? ""} onChange={handleChangeMovie} placeholder="Género"/>
+                                    <label className= "label-sett">Género</label>
+                                    <input name="genre" value={editingMovie.genre ?? ""} onChange={handleChangeMovie} placeholder="Género" />
                                     {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
 
-                                    <input name="duration_minutes" type="number" value={editingMovie.duration_minutes ?? ""} onChange={handleChangeMovie} min="1" placeholder="Duración (minutos)"/>
+                                    <label className= "label-sett">Duración (minutos)</label>
+                                    <input name="duration_minutes" type="number" value={editingMovie.duration_minutes ?? ""} onChange={handleChangeMovie} min="1" placeholder="Duración en minutos" />
                                     {fieldErrors.duration_minutes && <span className="error">{fieldErrors.duration_minutes}</span>}
 
-                                    <input name="release_date" type="date" value={movieReleaseDateValue} onChange={handleChangeMovie}/>
+                                    <label className= "label-sett">Fecha de estreno</label>
+                                    <input name="release_date" type="date" value={movieReleaseDateValue} onChange={handleChangeMovie} />
                                     {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
 
-                                    <input name="minimum_age" type="number" value={editingMovie.minimum_age ?? ""} onChange={handleChangeMovie} min="0" placeholder="Edad mínima"/>
+                                    <label className= "label-sett">Edad mínima</label>
+                                    <input name="minimum_age" type="number" value={editingMovie.minimum_age ?? ""} onChange={handleChangeMovie} min="0" placeholder="Edad mínima" />
                                     {fieldErrors.minimum_age && <span className="error">{fieldErrors.minimum_age}</span>}
 
-                                    <input name="image" value={editingMovie.image ?? ""} onChange={handleChangeMovie} placeholder="URL de la imagen"/>
+                                    <label className= "label-sett">Imagen (URL)</label>
+                                    <input name="image" value={editingMovie.image ?? ""} onChange={handleChangeMovie} placeholder="URL de la imagen" />
 
-                                    <div className="btns">
-                                        <button type="submit" className="btn-edit">Guardar</button>
-                                        <button type="button" className="btn-edit cancel" onClick={handleCancelMovie}>Cancelar</button>
+                                    <div className="btns-sett">
+                                        <button type="submit" className="btn-edit-sett">Guardar</button>
+                                        <button type="button" className="btn-edit-sett" onClick={handleCancelMovie}>Cancelar</button>
                                     </div>
                                     {error && <p className="error-message">{error}</p>}
                                 </form>
@@ -631,10 +638,10 @@ export default function Settings() {
                                                 <td>{s.seasons}</td>
                                                 <td>{s.minimum_age}</td>
                                                 <td>
-                                                    <img src={pen} alt="Editar" className="actions-icon" onClick={() => startEditingSerie(s)}/>
+                                                    <img src={pen} alt="Editar" className="actions-icon" onClick={() => startEditingSerie(s)} />
                                                 </td>
                                                 <td>
-                                                    <img src={binIcon} alt="Eliminar serie" className="actions-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)}/>
+                                                    <img src={binIcon} alt="Eliminar serie" className="actions-icon" onClick={() => handleDeleteSeriesSelect(s.id_series)} />
                                                 </td>
                                             </tr>
                                         ))}
@@ -644,32 +651,39 @@ export default function Settings() {
 
                             {/* Formulario de edición de serie */}
                             {editingSeries && (
-                                <form onSubmit={handleSubmit} noValidate className="edit-series-form">
+                                <form onSubmit={handleSubmit} noValidate className="edit-form">
                                     <h3>Editar serie: {editingSeries.title}</h3>
 
-                                    <input name="title" value={editingSeries.title ?? ""} onChange={handleChange} placeholder="Título"/>
+                                    <label className= "label-sett">Título</label>
+                                    <input name="title" value={editingSeries.title ?? ""} onChange={handleChange} placeholder="Título" />
                                     {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
 
-                                    <textarea name="description" value={editingSeries.description ?? ""} onChange={handleChange} placeholder="Descripción" rows="4"/>
+                                    <label className= "label-sett">Descripción</label>
+                                    <textarea name="description" value={editingSeries.description ?? ""} onChange={handleChange} placeholder="Descripción" rows="4" />
                                     {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
 
-                                    <input name="genre"value={editingSeries.genre ?? ""} onChange={handleChange} placeholder="Género"/>
+                                    <label className= "label-sett">Género</label>
+                                    <input name="genre" value={editingSeries.genre ?? ""} onChange={handleChange} placeholder="Género" />
                                     {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
 
-                                    <input name="seasons" type="number" value={editingSeries.seasons ?? ""} onChange={handleChange} min="1" placeholder="Temporadas"/>
+                                    <label className= "label-sett">Temporadas</label>
+                                    <input name="seasons" type="number" value={editingSeries.seasons ?? ""} onChange={handleChange} min="1" placeholder="Temporadas" />
                                     {fieldErrors.seasons && <span className="error">{fieldErrors.seasons}</span>}
 
-                                    <input name="release_date" type="date" value={releaseDateValue} onChange={handleChange}/>
+                                    <label className= "label-sett">Fecha de estreno</label>
+                                    <input name="release_date" type="date" value={releaseDateValue} onChange={handleChange} />
                                     {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
 
-                                    <input name="minimum_age" type="number" value={editingSeries.minimum_age ?? ""} onChange={handleChange} min="0" placeholder="Edad mínima"/>
+                                    <label className= "label-sett">Edad mínima</label>
+                                    <input name="minimum_age" type="number" value={editingSeries.minimum_age ?? ""} onChange={handleChange} min="0" placeholder="Edad mínima" />
                                     {fieldErrors.minimum_age && <span className="error">{fieldErrors.minimum_age}</span>}
 
-                                    <input name="image" value={editingSeries.image ?? ""} onChange={handleChange} placeholder="URL de la imagen"/>
+                                    <label className= "label-sett">Imagen (URL)</label>
+                                    <input name="image" value={editingSeries.image ?? ""} onChange={handleChange} placeholder="URL de la imagen" />
 
-                                    <div className="btns">
-                                        <button type="submit" className="btn-edit">Guardar</button>
-                                        <button type="button"className="btn-edit cancel" onClick={handleCancel}>Cancelar</button>
+                                    <div className="btns-sett">
+                                        <button type="submit" className="btn-edit-sett">Guardar</button>
+                                        <button type="button" className="btn-edit-sett" onClick={handleCancel}>Cancelar</button>
                                     </div>
                                     {error && <p className="error-message">{error}</p>}
                                 </form>

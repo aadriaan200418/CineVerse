@@ -18,7 +18,7 @@ export default function DetailMovie() {
   const [isLiked, setIsLiked] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   const validators = {
     title: (v) => {
@@ -78,11 +78,10 @@ export default function DetailMovie() {
         setError("Película no encontrada");
       })
       .finally(() => {
-        // Solo cuando termina la carga principal, quitamos el loading
         setLoading(false);
       });
 
-    // 2. Cargar likes y favoritos (en segundo plano, sin afectar loading)
+    // 2. Cargar likes y favoritos (en segundo plano)
     const id_profile = localStorage.getItem("id_profile");
     if (id_profile) {
       const numericId = Number(id);
@@ -190,12 +189,12 @@ export default function DetailMovie() {
     const role = localStorage.getItem("role");
 
     if (!token) {
-      setError(" No estás autenticado. Por favor, inicia sesión.");
+      setError("❌ No estás autenticado. Por favor, inicia sesión.");
       return;
     }
 
     if (role !== "admin") {
-      setError(" No tienes permisos para editar esta película.");
+      setError("❌ No tienes permisos para editar esta película.");
       return;
     }
 
@@ -230,7 +229,6 @@ export default function DetailMovie() {
       });
   };
 
-  //  Manejo de loading y errores al inicio
   if (loading) {
     return <Loading />;
   }
@@ -240,7 +238,7 @@ export default function DetailMovie() {
   }
 
   if (!movie) {
-    return <Loading />; // fallback por si acaso
+    return <Loading />;
   }
 
   const releaseDateValue =
@@ -263,6 +261,7 @@ export default function DetailMovie() {
         <div className="info">
           {isEditing ? (
             <form onSubmit={handleSubmit} noValidate>
+              <label className="label-edit">Título</label>
               <input
                 name="title"
                 value={movie.title ?? ""}
@@ -271,6 +270,7 @@ export default function DetailMovie() {
               />
               {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
 
+              <label className="label-edit">Descripción</label>
               <textarea
                 name="description"
                 value={movie.description ?? ""}
@@ -280,6 +280,7 @@ export default function DetailMovie() {
               />
               {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
 
+              <label className="label-edit">Género</label>
               <input
                 name="genre"
                 value={movie.genre ?? ""}
@@ -288,16 +289,18 @@ export default function DetailMovie() {
               />
               {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
 
+              <label className="label-edit">Duración (min)</label>
               <input
                 name="duration_minutes"
                 type="number"
                 value={movie.duration_minutes ?? ""}
                 onChange={handleChange}
                 min="0"
-                placeholder="Duración (minutos)"
+                placeholder="Duración en minutos"
               />
               {fieldErrors.duration_minutes && <span className="error">{fieldErrors.duration_minutes}</span>}
 
+              <label className="label-edit">Fecha de estreno</label>
               <input
                 name="release_date"
                 type="date"
@@ -306,6 +309,7 @@ export default function DetailMovie() {
               />
               {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
 
+              <label className="label-edit">Edad mínima</label>
               <input
                 name="minimum_age"
                 type="number"
