@@ -905,6 +905,167 @@ app.put("/api/series/:id", (req, res) => {
     }
   );
 });
+// -------------------------------------------------------------- TOP 10 PELICULAS -----------------------------------------------------------------
+app.get('/api/top-movies', (req, res) => {
+  const sql = `
+    SELECT 
+      m.id_movie,
+      m.title,
+      m.image,
+      m.genre,
+      m.release_date,
+      m.minimum_age,
+      m.duration_minutes,
+      COUNT(l.id_movie) AS total_likes
+    FROM movies m
+    LEFT JOIN likes l ON m.id_movie = l.id_movie
+    GROUP BY 
+      m.id_movie,
+      m.title,
+      m.image,
+      m.genre,
+      m.release_date,
+      m.minimum_age,
+      m.duration_minutes
+    ORDER BY total_likes DESC
+    LIMIT 10
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error Top Movies:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ top_movies: results });
+  });
+});
+
+// -------------------------------------------------------------- TOP 10 SERIES -----------------------------------------------------------------
+app.get('/api/top-series', (req, res) => {
+  const sql = `
+    SELECT 
+      s.id_series,
+      s.title,
+      s.image,
+      s.genre,
+      s.release_date,
+      s.minimum_age,
+      s.seasons,
+      COUNT(l.id_series) AS total_likes
+    FROM series s
+    LEFT JOIN likes l ON s.id_series = l.id_series
+    GROUP BY 
+      s.id_series,
+      s.title,
+      s.image,
+      s.genre,
+      s.release_date,
+      s.minimum_age,
+      s.seasons
+    ORDER BY total_likes DESC
+    LIMIT 10
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error Top Series:', err);
+     
+      return res.status(500).json({ error: err.message });
+    }
+       
+    res.json({ top_series: results });
+  });
+});
+
+// ------------------------------------------------------------ RECOMENDADOS ------------------------------------------------------------------
+app.get("/api/recommended/:id_profile", (req, res) => { 
+  const { id_profile } = req.params;
+
+  const sql = `
+    SELECT 
+      l.id_like,
+      l.id_movie,
+      l.id_series,
+
+      m.title AS movie_title,
+      m.genre AS movie_genre,
+      m.image AS movie_image,
+
+      s.title AS series_title,
+      s.genre AS series_genre,
+      s.image AS series_image
+
+    FROM likes l
+    LEFT JOIN movies m ON l.id_movie = m.id_movie
+    LEFT JOIN series s ON l.id_series = s.id_series
+    WHERE l.id_profile = ?
+  `;
+
+  db.query(sql, [id_profile], (err, results) => {
+    if (err) {
+      console.error("Error obteniendo likes:", err);
+      return res.status(500).json({ error: "Error obteniendo likes" });
+    }
+
+    // Normalizar resultados
+    const formatted = results.map(row => {
+      if (row.id_movie) {
+        return {
+          id_like: row.id_like,
+          type: "movie",
+          id_movie: row.id_movie,
+          title: row.movie_title,
+          genre: row.movie_genre,
+          image: row.movie_image
+        };
+      }
+
+      if (row.id_series) {
+        return {
+          id_like: row.id_like,
+          type: "series",
+          id_series: row.id_series,
+          title: row.series_title,
+          genre: row.series_genre,
+          image: row.series_image
+        };
+      }
+
+      return null;
+    }).filter(Boolean);
+
+    res.json({ likes: formatted });
+  });
+});
+
+//---------------------------------------------------FUTUROS ESTRENOS --------------------------------------------------
+// Obtener próximas películas
+app.get("/api/upcoming-movies", (req, res) => {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  db.query(
+    `SELECT * FROM movies WHERE release_date > ? ORDER BY release_date ASC`,
+    [today],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ upcoming_movies: results });
+    }
+  );
+});
+
+// Obtener próximas series
+app.get("/api/upcoming-series", (req, res) => {
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  db.query(
+    `SELECT * FROM series WHERE release_date > ? ORDER BY release_date ASC`,
+    [today],
+    (err, results) => {
+      if (err) return res.status(500).json({ error: err });
+      res.json({ upcoming_series: results });
+    }
+  );
+});
+
+
 
 // -------------------------------------------------------------- FAVORITES -----------------------------------------------------------------
 // Añadir favorito (película o serie)
@@ -960,7 +1121,7 @@ app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
 });
 
 // Eliminar favorito de serie
-app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
+app.delete("/api/favorites/:id_profile/:id_series", (req, res) => {
   const { id_profile, id_series } = req.params;
 
   db.query(
@@ -1025,7 +1186,7 @@ app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
 });
 
 //eliminar like serie
-app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
+app.delete("/api/favorites/:id_profile/:id_series", (req, res) => {
   const { id_profile, id_series } = req.params;
   db.query(
     "DELETE FROM favorites WHERE id_profile = ? AND id_series = ?",
@@ -1036,7 +1197,95 @@ app.delete("/api/favorites/:id_profile/series/:id_series", (req, res) => {
     }
   );
 });
+app.post('/api/series/:id/season-with-chapters', (req, res) => {
+  const { id } = req.params;
+  const { season_number, chapters } = req.body;
 
+  console.log("🔍 Recibiendo petición para serie ID:", id);
+  console.log("📊 Datos recibidos:", { season_number, chapters });
+
+  // Validación básica
+  if (!season_number || !Array.isArray(chapters) || chapters.length === 0) {
+    console.log("❌ Error: Datos incompletos");
+    return res.status(400).json({ error: 'season_number y al menos un capítulo son obligatorios' });
+  }
+
+  db.query('SELECT seasons FROM series WHERE id_series = ?', [id], (err, serieRes) => {
+    if (err) {
+      console.error("❌ Error SQL al buscar serie:", err);
+      return res.status(500).json({ error: 'Error al verificar serie' });
+    }
+
+    if (serieRes.length === 0) {
+      console.log("❌ Serie no encontrada con ID:", id);
+      return res.status(404).json({ error: 'Serie no encontrada' });
+    }
+
+    const currentSeasons = serieRes[0].seasons;
+    console.log("✅ Serie encontrada. Temporadas actuales:", currentSeasons);
+
+    // Insertar temporada
+    db.query(
+      'INSERT INTO seasons (id_series, season_number, chapters) VALUES (?, ?, ?)',
+      [id, season_number, chapters.length],
+      (err, seasonResult) => {
+        if (err) {
+          console.error("❌ Error al insertar temporada:", err);
+          if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({ error: 'Temporada ya existe' });
+          }
+          return res.status(500).json({ error: 'Error al crear temporada' });
+        }
+
+        console.log("✅ Temporada creada. Insertando capítulos...");
+
+        // Insertar capítulos
+        let completed = 0;
+        const total = chapters.length;
+
+        const insertNext = (index) => {
+          if (index >= total) {
+            // Actualizar número total de temporadas
+            db.query(
+              'UPDATE series SET seasons = ? WHERE id_series = ?',
+              [currentSeasons + 1, id],
+              (err) => {
+                if (err) {
+                  console.error("❌ Error al actualizar seasons:", err);
+                  return res.status(500).json({ error: 'Error al actualizar temporadas' });
+                }
+                console.log("✅ ¡Operación completada!");
+                return res.json({ success: true, message: 'Temporada y capítulos creados' });
+              }
+            );
+            return;
+          }
+
+          const chap = chapters[index];
+          db.query(
+            'INSERT INTO chapters (id_series, chapter_number, title, duration_minutes, images) VALUES (?, ?, ?, ?, ?)',
+            [id, chap.chapter_number, chap.title, chap.duration_minutes || null, chap.image || null],
+            (err) => {
+              if (err) {
+                console.error(`❌ Error en capítulo ${index + 1}:`, err);
+                if (err.code === 'ER_DUP_ENTRY') {
+                  return res.status(409).json({ 
+                    error: `El número de capítulo ${chap.chapter_number} ya existe en esta serie` 
+                  });
+                }
+                return res.status(500).json({ error: `Error en capítulo ${index + 1}` });
+              }
+              console.log(`✅ Capítulo ${index + 1} insertado`);
+              insertNext(index + 1);
+            }
+          );
+        };
+
+        insertNext(0);
+      }
+    );
+  });
+});
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'build')));
 app.use((req, res) => {

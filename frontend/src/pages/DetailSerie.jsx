@@ -24,6 +24,12 @@ export default function DetailSerie() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Estados para añadir temporada avanzada
+  const [showAddSeasonForm, setShowAddSeasonForm] = useState(false);
+  const [seasonNumber, setSeasonNumber] = useState("");
+  const [chapters, setChapters] = useState([{ chapter_number: "", title: "", duration_minutes: "", image: "" }]);
+  const [formMessage, setFormMessage] = useState("");
+
   // Validadores adaptados a tus campos reales
   const validators = {
     title: (v) => {
@@ -234,6 +240,68 @@ export default function DetailSerie() {
       });
   };
 
+  // === Funciones para temporada avanzada ===
+  const addChapterField = () => {
+    setChapters([...chapters, { chapter_number: "", title: "", duration_minutes: "", image: "" }]);
+  };
+
+  const removeChapterField = (index) => {
+    if (chapters.length > 1) {
+      setChapters(chapters.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleChapterChange = (index, field, value) => {
+    const newChapters = [...chapters];
+    newChapters[index][field] = value;
+    setChapters(newChapters);
+  };
+
+  const handleSaveSeason = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setFormMessage("❌ Debes iniciar sesión");
+      return;
+    }
+
+    // Validar capítulos
+    const invalidChapter = chapters.some(chap => !chap.chapter_number || !chap.title);
+    if (invalidChapter) {
+      setFormMessage("❌ Todos los capítulos deben tener número y título");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/series/${id}/season-with-chapters`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          season_number: seasonNumber,
+          chapters: chapters
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setFormMessage("✅ Temporada y capítulos creados");
+        setShowAddSeasonForm(false);
+        setSeasonNumber("");
+        setChapters([{ chapter_number: "", title: "", duration_minutes: "", image: "" }]);
+
+        // Actualizar localmente el número de temporadas
+        setSerie(prev => ({ ...prev, seasons: (prev?.seasons || 0) + 1 }));
+      } else {
+        setFormMessage(`❌ ${data.error || "Error al crear temporada"}`);
+      }
+    } catch (err) {
+      setFormMessage("❌ Error de conexión");
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -329,7 +397,7 @@ export default function DetailSerie() {
                 <button type="submit" className="btn-edit">Guardar</button>
                 <button
                   type="button"
-                  className="btn-edit"
+                  className="btn-edit cancel"
                   onClick={handleCancel}
                 >
                   Cancelar
@@ -380,6 +448,82 @@ export default function DetailSerie() {
                   )}
                 </div>
               </div>
+
+              {/* === ADMIN: Añadir temporada avanzada === */}
+              {localStorage.getItem("role") === "admin" && (
+                <div className="admin-actions">
+                  {!showAddSeasonForm ? (
+                    <button onClick={() => setShowAddSeasonForm(true)}>➕ Añadir Temporada</button>
+                  ) : (
+                    <form onSubmit={handleSaveSeason} className="admin-form">
+                      <h3>Añadir Temporada</h3>
+                      
+                      <label>Número de Temporada</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={seasonNumber}
+                        onChange={(e) => setSeasonNumber(e.target.value)}
+                        required
+                      />
+
+                      <h4>Capítulos</h4>
+                      {chapters.map((chap, index) => (
+                        <div key={index} className="chapter-form-group">
+                          <label>Capítulo {index + 1}</label>
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="Núm. capítulo"
+                            value={chap.chapter_number}
+                            onChange={(e) => handleChapterChange(index, "chapter_number", e.target.value)}
+                            required
+                          />
+                          <input
+                            type="text"
+                            placeholder="Título"
+                            value={chap.title}
+                            onChange={(e) => handleChapterChange(index, "title", e.target.value)}
+                            required
+                          />
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="Duración (min)"
+                            value={chap.duration_minutes}
+                            onChange={(e) => handleChapterChange(index, "duration_minutes", e.target.value)}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Imagen (ej. cap1.jpg)"
+                            value={chap.image}
+                            onChange={(e) => handleChapterChange(index, "image", e.target.value)}
+                          />
+                          {chapters.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeChapterField(index)}
+                              className="btn-remove-chapter"
+                            >
+                              🗑️ Quitar
+                            </button>
+                          )}
+                        </div>
+                      ))}
+
+                      <button type="button" onClick={addChapterField} className="btn-add-chapter">
+                        ➕ Añadir Capítulo
+                      </button>
+
+                      <div className="form-buttons">
+                        <button type="submit">Guardar Temporada</button>
+                        <button type="button" onClick={() => setShowAddSeasonForm(false)}>Cancelar</button>
+                      </div>
+                      {formMessage && <p className="form-message">{formMessage}</p>}
+                    </form>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

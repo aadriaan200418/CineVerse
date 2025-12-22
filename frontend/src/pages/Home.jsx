@@ -15,7 +15,6 @@ export default function Home({ view: initialView = "inicio" }) {
   const [movies, setMovies] = useState([]);
   const [series, setSeries] = useState([]);
   const [view, setView] = useState(initialView);
-  const [view2, setView2] = useState(initialView);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const [open1, setOpen1] = useState(false);
@@ -24,6 +23,12 @@ export default function Home({ view: initialView = "inicio" }) {
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [likes, setLikes] = useState([]);
+
+  // 🔥 Estados para el Top 10
+  const [topMovies, setTopMovies] = useState([]);
+  const [topSeries, setTopSeries] = useState([]);
+  const [loadingTop, setLoadingTop] = useState(true);
+
   // Estados para géneros seleccionados
   const [selectedSeriesGenre, setSelectedSeriesGenre] = useState(null);
   const [selectedMovieGenre, setSelectedMovieGenre] = useState(null);
@@ -33,7 +38,7 @@ export default function Home({ view: initialView = "inicio" }) {
     const id_profile = localStorage.getItem("id_profile");
     setRole(storedRole);
 
-    // Cargar películas — SIN modificar genre
+    // Cargar películas
     fetch("http://localhost:3001/api/movies")
       .then(res => res.json())
       .then(data => {
@@ -45,7 +50,7 @@ export default function Home({ view: initialView = "inicio" }) {
         setLoadingMovies(false);
       });
 
-    // Cargar series — SIN modificar genre
+    // Cargar series
     fetch("http://localhost:3001/api/series")
       .then(res => res.json())
       .then(data => {
@@ -57,13 +62,30 @@ export default function Home({ view: initialView = "inicio" }) {
         setLoadingSeries(false);
       });
 
+    // 🔥 Cargar Top 10 (independiente)
+    Promise.all([
+      fetch("http://localhost:3001/api/top-movies").then(res => res.json()),
+      fetch("http://localhost:3001/api/top-series").then(res => res.json())
+    ])
+      .then(([moviesRes, seriesRes]) => {
+        setTopMovies(moviesRes.top_movies || []);
+        setTopSeries(seriesRes.top_series || []);
+        setLoadingTop(false);
+      })
+      .catch(err => {
+        console.error("Error cargando Top 10:", err);
+        setLoadingTop(false);
+      });
+
     if (!id_profile) return;
 
+    // Cargar favoritos
     fetch(`http://localhost:3001/api/favorites/${id_profile}`)
       .then(res => res.json())
       .then(data => setFavorites(data.favorites))
       .catch(err => console.error("Error cargando favoritos:", err));
 
+    // Cargar likes
     fetch(`http://localhost:3001/api/likes/${id_profile}`)
       .then(res => res.json())
       .then(data => setLikes(data.likes))
@@ -74,27 +96,65 @@ export default function Home({ view: initialView = "inicio" }) {
     setSearchTerm(e.target.value.toLowerCase());
   };
 
-  // ✅ Géneros únicos de películas y series
+  const getRecommendedItems = () => {
+    if (!likes.length) return [];
+
+    const genres = likes
+      .map(like => {
+        if (like.id_movie) {
+          const movie = movies.find(m => m.id_movie === like.id_movie);
+          return movie?.genre;
+        }
+        if (like.id_series) {
+          const serie = series.find(s => s.id_series === like.id_series);
+          return serie?.genre;
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    if (!genres.length) return [];
+
+    const genreCount = genres.reduce((acc, genre) => {
+      acc[genre] = (acc[genre] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topGenre = Object.keys(genreCount).reduce((a, b) =>
+      genreCount[a] > genreCount[b] ? a : b
+    );
+
+    const recommendedMovies = movies.filter(m => m.genre === topGenre);
+    const recommendedSeries = series.filter(s => s.genre === topGenre);
+
+    return [...recommendedMovies, ...recommendedSeries];
+  };
+
+  const recommendedItems = getRecommendedItems();
+  const recommendedSeries = recommendedItems.filter(item => item.id_series !== undefined);
+  const recommendedMovies = recommendedItems.filter(item => item.id_movie !== undefined);
+
+  // Géneros únicos
   const uniqueMovieGenres = [...new Set(movies.map(m => m.genre).filter(Boolean))];
   const uniqueSeriesGenres = [...new Set(series.map(s => s.genre).filter(Boolean))];
 
-  // ✅ Filtrado de películas: por búsqueda + género
-  const filteredMovies = movies.filter((movie) => {
+  // Filtrado
+  const filteredMovies = movies.filter(movie => {
     const matchesSearch = movie.title.toLowerCase().startsWith(searchTerm);
-    const matchesGenre = selectedMovieGenre !== null
-      ? movie.genre === selectedMovieGenre
-      : true;
+    const matchesGenre = selectedMovieGenre !== null ? movie.genre === selectedMovieGenre : true;
     return matchesSearch && matchesGenre;
   });
 
-  // ✅ Filtrado de series: por búsqueda + género
-  const filteredSeries = series.filter((serie) => {
+  const filteredSeries = series.filter(serie => {
     const matchesSearch = serie.title.toLowerCase().startsWith(searchTerm);
-    const matchesGenre = selectedSeriesGenre !== null
-      ? serie.genre === selectedSeriesGenre
-      : true;
+    const matchesGenre = selectedSeriesGenre !== null ? serie.genre === selectedSeriesGenre : true;
     return matchesSearch && matchesGenre;
   });
+
+  // 🔥 Próximos estrenos
+  const today = new Date();
+  const upcomingSeries = series.filter(s => new Date(s.release_date) > today);
+  const upcomingMovies = movies.filter(m => new Date(m.release_date) > today);
 
   return (
     <div className="home-container">
@@ -108,24 +168,25 @@ export default function Home({ view: initialView = "inicio" }) {
                 <div className="dropdown-create">
                   <ul>
                     <li onClick={() => navigate("/create-admin?form=users-admin")}>Usuario / Admin</li>
-                    <li onClick={() => navigate("/create-admin?form=movies-series")}>Pelicula / Serie</li>
+                    <li onClick={() => navigate("/create-admin?form=movies-series")}>Película / Serie</li>
                   </ul>
                 </div>
               )}
-              <div className="back-point" onClick={() => navigate("/login")}>
-                {localStorage.getItem("username") || "Usuario"}
-              </div>
+              <div className="back-point">{localStorage.getItem("username") || "Usuario"}</div>
             </>
           )}
 
           {role === "user" && (
             <>
               <div className="profile-icon">
-                <img src={userIcon} alt="Usuario" className="user-icon" onClick={() => navigate("/profiles")} />
+                <img
+                  src={userIcon}
+                  alt="Usuario"
+                  className="user-icon"
+                  onClick={() => navigate("/profiles")}
+                />
               </div>
-              <div className="back-point">
-                {localStorage.getItem("username") || "Usuario"}
-              </div>
+              <div className="back-point">{localStorage.getItem("username") || "Usuario"}</div>
             </>
           )}
         </div>
@@ -136,17 +197,32 @@ export default function Home({ view: initialView = "inicio" }) {
           <button onClick={() => setView("movies")}>PELÍCULAS</button>
           <button onClick={() => setView("favorites")}>FAVORITOS</button>
           <button onClick={() => setView("likes")}>ME GUSTA</button>
-          <input type="text" placeholder="Buscar..." className="search-input" onChange={handleSearch} />
+          <input
+            type="text"
+            placeholder="Buscar..."
+            className="search-input"
+            onChange={handleSearch}
+          />
         </div>
 
         <div className="menu-right">
           {role === "user" && (
-            <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")} />
+            <img
+              src={settingsIcon}
+              alt="Settings"
+              className="settings"
+              onClick={() => navigate("/settings")}
+            />
           )}
 
           {role === "admin" && (
             <>
-              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen2(!open2)} />
+              <img
+                src={settingsIcon}
+                alt="Settings"
+                className="settings"
+                onClick={() => setOpen2(!open2)}
+              />
               {open2 && (
                 <div className="dropdown-settings">
                   <ul>
@@ -162,36 +238,78 @@ export default function Home({ view: initialView = "inicio" }) {
         </div>
       </nav>
 
-      {/* Vista: Inicio */}
+      {/* Vista Inicio */}
       {view === "inicio" && (
         <>
           <div className="featured-banner">
-            <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image" />
+            <img
+              src="/images-series/lidia_poet3.jpg"
+              alt="La Ley de Lidia Poët"
+              className="featured-image"
+            />
             <div className="featured-label">NUEVO ESTRENO</div>
           </div>
 
           {loadingSeries ? (
             <Loading />
           ) : (
-            <Carousel title="Top Series" items={filteredSeries} imagePath="images-series" />
+            <Carousel
+              title="Todas las Series"
+              items={filteredSeries}
+              imagePath="images-series"
+            />
           )}
 
           {loadingMovies ? (
             <Loading />
           ) : (
-            <Carousel title="Top Películas" items={filteredMovies} imagePath="images-movies" />
+            <Carousel
+              title="Todas las Películas"
+              items={filteredMovies}
+              imagePath="images-movies"
+            />
           )}
         </>
       )}
 
-      {/* Vista: Series con filtro por género real */}
+      {/* Vista Series */}
       {view === "series" && (
         <div className="section">
           <h2>Series</h2>
           {loadingSeries ? (
             <Loading />
           ) : (
-            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series" />
+            <>
+              <Carousel
+                title="Todas las Series"
+                items={filteredSeries}
+                imagePath="images-series"
+              />
+
+              {loadingTop ? (
+                <Loading />
+              ) : (
+                <Carousel
+                  title="Top 10 Series Más Likeadas"
+                  items={topSeries}
+                  imagePath="images-series"
+                />
+              )}
+
+              {upcomingSeries.length > 0 && (
+                <Carousel
+                  title="Próximos Estrenos"
+                  items={upcomingSeries}
+                  imagePath="images-series"
+                />
+              )}
+
+              <Carousel
+                title="Recomendadas"
+                items={recommendedSeries}
+                imagePath="images-series"
+              />
+            </>
           )}
 
           <div className="genre-grid">
@@ -201,7 +319,7 @@ export default function Home({ view: initialView = "inicio" }) {
             >
               TODAS
             </button>
-            {uniqueSeriesGenres.map((genre) => (
+            {uniqueSeriesGenres.map(genre => (
               <button
                 key={genre}
                 className={`genre-button ${selectedSeriesGenre === genre ? "active" : ""}`}
@@ -214,14 +332,44 @@ export default function Home({ view: initialView = "inicio" }) {
         </div>
       )}
 
-      {/* Vista: Películas con filtro por género real */}
+      {/* Vista Películas */}
       {view === "movies" && (
         <div className="section">
           <h2>Películas</h2>
           {loadingMovies ? (
             <Loading />
           ) : (
-            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies" />
+            <>
+              <Carousel
+                title="Todas las Películas"
+                items={filteredMovies}
+                imagePath="images-movies"
+              />
+
+              {loadingTop ? (
+                <Loading />
+              ) : (
+                <Carousel
+                  title="Top 10 Películas Más Likeadas"
+                  items={topMovies}
+                  imagePath="images-movies"
+                />
+              )}
+
+              {upcomingMovies.length > 0 && (
+                <Carousel
+                  title="Próximos Estrenos"
+                  items={upcomingMovies}
+                  imagePath="images-movies"
+                />
+              )}
+
+              <Carousel
+                title="Recomendadas"
+                items={recommendedMovies}
+                imagePath="images-movies"
+              />
+            </>
           )}
 
           <div className="genre-grid">
@@ -231,7 +379,7 @@ export default function Home({ view: initialView = "inicio" }) {
             >
               TODAS
             </button>
-            {uniqueMovieGenres.map((genre) => (
+            {uniqueMovieGenres.map(genre => (
               <button
                 key={genre}
                 className={`genre-button ${selectedMovieGenre === genre ? "active" : ""}`}
@@ -248,17 +396,36 @@ export default function Home({ view: initialView = "inicio" }) {
       {view === "favorites" && (
         <>
           <h2>Mis Favoritos</h2>
-          <div className="favorites-likes">
-            {favorites.map(f => (
-              <span className="card" key={f.id_favorite}>
-                <img
-                  src={`/images-${f.movie_title ? "movies" : "series"}/${f.movie_image || f.series_image}`}
-                  className="card-image"
-                  alt={f.movie_title || f.series_title}
-                />
-              </span>
-            ))}
-          </div>
+
+          {favorites.filter(f => f.id_movie).length > 0 && (
+            <Carousel
+              title="Películas Favoritas"
+              items={favorites
+                .filter(f => f.id_movie)
+                .map(f => ({
+                  id_movie: f.id_movie,
+                  id_series: null,
+                  image: f.movie_image,
+                  title: f.movie_title
+                }))}
+              imagePath="images-movies"
+            />
+          )}
+
+          {favorites.filter(f => f.id_series).length > 0 && (
+            <Carousel
+              title="Series Favoritas"
+              items={favorites
+                .filter(f => f.id_series)
+                .map(f => ({
+                  id_movie: null,
+                  id_series: f.id_series,
+                  image: f.series_image,
+                  title: f.series_title
+                }))}
+              imagePath="images-series"
+            />
+          )}
         </>
       )}
 
@@ -266,17 +433,36 @@ export default function Home({ view: initialView = "inicio" }) {
       {view === "likes" && (
         <>
           <h2>Mis Likes</h2>
-          <div className="favorites-likes">
-            {likes.map(l => (
-              <span className="card" key={l.id_like}>
-                <img
-                  src={`/images-${l.movie_title ? "movies" : "series"}/${l.movie_image || l.series_image}`}
-                  className="card-image"
-                  alt={l.movie_title || l.series_title}
-                />
-              </span>
-            ))}
-          </div>
+
+          {likes.filter(l => l.id_movie).length > 0 && (
+            <Carousel
+              title="Películas favoritas"
+              items={likes
+                .filter(l => l.id_movie)
+                .map(l => ({
+                  id_movie: l.id_movie,
+                  id_series: null,
+                  image: l.movie_image,
+                  title: l.movie_title
+                }))}
+              imagePath="images-movies"
+            />
+          )}
+
+          {likes.filter(l => l.id_series).length > 0 && (
+            <Carousel
+              title="Series favoritas"
+              items={likes
+                .filter(l => l.id_series)
+                .map(l => ({
+                  id_movie: null,
+                  id_series: l.id_series,
+                  image: l.series_image,
+                  title: l.series_title
+                }))}
+              imagePath="images-series"
+            />
+          )}
         </>
       )}
     </div>
