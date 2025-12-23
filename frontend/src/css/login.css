@@ -1,4 +1,4 @@
-/* Fondo con ondas neón */
+/* Contenedor principal*/
 .login-container {
   min-height: 100vh;    
   background-image: url("../assets/fondo-formato-bueno.png");               
@@ -29,7 +29,6 @@
   position: fixed;
   z-index: 1000; 
 }
-
 .back-button:hover {
   transform: scale(1.2);
 }
@@ -45,9 +44,9 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   width: 80%;
   max-width: 400px;
+  gap: 20px;
   background-color: rgba(180, 180, 180, 0.178); 
   padding: 20px;
   border-radius: 12px;
@@ -64,13 +63,12 @@
   font-size: 1rem;
   outline: none;
 }
-
 .login-form input::placeholder {
   color: #d0d0ff;
 }
 
 /*Boton de continuar*/
-.continue-btn {
+.login-continue-btn {
   margin-top: 10px;
   padding: 12px 20px;
   border: none;
@@ -81,16 +79,14 @@
   cursor: pointer;
   transition: background 0.3s;
 }
-
-.continue-btn:hover {
+.login-continue-btn:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
 /*Mensaje de error*/
 .error {
   color: #d32f2f;       
-  font-size: 0.85rem;   
-  margin-top: 4px;      
+  font-size: 0.85rem;     
 }
 
 /*Quitar scroll*/
@@ -99,7 +95,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }

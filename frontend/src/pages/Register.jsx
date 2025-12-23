@@ -1,21 +1,13 @@
-// Importamos React y useState para manejar el estado del formulario
+// Importamos React y hooks
 import React, { useState } from "react";
-
-// Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
 // Importamos los estilos CSS
 import "../css/register.css";
 
-// Definimos el componente principal de la página de registro
 export default function Register() {
-  // Inicializamos el useNavigate para poder redirigir al usuario
   const navigate = useNavigate();
-
-  // Estado para guardar los datos que el usuario escribe en el formulario
   const [formData, setFormData] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "" });
-
-  // Estado para guardar los errores específicos de cada campo
   const [errors, setErrors] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "" });
 
   // Funciones de validación para cada campo, comprueba  si están vacíos y si cumplen formato
@@ -47,7 +39,6 @@ export default function Register() {
       if (m < 0 || (m === 0 && today.getDate() < date.getDate())) {
         age--;
       }
-
       if (age < 18) return "Debe ser mayor de 18 años.";
       return "";
     },
@@ -68,7 +59,6 @@ export default function Register() {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    // limpiar error al escribir
     const error = validators[name] ? validators[name](value) : "";
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
@@ -86,12 +76,9 @@ export default function Register() {
   // Función que se ejecuta al enviar el formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validamos todos los campos antes de enviar
     if (!validateAll()) return;
 
     try {
-      // Enviamos los datos al backend
       const res = await fetch("http://localhost:3001/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,13 +87,11 @@ export default function Register() {
 
       const data = await res.json();
 
-      // Si el backend devuelve errores específicos por campo
       if (data.errors) {
         setErrors((prev) => ({ ...prev, ...data.errors }));
         return;
       }
 
-      // Si el registro fue exitoso redirige al inicio de sesion
       if (data.success) {
         alert("Usuario registrado correctamente");
         navigate("/login");
@@ -120,7 +105,6 @@ export default function Register() {
     }
   };
 
-  // Renderizamos el formulario
   return (
     <div className="register-container">
       <button className="back-button" onClick={() => navigate("/")}>←</button>
@@ -137,7 +121,7 @@ export default function Register() {
         <input type="text" name="dni" placeholder="DNI" value={formData.dni} onChange={handleChange} />
         {errors.dni && <div className="field-error">{errors.dni}</div>}
 
-        <input type="text" name="birth_date" placeholder="fecha de nacimiento" value={formData.birth_date} onChange={handleChange} />
+        <input type="date" name="birth_date" placeholder="fecha de nacimiento" value={formData.birth_date} onChange={handleChange} />
         {errors.birth_date && <div className="field-error">{errors.birth_date}</div>}
 
         <input type="email" name="email" placeholder="correo electrónico" value={formData.email} onChange={handleChange} />
@@ -146,7 +130,7 @@ export default function Register() {
         <input type="password" name="password" placeholder="contraseña" value={formData.password} onChange={handleChange} />
         {errors.password && <div className="field-error">{errors.password}</div>}
 
-        <button type="submit" className="continue-btn">Continuar</button>
+        <button type="submit" className="register-continue-btn">Continuar</button>
       </form>
     </div>
   );

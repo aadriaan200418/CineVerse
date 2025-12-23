@@ -1,63 +1,22 @@
-// Importamos React y useState para manejar el estado del formulario
+// Importamos React y hooks
 import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Importamos los estilos CSS
 import "../css/create-admin.css";
 
-// Componente principal de la página de create-admin
 export default function AddContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const form = searchParams.get("form");
 
   //Formulario de usuario/admin 
-  const [formData2, setFormData2] = useState({
-    name: "",
-    username: "",
-    dni: "",
-    birth_date: "",
-    email: "",
-    password: "",
-    role: "",
-  });
-  const [errors2, setErrors2] = useState({
-    name: "",
-    username: "",
-    dni: "",
-    birth_date: "",
-    email: "",
-    password: "",
-    role: "",
-  });
+  const [formData2, setFormData2] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "", role: "",});
+  const [errors2, setErrors2] = useState({ name: "", username: "", dni: "", birth_date: "", email: "", password: "", role: "",});
 
   //Formulario de serie/pelicula
-  const [formData1, setFormData1] = useState({
-    title: "",
-    description: "",
-    image: "",
-    releaseDate: "",
-    genre: "",
-    minAge: "",
-    type: "",
-    duration: "",
-    actors: "",
-    seasons: "",
-    episodes: ""
-  });
-  const [errors1, setErrors1] = useState({
-    title: "",
-    description: "",
-    image: "",
-    releaseDate: "",
-    genre: "",
-    minAge: "",
-    type: "",
-    duration: "",
-    actors: "",
-    seasons: "",
-    episodes: ""
-  });
+  const [formData1, setFormData1] = useState({ title: "", description: "", image: "", releaseDate: "", genre: "", minAge: "", type: "", duration: "", actors: "", seasons: "", episodes: ""});
+  const [errors1, setErrors1] = useState({ title: "", description: "", image: "", releaseDate: "", genre: "", minAge: "", type: "", duration: "", actors: "", seasons: "", episodes: ""});
 
   // Validadores por campo de series/peliculas
   const validators1 = {
@@ -73,7 +32,7 @@ export default function AddContent() {
     },
     image: (v) => {
       if (!v.trim()) return "La imagen es obligatoria.";
-      if (!/^[a-zA-Z0-9]+\.(jpg|jpeg|png|gif)$/i.test(v)) {
+      if (!/^[a-zA-Z0-9_]+[a-zA-Z0-9]?\.(jpg|jpeg|png|gif)$/i.test(v)) {
         return "Debe ser un formato válido de imagen (jpg, png, gif).";
       }
       return "";
@@ -174,7 +133,7 @@ export default function AddContent() {
     },
   };
 
-  // Manejo de cambios en inputs
+  // Manejo de cambios en inputs en series/peliculas
   const handleChange1 = (e) => {
     const { name, value } = e.target;
     setFormData1({ ...formData1, [name]: value });
@@ -183,6 +142,7 @@ export default function AddContent() {
     setErrors1((prev) => ({ ...prev, [name]: error }));
   };
 
+  // Manejo de cambios en inputs en user/admin
   const handleChange2 = (e) => {
     const { name, value } = e.target;
     setFormData2({ ...formData2, [name]: value });
@@ -191,7 +151,7 @@ export default function AddContent() {
     setErrors2((prev) => ({ ...prev, [name]: error }));
   };
 
-  // Validar todos los campos antes de enviar
+  // Validar todos los campos antes de enviar en series/peliculas
   const validateAll1 = () => {
     const newErrors = Object.keys(formData1).reduce((acc, key) => {
       acc[key] = validators1[key] ? validators1[key](formData1[key]) : "";
@@ -201,6 +161,7 @@ export default function AddContent() {
     return Object.values(newErrors).every((e) => e === "");
   };
 
+  // Validar todos los campos antes de enviar en user/admin
   const validateAll2 = () => {
     const newErrors = Object.keys(formData2).reduce((acc, key) => {
       acc[key] = validators2[key] ? validators2[key](formData2[key]) : "";
@@ -213,9 +174,7 @@ export default function AddContent() {
   // Enviar formulario de movies-series
   const handleSubmit1 = async (e) => {
     e.preventDefault();
-
     if (!validateAll1()) return;
-
     try {
       const res = await fetch("http://localhost:3001/api/add-movie-serie", {
         method: "POST",
@@ -224,12 +183,10 @@ export default function AddContent() {
       });
 
       const data = await res.json();
-
       if (data.errors1) {
         setErrors((prev) => ({ ...prev, ...data.errors1 }));
         return;
       }
-
       if (data.success) {
         alert("Contenido guardado correctamente");
         navigate("/home");
@@ -246,9 +203,7 @@ export default function AddContent() {
   // Enviar formulario de user-admin
   const handleSubmit2 = async (e) => {
     e.preventDefault();
-
     if (!validateAll2()) return;
-
     try {
       const res = await fetch("http://localhost:3001/api/add-user-admin", {
         method: "POST",
@@ -257,12 +212,10 @@ export default function AddContent() {
       });
 
       const data = await res.json();
-
       if (data.errors2) {
         setErrors2((prev) => ({ ...prev, ...data.errors2 }));
         return;
       }
-
       if (data.success) {
         alert("Contenido guardado correctamente");
         navigate("/home");
@@ -276,7 +229,6 @@ export default function AddContent() {
     }
   };
 
-  // Renderizado del formulario
   return (
     <div className="add-container">
       <button className="back-button" onClick={() => navigate("/home")}>←</button>
@@ -305,7 +257,7 @@ export default function AddContent() {
             <input type="number" name="minAge" placeholder="Edad mínima" value={formData1.minAge} onChange={handleChange1} />
             {errors1.minAge && <div className="field-error">{errors1.minAge}</div>}
 
-            <div className="type-selector">
+            <div className="add-type-selector">
               <label>
                 <input type="radio" name="type" value="pelicula" checked={formData1.type === "pelicula"} onChange={handleChange1} />
                 Película
@@ -317,6 +269,7 @@ export default function AddContent() {
             </div>
             {errors1.type && <div className="field-error">{errors1.type}</div>}
 
+            {/* Si es pelicula */}
             {formData1.type === "pelicula" && (
               <>
                 <input type="number" name="duration" placeholder="Duración en minutos" value={formData1.duration} onChange={handleChange1} />
@@ -327,6 +280,7 @@ export default function AddContent() {
               </>
             )}
 
+            {/* Si es serie */}
             {formData1.type === "serie" && (
               <>
                 <input type="number" name="seasons" placeholder="Número de temporadas" value={formData1.seasons} onChange={handleChange1} />
@@ -340,7 +294,7 @@ export default function AddContent() {
               </>
             )}
 
-            <button type="submit" className="continue-btn">Guardar</button>
+            <button type="submit" className="add-continue-btn">Guardar</button>
           </form>
         </>
       )}
@@ -369,7 +323,7 @@ export default function AddContent() {
             <input type="password" name="password" placeholder="Contraseña" value={formData2.password} onChange={handleChange2} />
             {errors2.password && <div className="field-error">{errors2.password}</div>}
 
-            <div className="type-selector">
+            <div className="add-type-selector">
               <label>
                 <input type="radio" name="role" value="user" checked={formData2.role === "user"} onChange={handleChange2} />
                 Usuario
@@ -382,7 +336,7 @@ export default function AddContent() {
             </div>
             {errors2.role && <div className="field-error">{errors2.role}</div>}
 
-            <button type="submit" className="continue-btn">Guardar</button>
+            <button type="submit" className="add-continue-btn">Guardar</button>
           </form>
         </>
       )}

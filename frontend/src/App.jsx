@@ -10,7 +10,6 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profiles from "./pages/Profiles";
 import Home from "./pages/Home";
-
 import CreateAdmin from "./pages/Create-admin";
 import Settings from "./pages/Settings";
 import DetailSerie from "./pages/DetailSerie";

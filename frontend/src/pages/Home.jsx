@@ -23,13 +23,9 @@ export default function Home({ view: initialView = "inicio" }) {
   const [loadingSeries, setLoadingSeries] = useState(true);
   const [favorites, setFavorites] = useState([]);
   const [likes, setLikes] = useState([]);
-
-  // 🔥 Estados para el Top 10
   const [topMovies, setTopMovies] = useState([]);
   const [topSeries, setTopSeries] = useState([]);
   const [loadingTop, setLoadingTop] = useState(true);
-
-  // Estados para géneros seleccionados
   const [selectedSeriesGenre, setSelectedSeriesGenre] = useState(null);
   const [selectedMovieGenre, setSelectedMovieGenre] = useState(null);
 
@@ -48,7 +44,8 @@ export default function Home({ view: initialView = "inicio" }) {
       .catch(err => {
         console.error("Error cargando películas:", err);
         setLoadingMovies(false);
-      });
+      }
+    );
 
     // Cargar series
     fetch("http://localhost:3001/api/series")
@@ -60,9 +57,10 @@ export default function Home({ view: initialView = "inicio" }) {
       .catch(err => {
         console.error("Error cargando series:", err);
         setLoadingSeries(false);
-      });
+      }
+    );
 
-    // 🔥 Cargar Top 10 (independiente)
+    // Cargar Top 10 
     Promise.all([
       fetch("http://localhost:3001/api/top-movies").then(res => res.json()),
       fetch("http://localhost:3001/api/top-series").then(res => res.json())
@@ -172,7 +170,7 @@ export default function Home({ view: initialView = "inicio" }) {
                   </ul>
                 </div>
               )}
-              <div className="back-point">{localStorage.getItem("username") || "Usuario"}</div>
+              <div className="back-point" onClick={() => navigate("/login")}>{localStorage.getItem("username") || "Usuario"}</div>
             </>
           )}
 

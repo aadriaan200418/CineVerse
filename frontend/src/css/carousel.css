@@ -18,7 +18,7 @@
   padding: 1rem;
 }
 
-/*Titulo de cada tipo (top 10...)*/
+/*Titulo de cada tipo */
 .carousel-section h1{
   text-align: left;
 }
@@ -49,7 +49,7 @@
 }
 
 /*Flechas de derecha e izquierda*/
-.scroll-button {
+.carousel-scroll-button {
   background:none;
   color: white;
   border: none;
@@ -60,7 +60,7 @@
   transition: background-color 0.3s;
 }
 
-.scroll-button:hover {
+.carousel--button:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 

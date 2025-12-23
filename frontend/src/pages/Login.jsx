@@ -1,7 +1,5 @@
-// Importamos React y hooks para estado y ciclo de vida
+// Importamos React y hooks
 import React, { useState } from "react";
-
-// Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
 // Importamos los estilos CSS
@@ -9,11 +7,7 @@ import "../css/login.css";
 
 export default function Login() {
   const navigate = useNavigate();
-
-  // Estado para guardar los datos del formulario
   const [formData, setFormData] = useState({ username: "", password: "" });
-
-  // Estado para mostrar errores de validación o del servidor
   const [errors, setErrors] = useState({});
 
   // Función para manejar cambios en los inputs
@@ -30,18 +24,17 @@ export default function Login() {
     if (!formData.username.trim()) {
       newErrors.username = "El usuario es obligatorio";
     }
+    
     if (!formData.password.trim()) {
       newErrors.password = "La contraseña es obligatoria";
     }
 
-    // Si hay errores, los mostramos y no continuamos
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
     try {
-      // Llamada al backend para login
       const res = await fetch("http://localhost:3001/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -50,14 +43,13 @@ export default function Login() {
 
       const data = await res.json();
       if (data.success) {
-        // Guardamos username y role en localStorage
         localStorage.setItem("username", data.username);
         localStorage.setItem("role", data.role);
- localStorage.setItem("token", data.token); 
-        // Redirigimos según el rol
+        localStorage.setItem("token", data.token);
+
         if (data.role === "admin") {
           navigate("/home");
-        } 
+        }
         else {
           navigate("/profiles");
         }
@@ -82,15 +74,15 @@ export default function Login() {
       <h1 className="login-title">Iniciar sesión</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <input id="username" type="text" name="username" value={formData.username} onChange={handleChange} className="form-input" placeholder="nombre de usuario"/>
+        <input id="username" type="text" name="username" value={formData.username} onChange={handleChange} className="form-input" placeholder="nombre de usuario" />
         {errors.username && <span className="error">{errors.username}</span>}
 
-        <input id="password" type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="contraseña"/>
+        <input id="password" type="password" name="password" value={formData.password} onChange={handleChange} className="form-input" placeholder="contraseña" />
         {errors.password && <span className="error">{errors.password}</span>}
 
         {errors.general && <div className="error">{errors.general}</div>}
 
-        <button type="submit" className="continue-btn">Continuar</button>
+        <button type="submit" className="login-continue-btn">Continuar</button>
       </form>
     </div>
   );

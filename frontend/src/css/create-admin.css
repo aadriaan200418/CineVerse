@@ -30,7 +30,6 @@
   z-index: 1000; 
   transition: transform 0.2s;
 }
-
 .back-button:hover {
   transform: scale(1.2);
 }
@@ -46,8 +45,8 @@
 .add-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   width: 85%;
+  gap: 20px;;
   max-width: 500px;
   background-color: rgba(180, 180, 180, 0.178); 
   padding: 25px;
@@ -65,39 +64,36 @@
   outline: none;
   resize: none;
 }
-
 .add-form input::placeholder, .add-form textarea::placeholder {
   color: #d0d0ff;
 }
 
-/*Selector de tipo (película/serie)*/
-.type-selector {
+/* Estilo de las flechas en el input number */
+.add-form input[type="number"]::-webkit-inner-spin-button, .add-form input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+/* Selector de tipo (película/serie) */
+.add-type-selector {
   display: flex;
   justify-content: space-around;
   margin-top: 10px;
   color: #fff;
   font-size: 1rem;
 }
-
-.type-selector label {
+.add-type-selector label {
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
 }
-
-.type-selector input[type="radio"] {
+.add-type-selector input[type="radio"] {
   accent-color: #c35ff5; 
   transform: scale(1.2);
 }
 
-/* Estilo de las flechas en navegadores WebKit (Chrome, Safari, Edge) */
-input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button {
-  appearance: none;
-}
-
 /*Botón de guardar*/
-.continue-btn {
+.add-continue-btn {
   margin-top: 10px;
   padding: 12px 20px;
   border: none;
@@ -108,16 +104,15 @@ input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-o
   cursor: pointer;
   transition: background 0.3s;
 }
-
-.continue-btn:hover {
+.add-continue-btn:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
 /*Mensaje de error*/
 .field-error {
   color: #d32f2f;       
-  font-size: 0.85rem;   
-  margin-top: 4px;      
+  font-size: 0.85rem;  
+  margin-bottom: 5px;    
 }
 
 /*Quitar scroll*/
@@ -126,7 +121,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }

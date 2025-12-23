@@ -1,25 +1,20 @@
-// Importamos React para poder usar JSX
-import React from "react";
-
-// Nos permite redirigir al usuario a otra ruta desde el código
-import { useNavigate } from "react-router-dom";
+// Importamos React y hooks
+import React, { useState } from "react";
+import { useNavigate,  } from "react-router-dom";
 
 // Importamos  el css
 import "../css/index.css";
 
-// Componente principal de la página de inicio
 export default function Index() {
-  // Nos permite redirigir al usuario a otras rutas
   const navigate = useNavigate();
 
-  // Estructura visual de la página de inicio
   return (
-    <div className="container">
-      <h1 className="title">🎬 ¿Tienes cuenta en CineVerse?</h1>
+    <div className="index-container">
+      <h1 className="index-title">🎬 ¿Tienes cuenta en CineVerse?</h1>
 
-      <div className="buttons">
-        <button onClick={() => navigate("/register")} className="btn btn-purple">Registrarse</button>
-        <button onClick={() => navigate("/login")} className="btn btn-blue">Iniciar sesión</button>
+      <div className="index-buttons">
+        <button onClick={() => navigate("/register")} className="index-btn index-btn-purple">Registrarse</button>
+        <button onClick={() => navigate("/login")} className="index-btn index-btn-blue">Iniciar sesión</button>
       </div>
     </div>
   );

@@ -5,28 +5,24 @@ import { useNavigate } from "react-router-dom";
 // Importamos los estilos CSS
 import "../css/carousel.css";
 
-// Definimos el componente principal del componenete carrusel
 export default function Carousel({ title, items, imagePath }) {
   const navigate = useNavigate();
 
-  //Flecha izquierda
   const scrollLeft = (id) => {
     document.getElementById(id).scrollLeft -= 300;
   };
 
-  //Flecha derecha
   const scrollRight = (id) => {
     document.getElementById(id).scrollLeft += 300;
   };
 
   const carouselId = `carousel-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
-  //Carrusel
   return (
     <div className="carousel-section">
       <h1>{title}</h1>
       <div className="carousel-container">
-        <button className="scroll-button left" onClick={() => scrollLeft(carouselId)}>←</button>
+        <button className="carousel-scroll-button" onClick={() => scrollLeft(carouselId)}>←</button>
 
         <div className="carousel" id={carouselId}>
           {items.map((item) => (
@@ -41,7 +37,7 @@ export default function Carousel({ title, items, imagePath }) {
           ))}
         </div>
 
-        <button className="scroll-button right" onClick={() => scrollRight(carouselId)}>→</button>
+        <button className="carousel-scroll-button" onClick={() => scrollRight(carouselId)}>→</button>
       </div>
     </div>
   );

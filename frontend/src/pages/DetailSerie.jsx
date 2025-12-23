@@ -23,6 +23,25 @@ export default function DetailSerie() {
   const [isEditing, setIsEditing] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
+  const [seasons, setSeasons] = useState([]);
+
+  const [editingSeasonId, setEditingSeasonId] = useState(null);
+  const [editingSeasonChapters, setEditingSeasonChapters] = useState([]);
+  const [editSeasonMessage, setEditSeasonMessage] = useState("");
+  const [editingSeasonErrors, setEditingSeasonErrors] = useState([]);
+  const [selectedSeasonId, setSelectedSeasonId] = useState("");
+
+  const [seasonsList, setSeasonsList] = useState([]);
+  const [chaptersList, setChaptersList] = useState([]);
+  const nextSeasonNumber = seasonsList.length + 1;
+  const [chapterErrors, setChapterErrors] = useState([]);
+
+  const [seasonError, setSeasonError] = useState("");
+
+
+  const editingSeasonData = editingSeasonId
+    ? seasonsList.find(s => Number(s.id_season) === Number(editingSeasonId))
+    : null;
 
   // Estados para añadir temporada avanzada
   const [showAddSeasonForm, setShowAddSeasonForm] = useState(false);
@@ -115,6 +134,124 @@ export default function DetailSerie() {
     }
   }, [id]);
 
+  // Cargar temporadas de la serie
+  fetch(`http://localhost:3001/api/seasons/${id}`)
+    .then(res => res.json())
+    .then(data => {
+      setSeasonsList(data.seasons || []);
+    })
+    .catch(err => console.error("Error cargando temporadas:", err));
+
+  //editar temporada
+  const openEditSeason = async (id_season) => {
+    setEditingSeasonId(id_season);
+    setEditSeasonMessage("");
+    setEditingSeasonErrors([]);
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/chapters/${id_season}`);
+      const data = await res.json();
+
+      setEditingSeasonChapters(data.chapters || []);
+    } catch (err) {
+      console.error("Error cargando capítulos:", err);
+      setEditSeasonMessage("Error al cargar capítulos de la temporada");
+    }
+  };
+
+  // editar capítulos de temporada
+  const handleEditSeasonChapterChange = (index, field, value) => {
+    setEditingSeasonChapters(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+
+    // limpiar error de ese campo al escribir
+    setEditingSeasonErrors(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], [field]: "" };
+      }
+      return updated;
+    });
+  };
+
+
+  //guardar cambios de edicion de temporadas y capitulos en la base de datos
+  const saveEditedSeason = async () => {
+    let hasError = false;
+    const errors = [];
+
+    // Validar capítulos editados
+    editingSeasonChapters.forEach((chap, index) => {
+      const err = {};
+
+      if (!chap.chapter_number) {
+        err.chapter_number = "El número de capítulo es obligatorio";
+        hasError = true;
+      }
+
+      if (!chap.title?.trim()) {
+        err.title = "El título es obligatorio";
+        hasError = true;
+      }
+
+      if (!chap.duration_minutes || chap.duration_minutes <= 0) {
+        err.duration_minutes = "La duración debe ser mayor que 0";
+        hasError = true;
+      }
+
+      if (!chap.image?.trim()) {
+        err.image = "La imagen es obligatoria";
+        hasError = true;
+      } else {
+        const validExt = /\.(jpg|jpeg|png|gif|webp)$/i;
+        if (!validExt.test(chap.image.trim().toLowerCase())) {
+          err.image = "La imagen debe terminar en .jpg, .jpeg, .png, .gif o .webp";
+          hasError = true;
+        }
+      }
+
+      errors[index] = err;
+    });
+
+    setEditingSeasonErrors(errors);
+
+    if (hasError) {
+      setEditSeasonMessage("❌ Hay errores en el formulario");
+      return;
+    }
+
+    try {
+      for (const chap of editingSeasonChapters) {
+        await fetch(`http://localhost:3001/api/chapters/${chap.id_chapter}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chapter_number: chap.chapter_number,
+            title: chap.title,
+            duration_minutes: chap.duration_minutes,
+            image: chap.image
+          })
+        });
+      }
+
+      setEditSeasonMessage("✔ Cambios guardados correctamente");
+
+      // Actualizar capítulos en pantalla si estás mostrando esa temporada
+      if (editingSeasonId) {
+        setChaptersList(editingSeasonChapters);
+      }
+
+    } catch (err) {
+      console.error("Error guardando cambios:", err);
+      setEditSeasonMessage("❌ Error al guardar cambios");
+    }
+  };
+  // Funciones para manejar likes y favoritos
+
+
   const toggleLike = () => {
     const id_profile = localStorage.getItem("id_profile");
     if (!id_profile || !serie?.id_series) return;
@@ -156,6 +293,23 @@ export default function DetailSerie() {
         .catch(err => console.error("Error al quitar favorito:", err));
     }
   };
+
+  const handleSeasonChange = (e) => {
+    const idSeason = e.target.value;
+
+    if (!idSeason) {
+      setChaptersList([]);
+      return;
+    }
+
+    fetch(`http://localhost:3001/api/chapters/${idSeason}`)
+      .then(res => res.json())
+      .then(data => {
+        setChaptersList(data.chapters || []);
+      })
+      .catch(err => console.error("Error cargando capítulos:", err));
+  };
+
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -255,22 +409,82 @@ export default function DetailSerie() {
     const newChapters = [...chapters];
     newChapters[index][field] = value;
     setChapters(newChapters);
+
+    setChapterErrors(prev => {
+      const updated = [...prev];
+      if (updated[index]) {
+        updated[index] = { ...updated[index], [field]: "" };
+      }
+      return updated;
+    });
   };
+
+
 
   const handleSaveSeason = async (e) => {
     e.preventDefault();
+
+    let hasError = false;
+    const errors = [];
+
+    // 🔴 Validar número de temporada
+    if (!seasonNumber || Number(seasonNumber) < 1) {
+      setSeasonError("El número de temporada debe ser mayor que 0");
+      hasError = true;
+    } else {
+      setSeasonError("");
+    }
+
+    // 🔴 Validar capítulos
+    chapters.forEach((chap, index) => {
+      const err = {};
+
+      if (!chap.chapter_number) {
+        err.chapter_number = "El número de capítulo es obligatorio";
+        hasError = true;
+      }
+
+      if (!chap.title?.trim()) {
+        err.title = "El título es obligatorio";
+        hasError = true;
+      }
+
+      if (!chap.duration_minutes || chap.duration_minutes <= 0) {
+        err.duration_minutes = "La duración debe ser mayor que 0";
+        hasError = true;
+      }
+
+      // Validar imagen + extensión
+      if (!chap.image?.trim()) {
+        err.image = "La imagen es obligatoria";
+        hasError = true;
+      } else {
+        const validExt = /\.(jpg|jpeg|png|gif|webp)$/i;
+        if (!validExt.test(chap.image.trim().toLowerCase())) {
+          err.image = "La imagen debe terminar en .jpg, .jpeg, .png, .gif o .webp";
+          hasError = true;
+        }
+      }
+
+      errors[index] = err;
+    });
+
+    setChapterErrors(errors);
+
+    if (hasError) {
+      setFormMessage("❌ Hay errores en el formulario");
+      return;
+    }
+
+    // 🔐 Token
     const token = localStorage.getItem("token");
     if (!token) {
       setFormMessage("❌ Debes iniciar sesión");
       return;
     }
 
-    // Validar capítulos
-    const invalidChapter = chapters.some(chap => !chap.chapter_number || !chap.title);
-    if (invalidChapter) {
-      setFormMessage("❌ Todos los capítulos deben tener número y título");
-      return;
-    }
+    // Número de temporada automático
+    const nextSeasonNumber = seasonsList.length + 1;
 
     try {
       const res = await fetch(`http://localhost:3001/api/series/${id}/season-with-chapters`, {
@@ -280,27 +494,36 @@ export default function DetailSerie() {
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-          season_number: seasonNumber,
+          season_number: nextSeasonNumber,
           chapters: chapters
         })
       });
 
       const data = await res.json();
+
       if (data.success) {
         setFormMessage("✅ Temporada y capítulos creados");
+
+        // Actualizar temporadas en pantalla
+        setSeasonsList(prev => [
+          ...prev,
+          { id_season: data.id_season, season_number: nextSeasonNumber }
+        ]);
+
+        // Resetear formulario
         setShowAddSeasonForm(false);
         setSeasonNumber("");
         setChapters([{ chapter_number: "", title: "", duration_minutes: "", image: "" }]);
-
-        // Actualizar localmente el número de temporadas
-        setSerie(prev => ({ ...prev, seasons: (prev?.seasons || 0) + 1 }));
+        setChapterErrors([]);
       } else {
         setFormMessage(`❌ ${data.error || "Error al crear temporada"}`);
       }
+
     } catch (err) {
       setFormMessage("❌ Error de conexión");
     }
   };
+
 
   if (loading) {
     return <Loading />;
@@ -411,7 +634,8 @@ export default function DetailSerie() {
               <div className="data">
                 <div className="row1">
                   <p>{serie.genre}</p>
-                  <p>{serie.seasons} temporadas</p>
+                  <p>{seasonsList.length} temporadas</p>
+
                 </div>
                 <div className="row2">
                   <p>{new Date(serie.release_date).getFullYear()}</p>
@@ -453,39 +677,198 @@ export default function DetailSerie() {
               {localStorage.getItem("role") === "admin" && (
                 <div className="admin-actions">
                   {!showAddSeasonForm ? (
-                    <button onClick={() => setShowAddSeasonForm(true)}>➕ Añadir Temporada</button>
+                    <>
+                      <div className="seasons">
+                        <select
+                          className="select-seasons"
+                          value={selectedSeasonId}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setSelectedSeasonId(value);
+                            if (value) {
+                              handleSeasonChange({ target: { value } }); // si ya tienes esta función para cargar capítulos
+                            } else {
+                              setChaptersList([]);
+                            }
+                          }}
+                        >
+                          <option value="">Selecciona una temporada</option>
+                          {seasonsList.map(season => (
+                            <option key={season.id_season} value={season.id_season}>
+                              Temporada {season.season_number}
+                            </option>
+                          ))}
+                        </select>
+
+                        <button
+                          type="button"
+                          className="btn-edit-season"
+                          disabled={!selectedSeasonId}
+                          onClick={() => {
+                            if (selectedSeasonId) {
+                              openEditSeason(selectedSeasonId);
+                            }
+                          }}
+                        >
+                          Editar temporada
+                        </button>
+
+                        <button
+                          className="new-season"
+                          type="button"
+                          onClick={() => setShowAddSeasonForm(true)}
+                        >
+                          Añadir Temporada
+                        </button>
+                      </div>
+
+                      <div className="chapters-container">
+                        {chaptersList.map(ch => (
+                          <div key={ch.id_chapter} className="chapter-card">
+                            <img src={`/images-chapters/${ch.image}`} alt={ch.title} />
+                            <h3>{ch.chapter_number}. {ch.title}</h3>
+                            <p>{ch.duration_minutes} min</p>
+                          </div>
+                        ))}
+                      </div>
+
+
+                      {editingSeasonId && (
+                        <div className="edit-season-form">
+                          <h3>
+                            Editando Temporada{" "}
+                            {editingSeasonData ? editingSeasonData.season_number : editingSeasonId}
+                          </h3>
+
+                          {editingSeasonChapters.map((chap, index) => (
+                            <div key={chap.id_chapter} className="chapter-edit-box">
+
+                              <label>Número de capítulo</label>
+                              <input
+                                type="number"
+                                value={chap.chapter_number}
+                                onChange={(e) =>
+                                  handleEditSeasonChapterChange(index, "chapter_number", e.target.value)
+                                }
+                              />
+                              {editingSeasonErrors[index]?.chapter_number && (
+                                <p className="error">{editingSeasonErrors[index].chapter_number}</p>
+                              )}
+
+                              <label>Título</label>
+                              <input
+                                type="text"
+                                value={chap.title}
+                                onChange={(e) =>
+                                  handleEditSeasonChapterChange(index, "title", e.target.value)
+                                }
+                              />
+                              {editingSeasonErrors[index]?.title && (
+                                <p className="error">{editingSeasonErrors[index].title}</p>
+                              )}
+
+                              <label>Duración (min)</label>
+                              <input
+                                type="number"
+                                value={chap.duration_minutes}
+                                onChange={(e) =>
+                                  handleEditSeasonChapterChange(index, "duration_minutes", e.target.value)
+                                }
+                              />
+                              {editingSeasonErrors[index]?.duration_minutes && (
+                                <p className="error">{editingSeasonErrors[index].duration_minutes}</p>
+                              )}
+
+                              <label>Imagen</label>
+                              <input
+                                type="text"
+                                value={chap.image}
+                                onChange={(e) =>
+                                  handleEditSeasonChapterChange(index, "image", e.target.value)
+                                }
+                              />
+                              {editingSeasonErrors[index]?.image && (
+                                <p className="error">{editingSeasonErrors[index].image}</p>
+                              )}
+                            </div>
+                          ))}
+
+                          <button type="button" onClick={saveEditedSeason} className="btn-save-season">
+                            Guardar cambios
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingSeasonId(null);
+                              setEditingSeasonChapters([]);
+                              setEditingSeasonErrors([]);
+                              setEditSeasonMessage("");
+                            }}
+                            className="btn-cancel-season"
+                          >
+                            Cerrar
+                          </button>
+
+                          {editSeasonMessage && <p className="form-message">{editSeasonMessage}</p>}
+                        </div>
+                      )}
+
+
+
+                      <div class="chapters-container"></div>
+                    </>
+
+
+
                   ) : (
                     <form onSubmit={handleSaveSeason} className="admin-form">
                       <h3>Añadir Temporada</h3>
-                      
+
+
                       <label>Número de Temporada</label>
                       <input
                         type="number"
                         min="1"
                         value={seasonNumber}
-                        onChange={(e) => setSeasonNumber(e.target.value)}
-                        required
+                        onChange={(e) => {
+                          setSeasonNumber(e.target.value);
+                          // limpiar error al escribir
+                          setSeasonError("");
+                        }}
                       />
+                      {seasonError && <p className="error">{seasonError}</p>}
+
+
+
 
                       <h4>Capítulos</h4>
                       {chapters.map((chap, index) => (
                         <div key={index} className="chapter-form-group">
+
                           <label>Capítulo {index + 1}</label>
+
                           <input
                             type="number"
                             min="1"
                             placeholder="Núm. capítulo"
                             value={chap.chapter_number}
                             onChange={(e) => handleChapterChange(index, "chapter_number", e.target.value)}
-                            required
                           />
+                          {chapterErrors[index]?.chapter_number && (
+                            <p className="error">{chapterErrors[index].chapter_number}</p>
+                          )}
+
                           <input
                             type="text"
                             placeholder="Título"
                             value={chap.title}
                             onChange={(e) => handleChapterChange(index, "title", e.target.value)}
-                            required
                           />
+                          {chapterErrors[index]?.title && (
+                            <p className="error">{chapterErrors[index].title}</p>
+                          )}
+
                           <input
                             type="number"
                             min="1"
@@ -493,26 +876,35 @@ export default function DetailSerie() {
                             value={chap.duration_minutes}
                             onChange={(e) => handleChapterChange(index, "duration_minutes", e.target.value)}
                           />
+                          {chapterErrors[index]?.duration_minutes && (
+                            <p className="error">{chapterErrors[index].duration_minutes}</p>
+                          )}
+
                           <input
                             type="text"
                             placeholder="Imagen (ej. cap1.jpg)"
                             value={chap.image}
                             onChange={(e) => handleChapterChange(index, "image", e.target.value)}
                           />
+                          {chapterErrors[index]?.image && (
+                            <p className="error">{chapterErrors[index].image}</p>
+                          )}
+
                           {chapters.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeChapterField(index)}
                               className="btn-remove-chapter"
                             >
-                              🗑️ Quitar
+                              Quitar
                             </button>
                           )}
                         </div>
                       ))}
 
+
                       <button type="button" onClick={addChapterField} className="btn-add-chapter">
-                        ➕ Añadir Capítulo
+                        Añadir Capítulo
                       </button>
 
                       <div className="form-buttons">
@@ -522,10 +914,15 @@ export default function DetailSerie() {
                       {formMessage && <p className="form-message">{formMessage}</p>}
                     </form>
                   )}
+
                 </div>
+
+
               )}
+
             </>
           )}
+
         </div>
       </div>
     </div>

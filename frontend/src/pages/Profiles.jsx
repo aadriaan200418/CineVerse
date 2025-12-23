@@ -1,10 +1,8 @@
-// Importamos React y hooks para estado y ciclo de vida
+// Importamos React y hooks
 import React, { useEffect, useState } from "react";
-
-// Nos permite redirigir al usuario a otra ruta desde el código
 import { useNavigate } from "react-router-dom";
 
-// Importamos los estilos CSS, la imagen de la papelera y el componente loading
+// Importamos los estilos CSS y las imagenes
 import "../css/profiles.css";
 import binIcon from "../assets/icons/bin.png";
 import Loading from "../components/Loading";
@@ -14,7 +12,6 @@ const getRandomColor = () => {
     return `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`;
 };
 
-// Componente principal de selección de perfiles
 export default function Profiles() {
     const navigate = useNavigate();
     const [profiles, setProfiles] = useState([]);
@@ -74,7 +71,6 @@ export default function Profiles() {
         e.preventDefault();
         setError("");
 
-        // Validar que no esté vacío el campo de nombre
         if (!newProfile.nombre.trim()) {
             setError("El nombre del perfil es obligatorio");
             return;
@@ -112,7 +108,6 @@ export default function Profiles() {
             const res = await fetch(`http://localhost:3001/api/deleteProfile/${id}`, {method: "DELETE"});
             const data = await res.json();
             if (data.success) {
-                // Actualizamos la lista de perfiles en el estado
                 setProfiles((prev) => prev.filter((p) => p.id !== id));
             } 
             else {
@@ -139,40 +134,40 @@ export default function Profiles() {
                 {/*Lista perfiles*/}
                 <div className="profiles-list">
                     {profiles.map((p) => (
-                        <div key={p.id} className="profile-row">
+                        <div key={p.id} className="profiles-row">
 
-                            <div className="profile-icon" style={{ backgroundColor: getRandomColor() }} onClick={() => handleSelectProfile(p.id)}>
-                                <span className="profile-initial">{p.name?.[0]?.toUpperCase()}</span>
+                            <div className="profiles-icon" style={{ backgroundColor: getRandomColor() }} onClick={() => handleSelectProfile(p.id)}>
+                                <span className="profiles-initial">{p.name?.[0]?.toUpperCase()}</span>
                             </div>
 
-                            <span className="profile-name" onClick={() => handleSelectProfile(p.id)}>{p.name}</span>
+                            <span className="profiles-name" onClick={() => handleSelectProfile(p.id)}>{p.name}</span>
 
-                            <img src={binIcon} alt="Eliminar perfil" className="delete-icon" onClick={() => handleDeleteProfile(p.id)}/>
+                            <img src={binIcon} alt="Eliminar perfil" className="profiles-delete-icon" onClick={() => handleDeleteProfile(p.id)}/>
                         </div>
                     ))}
 
                     {/*Crear nuevo perfil*/}
                     {!showForm && (
-                        <div className="profile-row new-profile" onClick={toggleForm}>
-                            <div className="profile-icon plus" >
-                                <span className="profile-plus">+</span>
+                        <div className="profiles-row new-profile" onClick={toggleForm}>
+                            <div className="profiles-icon plus" >
+                                <span className="profiles-plus">+</span>
                             </div>
-                            <span className="profile-name">Nuevo perfil</span>
+                            <span className="profiles-name">Nuevo perfil</span>
                         </div>
                     )}
                 </div>
 
                 {/*Formulario para crear nuevo perfil*/}
                 {showForm && (
-                    <form className="new-profile-form" onSubmit={handleCreateProfile}>
-                        <div className="form-row">
-                            <label className="form-label">Nombre del perfil</label>
-                            <input type="text" className="form-input" placeholder="Ej: Sofia" value={newProfile.nombre} onChange={(e) => setNewProfile({ nombre: e.target.value })}/>
+                    <form className="profiles-new-form" onSubmit={handleCreateProfile}>
+                        <div className="profiles-form-row">
+                            <label className="profiles-form-label">Nombre del perfil</label>
+                            <input type="text" className="profiles-form-input" placeholder="Ej: Sofia" value={newProfile.nombre} onChange={(e) => setNewProfile({ nombre: e.target.value })}/>
                         </div>
 
-                        <div className="form-actions">
-                            <button type="button" className="btn-secondary" onClick={toggleForm}>Cancelar</button>
-                            <button type="submit" className="btn-primary">Crear perfil</button>
+                        <div className="profiles-form-actions">
+                            <button type="button" className="profiles-btn-secondary" onClick={toggleForm}>Cancelar</button>
+                            <button type="submit" className="profiles-btn-primary">Crear perfil</button>
                         </div>
                     </form>
                 )}
@@ -180,5 +175,4 @@ export default function Profiles() {
         )}
     </div>
 );
-
 }

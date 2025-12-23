@@ -227,36 +227,53 @@ app.post('/api/addProfile', (req, res) => {
   });
 });
 
-// Eliminar un perfil
 app.delete('/api/deleteProfile/:id', (req, res) => {
   const profileId = req.params.id;
-  const sqlGetUserProfile = ` SELECT u.dni, p.name FROM profiles p JOIN users u ON u.dni = p.id_user WHERE p.id_profile = ?`;
+
+  const sqlGetUserProfile = `
+    SELECT u.dni, p.name 
+    FROM profiles p 
+    JOIN users u ON u.dni = p.id_user 
+    WHERE p.id_profile = ?
+  `;
+
   db.query(sqlGetUserProfile, [profileId], (err, results) => {
-    if (err) {
-      console.error('Error al obtener datos del perfil:', err);
-      return res.status(500).json({ error: 'Error al obtener datos del perfil' });
-    }
+    if (err) return res.status(500).json({ error: 'Error al obtener datos del perfil' });
 
     const { dni, name } = results[0];
 
-    const sqlDelete = 'DELETE FROM profiles WHERE id_profile = ?';
-    db.query(sqlDelete, [profileId], (err2) => {
-      if (err2) {
-        console.error(' Error al eliminar perfil:', err2);
-        return res.status(500).json({ error: 'Error al eliminar perfil' });
-      }
+    // 1. Eliminar likes
+    const sqlDeleteLikes = 'DELETE FROM likes WHERE id_profile = ?';
+    db.query(sqlDeleteLikes, [profileId], (errLikes) => {
+      if (errLikes) return res.status(500).json({ error: 'Error al eliminar likes' });
 
-      const sqlUpdateJson = `UPDATE users SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) WHERE dni = ?`;
-      db.query(sqlUpdateJson, [name, dni], (err3) => {
-        if (err3) {
-          console.error(' Error al actualizar campo JSON profile:', err3);
-        }
+      // 2. Eliminar favoritos
+      const sqlDeleteFavorites = 'DELETE FROM favorites WHERE id_profile = ?';
+      db.query(sqlDeleteFavorites, [profileId], (errFav) => {
+        if (errFav) return res.status(500).json({ error: 'Error al eliminar favoritos' });
 
-        res.json({ success: true });
+        // 3. Eliminar el perfil
+        const sqlDeleteProfile = 'DELETE FROM profiles WHERE id_profile = ?';
+        db.query(sqlDeleteProfile, [profileId], (errProfile) => {
+          if (errProfile) return res.status(500).json({ error: 'Error al eliminar perfil' });
+
+          // 4. Actualizar JSON del usuario
+          const sqlUpdateJson = `
+            UPDATE users 
+            SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) 
+            WHERE dni = ?
+          `;
+          db.query(sqlUpdateJson, [name, dni], (errJson) => {
+            if (errJson) console.error('Error al actualizar JSON:', errJson);
+
+            res.json({ success: true });
+          });
+        });
       });
     });
   });
 });
+
 
 // ------------------------------------------------------- AÑADIR USUERS/ADMINS/MOVIES/SERIES DESDE ADMIN --------------------------------------------
 app.get("/api/create-admin", (req, res) => {
@@ -1197,95 +1214,172 @@ app.delete("/api/favorites/:id_profile/:id_series", (req, res) => {
     }
   );
 });
+
+// -------------------------------------------------------------- AÑADIR TEMPORADA CON CAPÍTULOS SOLO ADMIN -----------------------------------------------------------------
 app.post('/api/series/:id/season-with-chapters', (req, res) => {
   const { id } = req.params;
   const { season_number, chapters } = req.body;
 
-  console.log("🔍 Recibiendo petición para serie ID:", id);
-  console.log("📊 Datos recibidos:", { season_number, chapters });
-
-  // Validación básica
   if (!season_number || !Array.isArray(chapters) || chapters.length === 0) {
-    console.log("❌ Error: Datos incompletos");
-    return res.status(400).json({ error: 'season_number y al menos un capítulo son obligatorios' });
+    return res.status(400).json({ error: 'Datos incompletos' });
   }
 
-  db.query('SELECT seasons FROM series WHERE id_series = ?', [id], (err, serieRes) => {
-    if (err) {
-      console.error("❌ Error SQL al buscar serie:", err);
-      return res.status(500).json({ error: 'Error al verificar serie' });
-    }
+  // 1️⃣ Obtener temporadas actuales
+  db.query(
+    'SELECT seasons FROM series WHERE id_series = ?',
+    [id],
+    (err, serieRes) => {
+      if (err) return res.status(500).json({ error: 'Error al buscar serie' });
+      if (serieRes.length === 0) return res.status(404).json({ error: 'Serie no encontrada' });
 
-    if (serieRes.length === 0) {
-      console.log("❌ Serie no encontrada con ID:", id);
-      return res.status(404).json({ error: 'Serie no encontrada' });
-    }
+      const currentSeasons = serieRes[0].seasons;
 
-    const currentSeasons = serieRes[0].seasons;
-    console.log("✅ Serie encontrada. Temporadas actuales:", currentSeasons);
-
-    // Insertar temporada
-    db.query(
-      'INSERT INTO seasons (id_series, season_number, chapters) VALUES (?, ?, ?)',
-      [id, season_number, chapters.length],
-      (err, seasonResult) => {
-        if (err) {
-          console.error("❌ Error al insertar temporada:", err);
-          if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({ error: 'Temporada ya existe' });
+      // 2️⃣ Insertar temporada
+      db.query(
+        'INSERT INTO seasons (id_series, season_number, chapters) VALUES (?, ?, ?)',
+        [id, season_number, chapters.length],
+        (err, seasonResult) => {
+          if (err) {
+            if (err.code === 'ER_DUP_ENTRY') {
+              return res.status(409).json({ error: 'La temporada ya existe' });
+            }
+            return res.status(500).json({ error: 'Error al crear temporada' });
           }
-          return res.status(500).json({ error: 'Error al crear temporada' });
-        }
 
-        console.log("✅ Temporada creada. Insertando capítulos...");
+          const id_season = seasonResult.insertId;
 
-        // Insertar capítulos
-        let completed = 0;
-        const total = chapters.length;
+          // 3️⃣ Insertar capítulos
+          let index = 0;
 
-        const insertNext = (index) => {
-          if (index >= total) {
-            // Actualizar número total de temporadas
+          const insertChapter = () => {
+            if (index >= chapters.length) {
+              // 4️⃣ Actualizar contador de temporadas
+              db.query(
+                'UPDATE series SET seasons = ? WHERE id_series = ?',
+                [currentSeasons + 1, id],
+                () => res.json({ success: true })
+              );
+              return;
+            }
+
+            const chap = chapters[index];
+
             db.query(
-              'UPDATE series SET seasons = ? WHERE id_series = ?',
-              [currentSeasons + 1, id],
+              `INSERT INTO chapters 
+               (id_season, chapter_number, title, duration_minutes, image)
+               VALUES (?, ?, ?, ?, ?)`,
+              [
+                id_season,
+                chap.chapter_number,
+                chap.title,
+                chap.duration_minutes || null,
+                chap.image || null
+              ],
               (err) => {
                 if (err) {
-                  console.error("❌ Error al actualizar seasons:", err);
-                  return res.status(500).json({ error: 'Error al actualizar temporadas' });
+                  if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({
+                      error: `Capítulo ${chap.chapter_number} duplicado`
+                    });
+                  }
+                  return res.status(500).json({ error: 'Error al crear capítulo' });
                 }
-                console.log("✅ ¡Operación completada!");
-                return res.json({ success: true, message: 'Temporada y capítulos creados' });
+
+                index++;
+                insertChapter();
               }
             );
-            return;
-          }
+          };
 
-          const chap = chapters[index];
-          db.query(
-            'INSERT INTO chapters (id_series, chapter_number, title, duration_minutes, images) VALUES (?, ?, ?, ?, ?)',
-            [id, chap.chapter_number, chap.title, chap.duration_minutes || null, chap.image || null],
-            (err) => {
-              if (err) {
-                console.error(`❌ Error en capítulo ${index + 1}:`, err);
-                if (err.code === 'ER_DUP_ENTRY') {
-                  return res.status(409).json({ 
-                    error: `El número de capítulo ${chap.chapter_number} ya existe en esta serie` 
-                  });
-                }
-                return res.status(500).json({ error: `Error en capítulo ${index + 1}` });
-              }
-              console.log(`✅ Capítulo ${index + 1} insertado`);
-              insertNext(index + 1);
-            }
-          );
-        };
+          insertChapter();
+        }
+      );
+    }
+  );
+});
 
-        insertNext(0);
-      }
-    );
+// Obtener temporadas de una serie
+app.get('/api/seasons/:id_series', (req, res) => {
+  const { id_series } = req.params;
+
+  const sql = `
+    SELECT id_season, season_number 
+    FROM seasons 
+    WHERE id_series = ?
+    ORDER BY season_number ASC
+  `;
+
+  db.query(sql, [id_series], (err, results) => {
+    if (err) {
+      console.error("Error al obtener temporadas:", err);
+      return res.status(500).json({ error: "Error al obtener temporadas" });
+    }
+    res.json({ success: true, seasons: results });
   });
 });
+
+
+// Obtener capítulos de una temporada
+app.get('/api/chapters/:id_season', (req, res) => {
+  const { id_season } = req.params;
+
+  const sql = `
+    SELECT id_chapter, chapter_number, title, duration_minutes, image
+    FROM chapters
+    WHERE id_season = ?
+    ORDER BY chapter_number ASC
+  `;
+
+  db.query(sql, [id_season], (err, results) => {
+    if (err) {
+      console.error("Error al obtener capítulos:", err);
+      return res.status(500).json({ error: "Error al obtener capítulos" });
+    }
+    res.json({ success: true, chapters: results });
+  });
+});
+
+// Editar temporada (solo season_number)
+app.put('/api/seasons/:id_season', (req, res) => {
+  const { id_season } = req.params;
+  const { season_number } = req.body;
+
+  const sql = `
+    UPDATE seasons
+    SET season_number = ?
+    WHERE id_season = ?
+  `;
+
+  db.query(sql, [season_number, id_season], (err, result) => {
+    if (err) {
+      console.error("Error al actualizar temporada:", err);
+      return res.status(500).json({ error: "Error al actualizar temporada" });
+    }
+    res.json({ success: true });
+  });
+});
+
+// Editar capítulo
+app.put('/api/chapters/:id_chapter', (req, res) => {
+  const { id_chapter } = req.params;
+  const { chapter_number, title, duration_minutes, image } = req.body;
+
+  const sql = `
+    UPDATE chapters
+    SET chapter_number = ?, title = ?, duration_minutes = ?, image = ?
+    WHERE id_chapter = ?
+  `;
+
+  db.query(sql, [chapter_number, title, duration_minutes, image, id_chapter], (err, result) => {
+    if (err) {
+      console.error("Error al actualizar capítulo:", err);
+      return res.status(500).json({ error: "Error al actualizar capítulo" });
+    }
+    res.json({ success: true });
+  });
+});
+
+
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'build')));
 app.use((req, res) => {

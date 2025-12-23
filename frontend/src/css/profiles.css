@@ -1,4 +1,4 @@
-/* Contenedor principal con el mismo fondo que login */
+/* Contenedor principal*/
 .profiles-container {
   min-height: 100vh;   
   background-image: url("../assets/fondo-formato-bueno.png");          
@@ -39,6 +39,9 @@
   z-index: 1000; 
   transition: transform 0.2s;
 }
+.back-button:hover {
+  transform: scale(1.2);
+}
 
 /* Título principal */
 .profiles-title {
@@ -65,7 +68,7 @@
 }
 
 /* Cada fila de perfil */
-.profile-row {
+.profiles-row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -76,15 +79,14 @@
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-
-.profile-row:hover {
+.profiles-row:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.1);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
 }
 
 /* Icono del perfil*/
-.profile-icon {
+.profiles-icon {
   width: 44px;
   height: 44px;
   border-radius: 12px;
@@ -97,21 +99,21 @@
 }
 
 /* Icono para el botón de "Nuevo perfil" */
-.profile-icon.plus {
+.profiles-icon.plus {
   font-size: 22px;
   background-color: #a23fd0;
   box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.39);
 }
 
 /* Nombre del perfil */
-.profile-name {
+.profiles-name {
   color: #fff;
   font-size: 16px;
   letter-spacing: 0.2px;
 }
 
 /* Formulario para crear nuevo perfil */
-.new-profile-form {
+.profiles-new-form {
   margin-top: 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -120,12 +122,12 @@
 }
 
 /* Fila del formulario */
-.form-row {
+.profiles-form-row {
   margin-bottom: 12px;
 }
 
 /* Etiqueta del campo */
-.form-label {
+.profiles-form-label {
   display: block;
   color: #cfe3ff;
   font-size: 14px;
@@ -133,7 +135,7 @@
 }
 
 /* Input de texto */
-.form-input {
+.profiles-form-input {
   width: 95%;
   padding: 10px 12px;
   border-radius: 8px;
@@ -142,14 +144,12 @@
   color: #fff;
   outline: none;
 }
-
-/* Placeholder del input */
-.form-input::placeholder {
+.profiles-form-input::placeholder {
   color: #9fb5d5;
 }
 
 /* Botones del formulario */
-.form-actions {
+.profiles-form-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
@@ -157,7 +157,7 @@
 }
 
 /* Botones de acciones */
-.btn-primary, .btn-secondary {
+.profiles-btn-primary, .profiles-btn-secondary {
   padding: 10px 14px;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -166,27 +166,26 @@
 }
 
 /* Botón crear perfil */
-.btn-primary {
+.profiles-btn-primary {
   background: #a23fd0;
   color: #fff;
 }
 
 /* Botón cancelar */
-.btn-secondary {
+.profiles-btn-secondary {
   background: rgba(70, 70, 160, 0.8);
   color: #fff;
 }
 
 /* Imagen de eliminar perfil */
-.delete-icon {
+.profiles-delete-icon {
   width: 22px;
   height: 22px;
   cursor: pointer;
   margin-left: auto; 
   transition: transform 0.2s ease, filter 0.2s ease;
 }
-
-.delete-icon:hover {
+.profiles-delete-icon:hover {
   transform: scale(1.2);
   filter: brightness(1.3);
 }
@@ -197,7 +196,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }

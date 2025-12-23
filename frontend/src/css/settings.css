@@ -1,5 +1,5 @@
 /*Contenedor principal*/
-.logout-container {
+.settings-container {
   min-height: 100vh;    
   background-image: url("../assets/fondo-formato-bueno.png");               
   background-size: cover;       
@@ -30,20 +30,19 @@
   z-index: 1000; 
   transition: transform 0.2s;
 }
-
 .back-button:hover {
   transform: scale(1.2);
 }
 
 /*Titulo*/
-h2 {
+.settings-title {
   font-size: 2.5rem;
   margin-bottom: 40px;
   text-align: center;
 }
 
 /*Contenedor de botones*/
-.button-group {
+.settings-button {
   display: flex;
   flex-direction: row;
   gap: 20px;
@@ -56,7 +55,7 @@ h2 {
 }
 
 /*Botón de cerrar sesión*/
-.logout-btn {
+.settings-btn {
   padding: 12px 20px;
   border: none;
   border-radius: 20px;
@@ -67,17 +66,17 @@ h2 {
   transition: background 0.3s;
   width: 100%;
 }
-
-.logout-btn:hover {
+.settings-btn:hover {
   background: linear-gradient(90deg, rgba(52, 52, 156, 0.8), rgba(70, 70, 160, 0.8));
 }
 
-/* Contenedor de la tabla */
-h1{
+/*Titulo de la pagina*/
+.settings-title-table{
   text-align: center;
 }
 
-.table-settings {
+/* Contenedor de la tabla */
+.settings-table {
   width: 90%;
   max-width: 1500px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -88,13 +87,15 @@ h1{
   color: white;
 }
 
-.table-settings table {
+/* Tabla */
+.settings-table table {
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
 }
 
-.table-settings th {
+/* Tiulos de las columnas */
+.settings-table th {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   padding: 12px;
   text-align: center;
@@ -103,29 +104,30 @@ h1{
   border-bottom: 2px solid rgba(255,255,255,0.2);
 }
 
-.table-settings td {
+/* Fila de la tabla */
+.settings-table tbody tr:nth-child(even) {
+  background-color: rgba(255,255,255,0.05);
+}
+.settings-table tbody tr:hover {
+  background-color: rgba(255,255,255,0.15);
+  transition: background 0.3s;
+}
+
+/* Celda de la tabla */
+.settings-table td {
   padding: 10px;
   font-size: 15px;
   border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
-.table-settings tbody tr:nth-child(even) {
-  background-color: rgba(255,255,255,0.05);
-}
-
-.table-settings tbody tr:hover {
-  background-color: rgba(255,255,255,0.15);
-  transition: background 0.3s;
-}
-
 /*Iconos de editar y eliminar*/
-.actions-icon{
+.settings-delete-icon, .settings-actions-icon{
   height: 30px;
   cursor: pointer;
 }
 
 /*Formulario de editar*/
-.edit-form {
+.settings-form {
   display: flex;
   flex-direction: column;
   width: 40%;
@@ -144,12 +146,25 @@ h1{
   scrollbar-width: none;  
 }
 
-.edit-form h3{
+/* Titulo del formulario de editar */
+.settings-form h3{
   text-align: center;
 }
 
+/* Etiquetas en formulario */
+.settings-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+  font-size: 0.95rem;
+}
+.settings-label:first-of-type {
+  margin-top: 0;
+}
+
 /*Inputs y textarea*/
-form input, form textarea {
+.settings-form input, .settings-form textarea {
   width: 92%;
   margin-bottom: 20px;
   padding: 10px 20px;
@@ -159,26 +174,28 @@ form input, form textarea {
   color: white;
   font-size: 1rem;
 }
-
-form input:focus, form textarea:focus {
+.settings-form input:focus, .settings-form textarea:focus {
   background-color: #c35ff5;
   outline: none;
 }
-
-form textarea {
+.settings-form textarea {
   min-height: 80px;
   resize: vertical;
 }
-
-/* Botones de guardar y cancelar */
-.btns-sett{
-  width: 90%;
-  display:flex;
-  flex-direction: row;
-  justify-content: space-between;
+/* Estilo de las flechas en el input number */
+.settings-form input[type="number"]::-webkit-inner-spin-button, .settings-form input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
 }
 
-.btn-edit-sett {
+/* Botones de guardar y cancelar */
+.settings-btns{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+/* Botones de editar */
+.settings-btn-edit {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   margin-top: 10px;
   padding: 10px 70px;
@@ -188,24 +205,11 @@ form textarea {
   font-size: 1.1rem;
   cursor: pointer;
 }
-
-.btn-edit-sett:hover {
+.settings-btn-edit:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
-/* Etiquetas en formularios de edición */
-.label-sett {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: white;
-  font-size: 0.95rem;
-}
-
-/* El primer label no necesita margen superior */
-.label-sett:first-of-type {
-  margin-top: 0;
-}
+/* Errores */
 .error {
   color: #e74c3c;
   font-size: 0.875rem;
@@ -220,7 +224,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }

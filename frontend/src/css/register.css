@@ -30,7 +30,6 @@
   z-index: 1000; 
   transition: transform 0.2s;
 }
-
 .back-button:hover {
   transform: scale(1.2);
 }
@@ -46,8 +45,8 @@
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   width: 80%;
+  gap: 20px;
   max-width: 400px;
   background-color: rgba(180, 180, 180, 0.178); 
   padding: 20px;
@@ -64,13 +63,12 @@
   font-size: 1rem;
   outline: none;
 }
-
 .register-form input::placeholder {
   color: #d0d0ff;
 }
 
 /*Boton de continuar*/
-.continue-btn {
+.register-continue-btn {
   margin-top: 10px;
   padding: 12px 20px;
   border: none;
@@ -81,8 +79,7 @@
   cursor: pointer;
   transition: background 0.3s;
 }
-
-.continue-btn:hover {
+.register-continue-btn:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
@@ -99,7 +96,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }
