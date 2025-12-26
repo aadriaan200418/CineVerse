@@ -34,14 +34,35 @@
 .detail {
   display: flex;
   align-items: top;
-  flex-direction: row-reverse;
+  flex-direction: row;
   margin-left: 20px;
   margin-right: 20px;
   justify-content: space-between;
 }
 
-/*Imagen de la serie*/
-.banner-image {
+/*Datos de cada serie/pelicula*/
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  width: 40%;
+  padding: 20px;
+  border-radius: 12px;
+}
+.detail-info h1 {
+  font-size: 40px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.detail-data {
+  display: flex;
+  flex-direction: row;
+}
+.detail-row1{
+  margin-right:80px;
+}
+
+/*Imagen de la serie/pelicula*/
+.detail-banner-image {
   width: 650px;
   height: 400px;
   object-fit: cover;
@@ -49,23 +70,8 @@
   margin-left: 50px;
 }
 
-/*Datos de cada serie*/
-.info h1 {
-  font-size: 40px;
-  margin-bottom: 20px;
-}
-
-.data {
-  display: flex;
-  flex-direction: row;
-}
-
-.row1{
-  margin-right:80px;
-}
-
-/*Botones*/
-.buttons-rep{
+/*Botones de acciones de la serie/pelicula*/
+.detail-buttons{
   display: flex;
   flex-direction: row;
   width: 100%;
@@ -75,7 +81,7 @@
 }
 
 /*Boton de reproducir*/
-.btn.play {
+.detail-btn-play {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   color: #fff;
   border: none;
@@ -87,47 +93,42 @@
 }
 
 /*Iconos*/
-.images{
+.detail-images{
   display: flex;
   flex-direction: row;
   margin-left: 20px;
 }
-
-.images button{
+.detail-images button{
   background: none;
   border: none;
   height: 100%;
 }
-
-.images button img{
+.detail-images img{
   cursor: pointer;
   height: 40px;
   margin-right: 20px;
 }
-
-.like-image.active {
+.detail-like-image.active {
+  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+}
+.detail-star-image.active {
   filter: hue-rotate(0deg) saturate(5) brightness(0.8);
 }
 
-.star-image.active {
-  filter: hue-rotate(0deg) saturate(5) brightness(0.8);
+/* Etiquetas en formularios de edición */
+.detail-label-edit {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+  font-size: 0.95rem;
+}
+.detail-label-edit:first-of-type {
+  margin-top: 0;
 }
 
-/*Formulario / contenedor de los datos*/
-.info {
-  display: flex;
-  flex-direction: column;
-  width: 40%;
-  padding: 20px;
-  border-radius: 12px;
-}
-
-.info h1{
-  text-align: left;
-}
-
-/*Inputs y textarea*/
-.detail form input, .detail form textarea {
+/*Inputs y textarea del formulario de editar serie*/
+.detail-info form input, .detail-info form textarea {
   width: 92%;
   margin-bottom: 15px;
   padding: 10px 20px;
@@ -137,25 +138,22 @@
   color: white;
   font-size: 1rem;
 }
-
-.detail form input:focus, .detail form textarea:focus {
+.detail-info form input:focus, .detail-info form textarea:focus {
   background-color: #c35ff5;
   outline: none;
 }
-
-.detail form textarea {
+.detail-info form textarea {
   min-height: 80px;
   resize: vertical;
 }
 
-/* Botones de guardar y cancelar */
-.btns{
+/* Botones de guardar y cancelar del editar serie */
+.detail-btns{
   display:flex;
   flex-direction: row;
   justify-content: space-between;
 }
-
-.btn-edit {
+.detail-btn-edit {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   margin-top: 10px;
   padding: 10px;
@@ -166,113 +164,91 @@
   font-size: 1.1rem;
   cursor: pointer;
 }
-
-.btn-edit:hover {
+.detail-btn-edit:hover {
   background: linear-gradient(90deg, #c35ff5, #e480ff);
 }
 
-/* === Estilos para administración de temporadas === */
-.admin-actions {
-  margin-top: 20px;
-  padding: 20px;
+/* Estilos para acciones de las temporadas */
+.detailSerie-admin-actions {
+  margin-top: 60px;
   border-radius: 8px;
 }
-
-.seasons{
+.detailSerie-seasons{
   display:flex;
   flex-direction: row;
-  justify-content: space-between;
+  gap: 20px;
+}
+.detailSerie-new-season, .detailSerie-select-seasons, .detailSerie-btn-edit-season{
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  padding: 10px 20px;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.detailSerie-select-seasons option {
+  background-color: #000000; 
+  color: white;
 }
 
-.new-season{
+/* Formulario de añadir temporada */
+.detailSerie-chapter-form:not(:first-of-type){
+  padding-top: 20px;
+}
+.detailSerie-admin-form button {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  margin-top: 10px;
   padding: 10px;
   color: white;
   border: none;
   width: 40%;
   border-radius: 20px;
-  font-size: 1rem;
   cursor: pointer;
 }
-.select-seasons{
-  background: linear-gradient(90deg, #a23fd0, #c35ff5);
-  padding: 10px;
-  color: white;
-  border: none;
-  width: 55%;
-  border-radius: 20px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-.select-seasons option {
-  background-color: #000000; 
-  color: white;
-}
 
-
-.admin-form {
+/* Formulario de editar la temporada */
+.detailSerie-edit-season-form {
   margin-top: 20px;
   padding: 20px;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 8px;
 }
-
-.admin-form h3, .admin-form h4 {
+.detailSerie-edit-season-form h3 {
   color: white;
   margin-bottom: 15px;
 }
 
-.chapter-form-group {
+/* Frmulario de editar el capitulo  */
+.detailSerie-chapter-edit {
   padding: 15px;
   margin: 15px 0;
   border-radius: 8px;
 }
-
-.chapter-form-group label {
+.detailSerie-chapter-edit label {
   display: block;
   margin: 10px 0 6px;
   color: #ddd;
   font-weight: bold;
 }
-
-.chapter-form-group input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  background: #333;
-  border: 1px solid #555;
-  color: white;
-  border-radius: 4px;
-}
-
-.btn-add-chapter, .btn-remove-chapter {
-  background: linear-gradient(90deg, #a23fd0, #c35ff5);
-  margin-top: 10px;
-  padding: 10px;
-  color: white;
-  border: none;
-  width: 40%;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.btn-remove-chapter {
-  background: #f44336;
-}
-
-.form-buttons {
-  margin-top: 20px;
-}
-
-.form-buttons button {
-  margin-right: 10px;
+.detailSerie-chapter-edit input {
+  width: 92%;
+  margin-bottom: 15px;
   padding: 10px 20px;
   border: none;
-  border-radius: 4px;
-  cursor: pointer;
+  border-radius: 20px;
+  background-color: rgba(70, 70, 160, 0.8);
+  color: white;
+  font-size: 1rem;
 }
-
-.form-buttons button[type="submit"] {
+.detailSerie-chapter-edit-buttons{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 95%;
+  gap: 50px;
+}
+.detailSerie-edit-season-form button {
   background: linear-gradient(90deg, #a23fd0, #c35ff5);
   margin-top: 10px;
   padding: 10px;
@@ -283,17 +259,19 @@
   cursor: pointer;
 }
 
-.form-buttons button[type="button"] {
-  background: linear-gradient(90deg, #a23fd0, #c35ff5);
-  margin-top: 10px;
-  padding: 10px;
-  color: white;
-  border: none;
-  width: 40%;
-  border-radius: 20px;
-  cursor: pointer;
+/* Contenedor de la temporada */
+.detailSerie-chapters-container{
+  display:flex;
+  flex-direction: row;
+  gap: 50px;
+  margin-top: 30px;
+  margin-left: 50px;
+}
+.detailSerie-chapter-card{
+  width: 200px;
 }
 
+/* Mensaje del formulario */
 .form-message {
   margin-top: 15px;
   padding: 10px;
@@ -303,9 +281,17 @@
   color: #4CAF50;
 }
 
-.form-message:contains('❌') {
-  background: rgba(244, 67, 54, 0.2);
-  color: #f44336;
+/* para mensajes de error */ 
+.error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* Estilo de las flechas en el input number */
+.detail-info input[type="number"]::-webkit-inner-spin-button, .detail-info input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
 }
 
 /*Quitar scroll*/
@@ -314,35 +300,6 @@ html, body {
   overflow-y: scroll;    
   scrollbar-width: none;    
 }
-
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
-}
-.error {
-  color: #e74c3c;
-  font-size: 0.875rem;
-  display: block;
-  margin-top: 4px;
-  margin-bottom: 8px;
-}
-/* Etiquetas en formularios de edición */
-.label-edit {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: white;
-  font-size: 0.95rem;
-}
-
-/* El primer label no necesita margen superior */
-.label-edit:first-of-type {
-  margin-top: 0;
-}
-
-/* para mensajes de error */ 
-.error {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: 4px;
-  margin-bottom: 8px;
 }

@@ -1,5 +1,8 @@
+// Importamos React y hooks
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+// Importamos los estilos CSS y las imagenes
 import "../css/detail.css";
 import like from "../assets/icons/like.png";
 import likeFilled from "../assets/icons/like-filled.png";
@@ -20,6 +23,7 @@ export default function DetailMovie() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Funciones de validación para cada campo
   const validators = {
     title: (v) => {
       if (!v?.trim()) return "El título es obligatorio.";
@@ -55,15 +59,15 @@ export default function DetailMovie() {
     }
   };
 
+  /* Al cargar la pagina */
   useEffect(() => {
-    // Reiniciar estados al cambiar de película
     setLoading(true);
     setError("");
     setMovie(null);
     setIsLiked(false);
     setIsFavorite(false);
 
-    // 1. Cargar la película (bloquea el loading)
+    // Petición para obtener la película
     fetch(`http://localhost:3001/api/movies/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("No se pudo cargar la película");
@@ -81,8 +85,10 @@ export default function DetailMovie() {
         setLoading(false);
       });
 
-    // 2. Cargar likes y favoritos (en segundo plano)
+    //Obtenemos el perfil del usuario
     const id_profile = localStorage.getItem("id_profile");
+
+    // Cargar likes y favoritos
     if (id_profile) {
       const numericId = Number(id);
 
@@ -104,6 +110,7 @@ export default function DetailMovie() {
     }
   }, [id]);
 
+  // Función para dar o quitar like
   const toggleLike = () => {
     const id_profile = localStorage.getItem("id_profile");
     if (!id_profile || !movie?.id_movie) return;
@@ -116,7 +123,8 @@ export default function DetailMovie() {
       })
         .then(() => setIsLiked(true))
         .catch(err => console.error("Error al dar like:", err));
-    } else {
+    }
+    else {
       fetch(`http://localhost:3001/api/likes/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
@@ -125,6 +133,7 @@ export default function DetailMovie() {
     }
   };
 
+  // Función para añadir o quitar favorito
   const toggleFavorite = () => {
     const id_profile = localStorage.getItem("id_profile");
     if (!id_profile || !movie?.id_movie) return;
@@ -137,7 +146,8 @@ export default function DetailMovie() {
       })
         .then(() => setIsFavorite(true))
         .catch(err => console.error("Error al añadir favorito:", err));
-    } else {
+    }
+    else {
       fetch(`http://localhost:3001/api/favorites/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
@@ -146,11 +156,13 @@ export default function DetailMovie() {
     }
   };
 
+  // Maneja cambios en los inputs del formulario
   const handleChange = e => {
     const { name, value } = e.target;
     setMovie(prev => ({ ...prev, [name]: value }));
   };
 
+  // Activa el modo edición
   const startEditing = () => {
     setOriginalMovie({ ...movie });
     setIsEditing(true);
@@ -158,6 +170,7 @@ export default function DetailMovie() {
     setError("");
   };
 
+  // Cancela la edición y restaura valores
   const handleCancel = () => {
     if (originalMovie) {
       setMovie(originalMovie);
@@ -167,6 +180,7 @@ export default function DetailMovie() {
     setFieldErrors({});
   };
 
+  // Envía el formulario de edición
   const handleSubmit = e => {
     e.preventDefault();
     if (!movie) return;
@@ -184,17 +198,15 @@ export default function DetailMovie() {
     }
 
     setFieldErrors({});
-
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
     if (!token) {
-      setError("❌ No estás autenticado. Por favor, inicia sesión.");
+      setError("No estás autenticado. Por favor, inicia sesión.");
       return;
     }
-
     if (role !== "admin") {
-      setError("❌ No tienes permisos para editar esta película.");
+      setError("No tienes permisos para editar esta película.");
       return;
     }
 
@@ -229,18 +241,20 @@ export default function DetailMovie() {
       });
   };
 
+  // Pantalla de carga
   if (loading) {
     return <Loading />;
   }
-
-  if (error) {
-    return <p className="error-message">{error}</p>;
-  }
-
   if (!movie) {
     return <Loading />;
   }
 
+  // Error general
+  if (error) {
+    return <p className="error-message">{error}</p>;
+  }
+
+  // Valor de la fecha para el input date
   const releaseDateValue =
     typeof movie.release_date === "string"
       ? movie.release_date.slice(0, 10)
@@ -250,127 +264,73 @@ export default function DetailMovie() {
     <div className="detail-page">
       <button className="back-button" onClick={() => navigate("/movies")}>←</button>
 
+      {/* Formulario para editar la pelicula */}
       <div className="detail">
-        <img
-          src={`/images-movies/${movie.image}`}
-          alt={movie.title}
-          className="banner-image"
-          onError={e => (e.target.style.display = "none")}
-        />
-
-        <div className="info">
+        <div className="detail-info">
           {isEditing ? (
             <form onSubmit={handleSubmit} noValidate>
-              <label className="label-edit">Título</label>
-              <input
-                name="title"
-                value={movie.title ?? ""}
-                onChange={handleChange}
-                placeholder="Título"
-              />
+              <label className="detail-label-edit">Título</label>
+              <input name="title" value={movie.title ?? ""} onChange={handleChange} placeholder="Título" />
               {fieldErrors.title && <span className="error">{fieldErrors.title}</span>}
 
-              <label className="label-edit">Descripción</label>
-              <textarea
-                name="description"
-                value={movie.description ?? ""}
-                onChange={handleChange}
-                placeholder="Descripción"
-                rows="4"
-              />
+              <label className="detail-label-edit">Descripción</label>
+              <textarea name="description" value={movie.description ?? ""} onChange={handleChange} placeholder="Descripción" rows="4" />
               {fieldErrors.description && <span className="error">{fieldErrors.description}</span>}
 
-              <label className="label-edit">Género</label>
-              <input
-                name="genre"
-                value={movie.genre ?? ""}
-                onChange={handleChange}
-                placeholder="Género"
-              />
+              <label className="detail-label-edit">Género</label>
+              <input name="genre" value={movie.genre ?? ""} onChange={handleChange} placeholder="Género" />
               {fieldErrors.genre && <span className="error">{fieldErrors.genre}</span>}
 
-              <label className="label-edit">Duración (min)</label>
-              <input
-                name="duration_minutes"
-                type="number"
-                value={movie.duration_minutes ?? ""}
-                onChange={handleChange}
-                min="0"
-                placeholder="Duración en minutos"
-              />
+              <label className="detail-label-edit">Duración (min)</label>
+              <input name="duration_minutes" type="number" value={movie.duration_minutes ?? ""} onChange={handleChange} min="0" placeholder="Duración en minutos" />
               {fieldErrors.duration_minutes && <span className="error">{fieldErrors.duration_minutes}</span>}
 
-              <label className="label-edit">Fecha de estreno</label>
-              <input
-                name="release_date"
-                type="date"
-                value={releaseDateValue}
-                onChange={handleChange}
-              />
+              <label className="detail-label-edit">Fecha de estreno</label>
+              <input name="release_date" type="date" value={releaseDateValue} onChange={handleChange} />
               {fieldErrors.release_date && <span className="error">{fieldErrors.release_date}</span>}
 
-              <label className="label-edit">Edad mínima</label>
-              <input
-                name="minimum_age"
-                type="number"
-                value={movie.minimum_age ?? ""}
-                onChange={handleChange}
-                min="0"
-                placeholder="Edad mínima"
-              />
+              <label className="detail-label-edit">Edad mínima</label>
+              <input name="minimum_age" type="number" value={movie.minimum_age ?? ""} onChange={handleChange} min="0" placeholder="Edad mínima" />
               {fieldErrors.minimum_age && <span className="error">{fieldErrors.minimum_age}</span>}
 
-              <div className="btns">
-                <button type="submit" className="btn-edit">Guardar</button>
-                <button
-                  type="button"
-                  className="btn-edit cancel"
-                  onClick={handleCancel}
-                >
-                  Cancelar
-                </button>
+              <div className="detail-btns">
+                <button type="submit" className="detail-btn-edit">Guardar</button>
+                <button type="button" className="detail-btn-edit" onClick={handleCancel}>Cancelar</button>
               </div>
               {error && <p className="error-message" style={{ marginTop: "10px" }}>{error}</p>}
             </form>
           ) : (
             <>
+              {/* Datos de la pelicula y botones de rep, lik y fav */}
               <h1>{movie.title}</h1>
-              <div className="data">
-                <div className="row1">
+              <div className="detail-data">
+                <div className="detail-row1">
                   <p>{movie.genre}</p>
                   <p>{movie.duration_minutes} min</p>
                 </div>
-                <div className="row2">
+                <div className="detail-row2">
                   <p>{new Date(movie.release_date).getFullYear()}</p>
-                  <p>+{movie.minimum_age}</p>
+                  <p>+{movie.minimum_age} años</p>
                 </div>
               </div>
 
               <p>{movie.description || "Sin descripción disponible"}</p>
 
-              <div className="buttons-rep">
-                <button className="btn play">▶ Reproducir</button>
+              <div className="detail-buttons">
+                <button className="detail-btn-play">▶ Reproducir</button>
 
-                <div className="images">
+                <div className="detail-images">
                   <button onClick={toggleLike} aria-label={isLiked ? "Quitar like" : "Dar like"}>
-                    <img
-                      src={isLiked ? likeFilled : like}
-                      alt="like"
-                      className={`like-image ${isLiked ? "active" : ""}`}
-                    />
+                    <img src={isLiked ? likeFilled : like} alt="like" className={`detail-like-image ${isLiked ? "active" : ""}`} />
                   </button>
 
                   <button onClick={toggleFavorite} aria-label={isFavorite ? "Quitar favorito" : "Añadir a favoritos"}>
-                    <img
-                      src={isFavorite ? starFilled : star}
-                      alt="favorito"
-                      className={`star-image ${isFavorite ? "active" : ""}`}
-                    />
+                    <img src={isFavorite ? starFilled : star} alt="favorito" className={`detail-star-image ${isFavorite ? "active" : ""}`} />
                   </button>
 
                   {localStorage.getItem("role") === "admin" && (
                     <button onClick={startEditing} aria-label="Editar">
-                      <img src={pen} alt="Editar" className="pen-image" />
+                      <img src={pen} alt="Editar" className="detail-pen-image" />
                     </button>
                   )}
                 </div>
@@ -378,7 +338,11 @@ export default function DetailMovie() {
             </>
           )}
         </div>
+
+        {/* Image de la pelicula */}
+        <img src={`/images-movies/${movie.image}`} alt={movie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
       </div>
     </div>
   );
+
 }
