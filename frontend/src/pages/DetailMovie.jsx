@@ -125,7 +125,7 @@ export default function DetailMovie() {
         .catch(err => console.error("Error al dar like:", err));
     }
     else {
-      fetch(`http://localhost:3001/api/likes/${id_profile}/${movie.id_movie}`, {
+      fetch(`http://localhost:3001/api/likes/movies/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
         .then(() => setIsLiked(false))
@@ -148,7 +148,7 @@ export default function DetailMovie() {
         .catch(err => console.error("Error al añadir favorito:", err));
     }
     else {
-      fetch(`http://localhost:3001/api/favorites/${id_profile}/${movie.id_movie}`, {
+      fetch(`http://localhost:3001/api/favorites/movies/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
         .then(() => setIsFavorite(false))

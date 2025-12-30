@@ -1124,7 +1124,7 @@ app.get("/api/favorites/:id_profile", (req, res) => {
 });
 
 // Eliminar favorito de película
-app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
+app.delete("/api/favorites/movies/:id_profile/:id_movie", (req, res) => {
   const { id_profile, id_movie } = req.params;
 
   db.query(
@@ -1138,7 +1138,7 @@ app.delete("/api/favorites/:id_profile/:id_movie", (req, res) => {
 });
 
 // Eliminar favorito de serie
-app.delete("/api/favorites/:id_profile/:id_series", (req, res) => {
+app.delete("/api/favorites/series/:id_profile/:id_series", (req, res) => {
   const { id_profile, id_series } = req.params;
 
   db.query(
@@ -1190,7 +1190,7 @@ app.get("/api/likes/:id_profile", (req, res) => {
 });
 
 // Eliminar like peli
-app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
+app.delete("/api/likes/movies/:id_profile/:id_movie", (req, res) => {
   const { id_profile, id_movie } = req.params;
   db.query(
     "DELETE FROM likes WHERE id_profile = ? AND id_movie = ?",
@@ -1203,10 +1203,10 @@ app.delete("/api/likes/:id_profile/:id_movie", (req, res) => {
 });
 
 //eliminar like serie
-app.delete("/api/favorites/:id_profile/:id_series", (req, res) => {
+app.delete("/api/likes/series/:id_profile/:id_series", (req, res) => {
   const { id_profile, id_series } = req.params;
   db.query(
-    "DELETE FROM favorites WHERE id_profile = ? AND id_series = ?",
+    "DELETE FROM likes WHERE id_profile = ? AND id_series = ?",
     [id_profile, id_series],
     (err, result) => {
       if (err) return res.status(500).send(err);
