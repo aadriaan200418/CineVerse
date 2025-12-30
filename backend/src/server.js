@@ -1224,7 +1224,7 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
     return res.status(400).json({ error: 'Datos incompletos' });
   }
 
-  // 1️⃣ Obtener temporadas actuales
+  // Obtener temporadas actuales
   db.query(
     'SELECT seasons FROM series WHERE id_series = ?',
     [id],
@@ -1234,7 +1234,7 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
 
       const currentSeasons = serieRes[0].seasons;
 
-      // 2️⃣ Insertar temporada
+      // Insertar temporada
       db.query(
         'INSERT INTO seasons (id_series, season_number, chapters) VALUES (?, ?, ?)',
         [id, season_number, chapters.length],
@@ -1379,6 +1379,55 @@ app.put('/api/chapters/:id_chapter', (req, res) => {
   });
 });
 
+/* Eliminar el capitulo */
+app.delete('/api/chapters/:id_chapter', (req, res) => {
+  const { id_chapter } = req.params;
+
+  const sql = `
+    DELETE FROM chapters
+    WHERE id_chapter = ?
+  `;
+
+  db.query(sql, [id_chapter], (err, result) => {
+    if (err) {
+      console.error("Error al eliminar capítulo:", err);
+      return res.status(500).json({ error: "Error al eliminar capítulo" });
+    }
+
+    res.json({ success: true });
+  });
+});
+
+// Eliminar temporada y sus capítulos
+app.delete('/api/seasons/:id_season', (req, res) => {
+  const { id_season } = req.params;
+
+  const deleteChaptersSql = `
+    DELETE FROM chapters
+    WHERE season_id = ?
+  `;
+
+  const deleteSeasonSql = `
+    DELETE FROM seasons
+    WHERE id_season = ?
+  `;
+
+  db.query(deleteChaptersSql, [id_season], (err) => {
+    if (err) {
+      console.error("Error al eliminar capítulos:", err);
+      return res.status(500).json({ error: "Error al eliminar capítulos de la temporada" });
+    }
+
+    db.query(deleteSeasonSql, [id_season], (err2) => {
+      if (err2) {
+        console.error("Error al eliminar temporada:", err2);
+        return res.status(500).json({ error: "Error al eliminar temporada" });
+      }
+
+      res.json({ success: true });
+    });
+  });
+});
 
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
 app.use(express.static(path.join(__dirname, 'build')));

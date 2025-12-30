@@ -115,62 +115,14 @@
   filter: hue-rotate(0deg) saturate(5) brightness(0.8);
 }
 
-/* Etiquetas en formularios de edición */
-.detail-label-edit {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: white;
-  font-size: 0.95rem;
-}
-.detail-label-edit:first-of-type {
-  margin-top: 0;
-}
-
-/*Inputs y textarea del formulario de editar serie*/
-.detail-info form input, .detail-info form textarea {
-  width: 92%;
-  margin-bottom: 15px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  background-color: rgba(70, 70, 160, 0.8);
-  color: white;
-  font-size: 1rem;
-}
-.detail-info form input:focus, .detail-info form textarea:focus {
-  background-color: #c35ff5;
-  outline: none;
-}
-.detail-info form textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-/* Botones de guardar y cancelar del editar serie */
-.detail-btns{
-  display:flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.detail-btn-edit {
-  background: linear-gradient(90deg, #a23fd0, #c35ff5);
-  margin-top: 10px;
-  padding: 10px;
-  color: white;
-  border: none;
-  width: 40%;
-  border-radius: 20px;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-.detail-btn-edit:hover {
-  background: linear-gradient(90deg, #c35ff5, #e480ff);
+/* Select de temporadas */
+.detailSerie-view-seasons{
+  margin-top: 50px;
 }
 
 /* Estilos para acciones de las temporadas */
 .detailSerie-admin-actions {
-  margin-top: 60px;
+  margin-top: 30px;
   border-radius: 8px;
 }
 .detailSerie-seasons{
@@ -192,19 +144,15 @@
   color: white;
 }
 
-/* Formulario de añadir temporada */
-.detailSerie-chapter-form:not(:first-of-type){
-  padding-top: 20px;
-}
-.detailSerie-admin-form button {
-  background: linear-gradient(90deg, #a23fd0, #c35ff5);
-  margin-top: 10px;
-  padding: 10px;
-  color: white;
-  border: none;
-  width: 40%;
-  border-radius: 20px;
-  cursor: pointer;
+/* Contenedor de la temporada */
+.carousel-fullscreen {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  margin-top: 20px;
+  padding: 0 40px;
+  box-sizing: border-box;
 }
 
 /* Formulario de editar la temporada */
@@ -258,17 +206,78 @@
   border-radius: 20px;
   cursor: pointer;
 }
+/* Etiquetas en formularios de edición */
+.detail-label-edit {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: white;
+  font-size: 0.95rem;
+}
+.detail-label-edit:first-of-type {
+  margin-top: 0;
+}
 
-/* Contenedor de la temporada */
-.detailSerie-chapters-container{
+/*Inputs y textarea del formulario de editar serie*/
+.detail-info form input, .detail-info form textarea {
+  width: 92%;
+  margin-bottom: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: rgba(70, 70, 160, 0.8);
+  color: white;
+  font-size: 1rem;
+}
+.detail-info form input:focus, .detail-info form textarea:focus {
+  background-color: #c35ff5;
+  outline: none;
+}
+.detail-info form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Botones de guardar y cancelar del editar serie */
+.detail-btns{
   display:flex;
   flex-direction: row;
-  gap: 50px;
-  margin-top: 30px;
-  margin-left: 50px;
+  justify-content: space-between;
 }
-.detailSerie-chapter-card{
-  width: 200px;
+.detail-btn-edit {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  margin-top: 10px;
+  padding: 10px;
+  color: white;
+  border: none;
+  width: 40%;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.detail-btn-edit:hover {
+  background: linear-gradient(90deg, #c35ff5, #e480ff);
+}
+
+/* Formulario de añadir temporada */
+.detailSerie-admin-form{
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+}
+.detailSerie-chapter-form:not(:first-of-type){
+  padding-top: 20px;
+}
+.detailSerie-admin-form button {
+  background: linear-gradient(90deg, #a23fd0, #c35ff5);
+  margin-top: 10px;
+  padding: 10px;
+  color: white;
+  border: none;
+  width: 40%;
+  border-radius: 20px;
+  cursor: pointer;
 }
 
 /* Mensaje del formulario */

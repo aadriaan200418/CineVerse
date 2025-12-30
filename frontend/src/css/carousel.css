@@ -74,3 +74,38 @@ html, body {
 html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;         
 }
+
+/* Aseguramos que el contenido del capítulo quede encima de la imagen */
+.carousel-card.chapter-card {
+  position: relative;
+  width: 200px; /* ajusta según tu diseño */
+  margin: 0 10px;
+}
+
+.carousel-card.chapter-card img {
+  width: 100%;
+  display: block;
+  border-radius: 8px;
+}
+
+.carousel-card.chapter-card .detailSerie-chapter-card {
+  position: absolute; /* sobre la imagen */
+  bottom: 0;          /* pegado al fondo */
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6); /* semitransparente */
+  color: white;
+  padding: 5px;
+  box-sizing: border-box;
+  border-radius: 0 0 8px 8px;
+}
+
+.carousel-card.chapter-card .detailSerie-chapter-card h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.carousel-card.chapter-card .detailSerie-chapter-card p {
+  margin: 0;
+  font-size: 12px;
+}

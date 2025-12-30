@@ -10,7 +10,7 @@ import star from "../assets/icons/star.png";
 import starFilled from "../assets/icons/star-filled.png";
 import pen from "../assets/icons/pen.png";
 import Loading from "../components/Loading";
-
+import Carousel from "../components/Carousel";
 // Componente principal de la página de detalle de serie
 export default function DetailSerie() {
   const { id } = useParams();
@@ -42,7 +42,7 @@ export default function DetailSerie() {
   const [chapterErrors, setChapterErrors] = useState([]);
 
   const editingSeasonData = editingSeasonId
-    ? seasonsList.find(s => Number(s.id_season) === Number(editing_seasonId))
+    ? seasonsList.find(s => Number(s.id_season) === Number(editingSeasonId))
     : null;
 
   const nextSeasonNumber = seasonsList.length + 1;
@@ -401,7 +401,8 @@ export default function DetailSerie() {
     if (!seasonNumber || Number(seasonNumber) < 1) {
       setSeasonError("El número de temporada debe ser mayor que 0");
       hasError = true;
-    } else {
+    }
+    else {
       setSeasonError("");
     }
 
@@ -423,7 +424,8 @@ export default function DetailSerie() {
       if (!chap.image?.trim()) {
         err.image = "La imagen es obligatoria";
         hasError = true;
-      } else {
+      }
+      else {
         const validExt = /\.(jpg|jpeg|png|gif|webp)$/i;
         if (!validExt.test(chap.image.trim().toLowerCase())) {
           err.image = "La imagen debe terminar en .jpg, .jpeg, .png, .gif o .webp";
@@ -476,10 +478,55 @@ export default function DetailSerie() {
       } else {
         setFormMessage(`${data.error || "Error al crear temporada"}`);
       }
-    } catch (err) {
+    }
+    catch (err) {
       setFormMessage("Error de conexión");
     }
   };
+
+  /* Eliminar capitulo */
+  const deleteChapter = async (chapterId, index) => {
+    if (!window.confirm("¿Seguro que quieres eliminar este capítulo?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/chapters/${chapterId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Error eliminando capítulo");
+      setEditingSeasonChapters(prev =>
+        prev.filter((_, i) => i !== index)
+      );
+
+    }
+    catch (err) {
+      console.error(err);
+      alert("No se pudo eliminar el capítulo");
+    }
+  };
+
+  /* Eliminar temporada */
+  const deleteSeason = async () => {
+  if (!window.confirm("Esto eliminará la temporada y TODOS sus capítulos. ¿Seguro?")) return;
+
+  try {
+    const res = await fetch(`http://localhost:3001/seasons/${editingSeasonId}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Error eliminando temporada");
+    setEditingSeasonId(null);
+    setEditingSeasonChapters([]);
+    setEditingSeasonErrors([]);
+    setEditSeasonMessage("Temporada eliminada correctamente");
+
+  } 
+  catch (err) {
+    console.error(err);
+    alert("No se pudo eliminar la temporada");
+  }
+};
+
 
   // Pantalla de carga
   if (loading) return <Loading />;
@@ -566,7 +613,7 @@ export default function DetailSerie() {
                 </div>
               </div>
 
-              {/* === Sección visible para TODOS: ver temporadas y capítulos === */}
+              {/* Ver temporadas y capítulos */}
               <div className="detailSerie-view-seasons">
                 <select className="detailSerie-select-seasons" value={selectedSeasonId}
                   onChange={(e) => {
@@ -574,7 +621,7 @@ export default function DetailSerie() {
                     setSelectedSeasonId(value);
                     if (value) {
                       loadChapters(value);
-                    } 
+                    }
                     else {
                       setChaptersList([]);
                     }
@@ -582,122 +629,77 @@ export default function DetailSerie() {
                 >
                   <option value="">Selecciona una temporada</option>
                   {seasonsList.map(season => (
-                    <option key={season.id_season} value={season.id_season}>
-                      Temporada {season.season_number}
-                    </option>
+                    <option key={season.id_season} value={season.id_season}>Temporada {season.season_number}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Listado de capítulos: visible para todos */}
-              <div className="detailSerie-chapters-container">
-                {chaptersList.map(ch => (
-                  <div key={ch.id_chapter} className="detailSerie-chapter-card">
-                    <img src={`/images-chapters/${ch.image}`} alt={ch.title} />
-                    <h3>{ch.chapter_number}. {ch.title}</h3>
-                    <p>{ch.duration_minutes} min</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* === Sección solo para ADMIN: gestión avanzada === */}
+              {/* Solo para ADMIN */}
               {localStorage.getItem("role") === "admin" && (
                 <div className="detailSerie-admin-actions">
                   {!showAddSeasonForm ? (
                     <>
+                      {/* Boton de añadir y de editar temporadas */}
                       <div className="detailSerie-seasons">
-                        <button className="detailSerie-new-season" type="button" onClick={() => setShowAddSeasonForm(true)}>
-                          Añadir Temporada
-                        </button>
+                        <button className="detailSerie-new-season" type="button" onClick={() => setShowAddSeasonForm(true)}>Añadir Temporada</button>
 
                         {selectedSeasonId && (
-                          <button
-                            type="button"
-                            className="detailSerie-btn-edit-season"
-                            onClick={() => openEditSeason(selectedSeasonId)}
-                          >
-                            Editar temporada
-                          </button>
+                          <button type="button" className="detailSerie-btn-edit-season" onClick={() => openEditSeason(selectedSeasonId)}>Editar temporada</button>
                         )}
                       </div>
 
                       {editingSeasonId && (
+                        /* Formulario de editar temporada y capitulos */
                         <div className="detailSerie-edit-season-form">
                           <h3>Editando Temporada {editingSeasonData ? editingSeasonData.season_number : editingSeasonId}</h3>
 
                           {editingSeasonChapters.map((chap, index) => (
                             <div key={chap.id_chapter} className="detailSerie-chapter-edit">
                               <label>Número de capítulo</label>
-                              <input
-                                type="number"
-                                value={chap.chapter_number}
-                                onChange={(e) => handleEditSeasonChapterChange(index, "chapter_number", e.target.value)}
-                              />
+                              <input type="number" value={chap.chapter_number} onChange={(e) => handleEditSeasonChapterChange(index, "chapter_number", e.target.value)} />
                               {editingSeasonErrors[index]?.chapter_number && (
                                 <p className="error">{editingSeasonErrors[index].chapter_number}</p>
                               )}
 
                               <label>Título</label>
-                              <input
-                                type="text"
-                                value={chap.title}
-                                onChange={(e) => handleEditSeasonChapterChange(index, "title", e.target.value)}
-                              />
+                              <input type="text" value={chap.title} onChange={(e) => handleEditSeasonChapterChange(index, "title", e.target.value)} />
                               {editingSeasonErrors[index]?.title && <p className="error">{editingSeasonErrors[index].title}</p>}
 
                               <label>Duración (min)</label>
-                              <input
-                                type="number"
-                                value={chap.duration_minutes}
-                                onChange={(e) => handleEditSeasonChapterChange(index, "duration_minutes", e.target.value)}
-                              />
+                              <input type="number" value={chap.duration_minutes} onChange={(e) => handleEditSeasonChapterChange(index, "duration_minutes", e.target.value)} />
                               {editingSeasonErrors[index]?.duration_minutes && (
                                 <p className="error">{editingSeasonErrors[index].duration_minutes}</p>
                               )}
 
                               <label>Imagen</label>
-                              <input
-                                type="text"
-                                value={chap.image}
-                                onChange={(e) => handleEditSeasonChapterChange(index, "image", e.target.value)}
-                              />
+                              <input type="text" value={chap.image} onChange={(e) => handleEditSeasonChapterChange(index, "image", e.target.value)} />
                               {editingSeasonErrors[index]?.image && <p className="error">{editingSeasonErrors[index].image}</p>}
+
+                              <button type="button" className="detailSerie-btn-delete-chapter" onClick={() => deleteChapter(chap.id_chapter, index)}>Eliminar capítulo</button>
+
                             </div>
                           ))}
 
                           <div className="detailSerie-chapter-edit-buttons">
-                            <button type="button" onClick={saveEditedSeason} className="detailSerie-btn-save-season">
-                              Guardar cambios
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingSeasonId(null);
-                                setEditingSeasonChapters([]);
-                                setEditingSeasonErrors([]);
-                                setEditSeasonMessage("");
-                              }}
-                              className="detailSerie-btn-cancel-season"
-                            >
-                              Cerrar
-                            </button>
+                            <button type="button" onClick={saveEditedSeason} className="detailSerie-btn-save-season">Guardar cambios</button>
+
+                            <button type="button" className="detailSerie-btn-delete-season" onClick={deleteSeason}>Eliminar temporada</button>
+
+                            <button type="button" className="detailSerie-btn-cancel-season"
+                              onClick={() => { setEditingSeasonId(null); setEditingSeasonChapters([]); setEditingSeasonErrors([]); setEditSeasonMessage(""); }}
+                            >Cerrar</button>
                           </div>
                           {editSeasonMessage && <p className="form-message">{editSeasonMessage}</p>}
                         </div>
                       )}
                     </>
                   ) : (
+                    /* Formulario de añadir temporada y capitulos */
                     <form onSubmit={handleSaveSeason} className="detailSerie-admin-form">
                       <h3>Añadir Temporada</h3>
                       <label>Número de Temporada</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={seasonNumber}
-                        onChange={(e) => {
-                          setSeasonNumber(e.target.value);
-                          setSeasonError("");
-                        }}
+                      <input type="number" min="1" value={seasonNumber}
+                        onChange={(e) => { setSeasonNumber(e.target.value); setSeasonError(""); }}
                       />
                       {seasonError && <p className="error">{seasonError}</p>}
 
@@ -705,57 +707,37 @@ export default function DetailSerie() {
                       {chapters.map((chap, index) => (
                         <div key={index} className="detailSerie-chapter-form">
                           <label>Capítulo {index + 1}</label>
-                          <input
-                            type="number"
-                            min="1"
-                            placeholder="Núm. capítulo"
-                            value={chap.chapter_number}
+                          <input type="number" min="1" placeholder="Núm. capítulo" value={chap.chapter_number}
                             onChange={(e) => handleChapterChange(index, "chapter_number", e.target.value)}
                           />
                           {chapterErrors[index]?.chapter_number && <p className="error">{chapterErrors[index].chapter_number}</p>}
 
-                          <input
-                            type="text"
-                            placeholder="Título"
-                            value={chap.title}
+                          <input type="text" placeholder="Título" value={chap.title}
                             onChange={(e) => handleChapterChange(index, "title", e.target.value)}
                           />
                           {chapterErrors[index]?.title && <p className="error">{chapterErrors[index].title}</p>}
 
-                          <input
-                            type="number"
-                            min="1"
-                            placeholder="Duración (min)"
-                            value={chap.duration_minutes}
+                          <input type="number" min="1" placeholder="Duración (min)" value={chap.duration_minutes}
                             onChange={(e) => handleChapterChange(index, "duration_minutes", e.target.value)}
                           />
                           {chapterErrors[index]?.duration_minutes && <p className="error">{chapterErrors[index].duration_minutes}</p>}
 
-                          <input
-                            type="text"
-                            placeholder="Imagen (ej. cap1.jpg)"
-                            value={chap.image}
+                          <input type="text" placeholder="Imagen (ej. cap1.jpg)" value={chap.image}
                             onChange={(e) => handleChapterChange(index, "image", e.target.value)}
                           />
                           {chapterErrors[index]?.image && <p className="error">{chapterErrors[index].image}</p>}
 
                           {chapters.length > 1 && (
-                            <button type="button" onClick={() => removeChapterField(index)} className="btn-remove-chapter">
-                              Quitar
-                            </button>
+                            <button type="button" onClick={() => removeChapterField(index)} className="btn-remove-chapter">Quitar</button>
                           )}
                         </div>
                       ))}
 
-                      <button type="button" onClick={addChapterField} className="detailSerie-btn-add-chapter">
-                        Añadir Capítulo
-                      </button>
+                      <button type="button" onClick={addChapterField} className="detailSerie-btn-add-chapter">Añadir Capítulo</button>
 
                       <div className="detailSerie-form-buttons">
                         <button type="submit">Guardar Temporada</button>
-                        <button type="button" onClick={() => setShowAddSeasonForm(false)}>
-                          Cancelar
-                        </button>
+                        <button type="button" onClick={() => setShowAddSeasonForm(false)}>Cancelar</button>
                       </div>
                       {formMessage && <p className="detailSerie-form-message">{formMessage}</p>}
                     </form>
@@ -767,13 +749,18 @@ export default function DetailSerie() {
         </div>
 
         {/* Imagen de la serie */}
-        <img
-          src={`/images-series/${serie.image}`}
-          alt={serie.title}
-          className="detail-banner-image"
-          onError={e => (e.target.style.display = "none")}
-        />
+        <img src={`/images-series/${serie.image}`} alt={serie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
+
       </div>
+      {selectedSeasonId && (
+        <section className="carousel-fullscreen">
+          <Carousel
+            title="Capítulos"
+            items={chaptersList}
+            imagePath="images-chapters"
+          />
+        </section>
+      )}
     </div>
   );
 }
