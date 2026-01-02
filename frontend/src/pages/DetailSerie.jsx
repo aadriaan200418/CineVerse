@@ -11,6 +11,7 @@ import starFilled from "../assets/icons/star-filled.png";
 import pen from "../assets/icons/pen.png";
 import Loading from "../components/Loading";
 import Carousel from "../components/Carousel";
+
 // Componente principal de la página de detalle de serie
 export default function DetailSerie() {
   const { id } = useParams();
@@ -80,6 +81,25 @@ export default function DetailSerie() {
       if (v === "" || isNaN(num)) return "La edad mínima es obligatoria.";
       if (num < 0) return "Debe ser un número positivo.";
       return "";
+    }
+  };
+
+  // ✅ NUEVA FUNCIÓN: recargar serie y temporadas
+  const reloadSerieAndSeasons = async () => {
+    try {
+      // Recargar serie
+      const serieRes = await fetch(`http://localhost:3001/api/series/${id}`);
+      if (!serieRes.ok) throw new Error("No se pudo recargar la serie");
+      const serieData = await serieRes.json();
+      setSerie(serieData.series);
+      setOriginalSerie(serieData.series);
+
+      // Recargar temporadas
+      const seasonsRes = await fetch(`http://localhost:3001/api/seasons/${id}`);
+      const seasonsData = await seasonsRes.json();
+      setSeasonsList(seasonsData.seasons || []);
+    } catch (err) {
+      console.error("Error al recargar serie y temporadas:", err);
     }
   };
 
@@ -466,10 +486,8 @@ export default function DetailSerie() {
       if (data.success) {
         setFormMessage("Temporada y capítulos creados");
 
-        setSeasonsList(prev => [
-          ...prev,
-          { id_season: data.id_season, season_number: nextSeasonNumber }
-        ]);
+        // ✅ Recargar temporadas tras crear una nueva
+        reloadSerieAndSeasons();
 
         setShowAddSeasonForm(false);
         setSeasonNumber("");
@@ -488,45 +506,79 @@ export default function DetailSerie() {
   const deleteChapter = async (chapterId, index) => {
     if (!window.confirm("¿Seguro que quieres eliminar este capítulo?")) return;
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setEditSeasonMessage("Debes iniciar sesión");
+      return;
+    }
+
     try {
-      const res = await fetch(`http://localhost:3001/chapters/${chapterId}`, {
+      const res = await fetch(`http://localhost:3001/api/chapters/${chapterId}`, {
         method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
       });
 
-      if (!res.ok) throw new Error("Error eliminando capítulo");
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error eliminando capítulo");
+      }
+
+      // Actualizar estado local
       setEditingSeasonChapters(prev =>
         prev.filter((_, i) => i !== index)
       );
+      setEditSeasonMessage("✔ Capítulo eliminado correctamente");
 
-    }
-    catch (err) {
+      // Actualizar también la lista del carousel si es la temporada actual
+      if (selectedSeasonId == editingSeasonId) {
+        setChaptersList(prev => prev.filter((_, i) => i !== index));
+      }
+
+    } catch (err) {
       console.error(err);
-      alert("No se pudo eliminar el capítulo");
+      setEditSeasonMessage(err.message || "No se pudo eliminar el capítulo");
     }
   };
 
   /* Eliminar temporada */
   const deleteSeason = async () => {
-  if (!window.confirm("Esto eliminará la temporada y TODOS sus capítulos. ¿Seguro?")) return;
+    if (!window.confirm("Esto eliminará la temporada y TODOS sus capítulos. ¿Seguro?")) return;
 
-  try {
-    const res = await fetch(`http://localhost:3001/seasons/${editingSeasonId}`, {
-      method: "DELETE",
-    });
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setEditSeasonMessage("Debes iniciar sesión");
+      return;
+    }
 
-    if (!res.ok) throw new Error("Error eliminando temporada");
-    setEditingSeasonId(null);
-    setEditingSeasonChapters([]);
-    setEditingSeasonErrors([]);
-    setEditSeasonMessage("Temporada eliminada correctamente");
+    try {
+      const res = await fetch(`http://localhost:3001/api/seasons/${editingSeasonId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
 
-  } 
-  catch (err) {
-    console.error(err);
-    alert("No se pudo eliminar la temporada");
-  }
-};
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Error eliminando temporada");
+      }
 
+      // ✅ Recargar toda la serie y temporadas tras eliminar
+      await reloadSerieAndSeasons();
+
+      setChaptersList([]);
+      setSelectedSeasonId("");
+      setEditingSeasonId(null);
+      setEditingSeasonChapters([]);
+      setEditSeasonMessage("✔ Temporada eliminada correctamente");
+
+    } catch (err) {
+      console.error(err);
+      setEditSeasonMessage(err.message || "No se pudo eliminar la temporada");
+    }
+  };
 
   // Pantalla de carga
   if (loading) return <Loading />;

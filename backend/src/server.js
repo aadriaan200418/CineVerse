@@ -1379,52 +1379,88 @@ app.put('/api/chapters/:id_chapter', (req, res) => {
   });
 });
 
-/* Eliminar el capitulo */
-app.delete('/api/chapters/:id_chapter', (req, res) => {
-  const { id_chapter } = req.params;
+// -------------------------------------------------------------- ELIMINAR UN CAPÍTULO (solo admin) -----------------------------------------------
+app.delete('/api/chapters/:id', (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: "Token no proporcionado" });
+  }
 
-  const sql = `
-    DELETE FROM chapters
-    WHERE id_chapter = ?
-  `;
+  let decoded;
+  try {
+    decoded = jwt.verify(token, 'mi_secreto_para_dev_1234567890');
+  } catch (err) {
+    return res.status(403).json({ message: "Token inválido" });
+  }
 
-  db.query(sql, [id_chapter], (err, result) => {
+  if (decoded.role !== 'admin') {
+    return res.status(403).json({ message: "Acceso denegado: solo administradores" });
+  }
+
+  const { id } = req.params;
+  db.query('DELETE FROM chapters WHERE id_chapter = ?', [id], (err, result) => {
     if (err) {
       console.error("Error al eliminar capítulo:", err);
-      return res.status(500).json({ error: "Error al eliminar capítulo" });
+      return res.status(500).json({ message: "Error interno al eliminar capítulo" });
     }
-
-    res.json({ success: true });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Capítulo no encontrado" });
+    }
+    res.json({ success: true, message: "Capítulo eliminado correctamente" });
   });
 });
 
-// Eliminar temporada y sus capítulos
-app.delete('/api/seasons/:id_season', (req, res) => {
-  const { id_season } = req.params;
+// -------------------------------------------------------------- ELIMINAR UNA TEMPORADA (con sus capítulos, solo admin) -------------------------
+app.delete('/api/seasons/:id', (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: "Token no proporcionado" });
+  }
+  let decoded;
+  try {
+    decoded = jwt.verify(token, 'mi_secreto_para_dev_1234567890');
+  } catch {
+    return res.status(403).json({ message: "Token inválido" });
+  }
+  if (decoded.role !== 'admin') {
+    return res.status(403).json({ message: "Acceso denegado: solo administradores" });
+  }
 
-  const deleteChaptersSql = `
-    DELETE FROM chapters
-    WHERE season_id = ?
-  `;
+  const { id } = req.params;
 
-  const deleteSeasonSql = `
-    DELETE FROM seasons
-    WHERE id_season = ?
-  `;
-
-  db.query(deleteChaptersSql, [id_season], (err) => {
-    if (err) {
-      console.error("Error al eliminar capítulos:", err);
-      return res.status(500).json({ error: "Error al eliminar capítulos de la temporada" });
+  // 1. Obtener id_series
+  db.query('SELECT id_series FROM seasons WHERE id_season = ?', [id], (err, rows) => {
+    if (err || rows.length === 0) {
+      return res.status(404).json({ message: "Temporada no encontrada" });
     }
+    const idSeries = rows[0].id_series;
 
-    db.query(deleteSeasonSql, [id_season], (err2) => {
+    // 2. Eliminar capítulos
+    db.query('DELETE FROM chapters WHERE id_season = ?', [id], (err2) => {
       if (err2) {
-        console.error("Error al eliminar temporada:", err2);
-        return res.status(500).json({ error: "Error al eliminar temporada" });
+        console.error("Error al eliminar capítulos:", err2);
+        return res.status(500).json({ message: "Error al eliminar capítulos" });
       }
 
-      res.json({ success: true });
+      // 3. Eliminar temporada
+      db.query('DELETE FROM seasons WHERE id_season = ?', [id], (err3) => {
+        if (err3) {
+          console.error("Error al eliminar temporada:", err3);
+          return res.status(500).json({ message: "Error al eliminar temporada" });
+        }
+
+        // 4. ✅ ACTUALIZAR EL CONTADOR REAL EN LA TABLA series
+        db.query(
+          'UPDATE series SET seasons = (SELECT COUNT(*) FROM seasons WHERE id_series = ?) WHERE id_series = ?',
+          [idSeries, idSeries],
+          (err4) => {
+            if (err4) {
+              console.error("Error al actualizar contador:", err4);
+            }
+            res.json({ success: true, message: "Temporada eliminada correctamente" });
+          }
+        );
+      });
     });
   });
 });
