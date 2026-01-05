@@ -78,7 +78,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 /* Aseguramos que el contenido del capítulo quede encima de la imagen */
 .carousel-card.chapter-card {
   position: relative;
-  width: 200px; /* ajusta según tu diseño */
+  width: 350px; 
   margin: 0 10px;
 }
 

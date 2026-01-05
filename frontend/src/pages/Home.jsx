@@ -9,7 +9,6 @@ import settingsIcon from "../assets/icons/settings.png";
 import Loading from "../components/Loading";
 import Carousel from "../components/Carousel";
 
-// Componente principal de la página de home
 export default function Home({ view: initialView = "inicio" }) {
   const [role, setRole] = useState("");
   const [movies, setMovies] = useState([]);
@@ -149,7 +148,7 @@ export default function Home({ view: initialView = "inicio" }) {
     return matchesSearch && matchesGenre;
   });
 
-  // 🔥 Próximos estrenos
+  // Próximos estrenos
   const today = new Date();
   const upcomingSeries = series.filter(s => new Date(s.release_date) > today);
   const upcomingMovies = movies.filter(m => new Date(m.release_date) > today);
@@ -177,12 +176,7 @@ export default function Home({ view: initialView = "inicio" }) {
           {role === "user" && (
             <>
               <div className="profile-icon">
-                <img
-                  src={userIcon}
-                  alt="Usuario"
-                  className="user-icon"
-                  onClick={() => navigate("/profiles")}
-                />
+                <img src={userIcon} alt="Usuario" className="user-icon" onClick={() => navigate("/profiles")}/>
               </div>
               <div className="back-point">{localStorage.getItem("username") || "Usuario"}</div>
             </>
@@ -195,31 +189,18 @@ export default function Home({ view: initialView = "inicio" }) {
           <button onClick={() => setView("movies")}>PELÍCULAS</button>
           <button onClick={() => setView("favorites")}>FAVORITOS</button>
           <button onClick={() => setView("likes")}>ME GUSTA</button>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="search-input"
-            onChange={handleSearch}
-          />
+          <input type="text" placeholder="Buscar..." className="search-input" onChange={handleSearch}/>
         </div>
 
+        {/* Funciones de settings */}
         <div className="menu-right">
           {role === "user" && (
-            <img
-              src={settingsIcon}
-              alt="Settings"
-              className="settings"
-              onClick={() => navigate("/settings")}
-            />
+            <img src={settingsIcon} alt="Settings" className="settings" onClick={() => navigate("/settings")}/>
           )}
 
           {role === "admin" && (
             <>
-              <img
-                src={settingsIcon}
-                alt="Settings"
-                className="settings"
-                onClick={() => setOpen2(!open2)}
+              <img src={settingsIcon} alt="Settings" className="settings" onClick={() => setOpen2(!open2)}
               />
               {open2 && (
                 <div className="dropdown-settings">
@@ -240,32 +221,20 @@ export default function Home({ view: initialView = "inicio" }) {
       {view === "inicio" && (
         <>
           <div className="featured-banner">
-            <img
-              src="/images-series/lidia_poet3.jpg"
-              alt="La Ley de Lidia Poët"
-              className="featured-image"
-            />
+            <img src="/images-series/lidia_poet3.jpg" alt="La Ley de Lidia Poët" className="featured-image"/>
             <div className="featured-label">NUEVO ESTRENO</div>
           </div>
 
           {loadingSeries ? (
             <Loading />
           ) : (
-            <Carousel
-              title="Todas las Series"
-              items={filteredSeries}
-              imagePath="images-series"
-            />
+            <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series"/>
           )}
 
           {loadingMovies ? (
             <Loading />
           ) : (
-            <Carousel
-              title="Todas las Películas"
-              items={filteredMovies}
-              imagePath="images-movies"
-            />
+            <Carousel title="Todas las Películas" items={filteredMovies} imagePath="images-movies"/>
           )}
         </>
       )}
@@ -278,53 +247,27 @@ export default function Home({ view: initialView = "inicio" }) {
             <Loading />
           ) : (
             <>
-              <Carousel
-                title="Todas las Series"
-                items={filteredSeries}
-                imagePath="images-series"
-              />
+              <Carousel title="Todas las Series" items={filteredSeries} imagePath="images-series"/>
 
               {loadingTop ? (
                 <Loading />
               ) : (
-                <Carousel
-                  title="Top 10 Series Más Likeadas"
-                  items={topSeries}
-                  imagePath="images-series"
-                />
+                <Carousel title="Top 10 Series Más Likeadas" items={topSeries} imagePath="images-series"/>
               )}
 
               {upcomingSeries.length > 0 && (
-                <Carousel
-                  title="Próximos Estrenos"
-                  items={upcomingSeries}
-                  imagePath="images-series"
-                />
+                <Carousel title="Próximos Estrenos" items={upcomingSeries} imagePath="images-series"/>
               )}
 
-              <Carousel
-                title="Recomendadas"
-                items={recommendedSeries}
-                imagePath="images-series"
-              />
+              <Carousel title="Recomendadas" items={recommendedSeries} imagePath="images-series"/>
             </>
           )}
 
           <div className="genre-grid">
-            <button
-              className={`genre-button ${selectedSeriesGenre === null ? "active" : ""}`}
-              onClick={() => setSelectedSeriesGenre(null)}
-            >
-              TODAS
-            </button>
+            <button className={`genre-button ${selectedSeriesGenre === null ? "active" : ""}`} onClick={() => setSelectedSeriesGenre(null)}>TODAS</button>
+            
             {uniqueSeriesGenres.map(genre => (
-              <button
-                key={genre}
-                className={`genre-button ${selectedSeriesGenre === genre ? "active" : ""}`}
-                onClick={() => setSelectedSeriesGenre(genre)}
-              >
-                {genre.toUpperCase()}
-              </button>
+              <button key={genre} className={`genre-button ${selectedSeriesGenre === genre ? "active" : ""}`} onClick={() => setSelectedSeriesGenre(genre)}>{genre.toUpperCase()}</button>
             ))}
           </div>
         </div>
