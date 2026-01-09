@@ -340,7 +340,7 @@ export default function DetailMovie() {
         </div>
 
         {/* Image de la pelicula */}
-        <img src={`/images-movies/${movie.image}`} alt={movie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
+        <img src={`/images-movies-front/${movie.image_front}`} alt={movie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
       </div>
     </div>
   );

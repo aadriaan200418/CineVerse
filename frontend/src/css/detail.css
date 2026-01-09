@@ -63,8 +63,8 @@
 
 /*Imagen de la serie/pelicula*/
 .detail-banner-image {
-  width: 650px;
-  height: 400px;
+  width: 720px;
+  height: 420px;
   object-fit: cover;
   border-radius: 20px;
   margin-left: 50px;

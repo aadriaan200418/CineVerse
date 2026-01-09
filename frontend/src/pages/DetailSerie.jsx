@@ -801,7 +801,7 @@ export default function DetailSerie() {
         </div>
 
         {/* Imagen de la serie */}
-        <img src={`/images-series/${serie.image}`} alt={serie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
+        <img src={`/images-series-front/${serie.image_front}`} alt={serie.title} className="detail-banner-image" onError={e => (e.target.style.display = "none")} />
 
       </div>
       {selectedSeasonId && (
