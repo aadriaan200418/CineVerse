@@ -260,6 +260,9 @@ export default function DetailMovie() {
       ? movie.release_date.slice(0, 10)
       : new Date(movie.release_date).toISOString().slice(0, 10);
 
+  // Futuros estrenos
+  const isFutureRelease = new Date(movie.release_date) > new Date();
+
   return (
     <div className="detail-page">
       <button className="back-button" onClick={() => navigate("/movies")}>←</button>
@@ -317,7 +320,11 @@ export default function DetailMovie() {
               <p>{movie.description || "Sin descripción disponible"}</p>
 
               <div className="detail-buttons">
-                <button className="detail-btn-play">▶ Reproducir</button>
+                {isFutureRelease ? (
+                  <button className="detail-btn-soon" disabled>Próximamente</button>
+                ) : (
+                  <button className="detail-btn-play">▶ Reproducir</button>
+                )}
 
                 <div className="detail-images">
                   <button onClick={toggleLike} aria-label={isLiked ? "Quitar like" : "Dar like"}>

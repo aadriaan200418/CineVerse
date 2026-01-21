@@ -54,6 +54,12 @@
   align-items: center;
 }
 
+/*Contenedor de soporte*/
+.setting-support{
+  margin-top: 70px;
+  align-items: center;
+}
+
 /*Botón de cerrar sesión*/
 .settings-logout-btn {
   padding: 12px 20px;

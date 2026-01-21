@@ -126,7 +126,7 @@ app.delete('/api/deleteUser/:username', (req, res) => {
 
     const { dni } = results[0];
 
-    // Eliminamos perfiles asociados al usuario (si aplica)
+    // Eliminamos perfiles asociados al usuario 
     const sqlDeleteProfiles = 'DELETE FROM profiles WHERE id_user = ?';
     db.query(sqlDeleteProfiles, [dni], (err2) => {
       if (err2) {
@@ -179,7 +179,7 @@ app.get('/api/profiles', (req, res) => {
   });
 });
 
-// Añadir/crear un nuevo perfil
+// Crear un nuevo perfil
 app.post('/api/addProfile', (req, res) => {
   const { username, nombre } = req.body;
 
@@ -205,12 +205,10 @@ app.post('/api/addProfile', (req, res) => {
         return res.status(500).json({ error: 'Error al crear perfil' });
       }
 
-      // Actualizar campo JSON profile en users
       const sqlUpdateJson = ` UPDATE users   SET profile = JSON_ARRAY_APPEND(IFNULL(profile, JSON_ARRAY()), '$', ?) WHERE dni = ?`;
       db.query(sqlUpdateJson, [nombre, dni], (err3) => {
         if (err3) {
           console.error(' Error al actualizar campo JSON profile:', err3);
-          // No bloqueamos la creación, solo avisamos
         }
 
         const sqlProfiles = 'SELECT id_profile AS id, name FROM profiles WHERE id_user = ?';
@@ -227,42 +225,33 @@ app.post('/api/addProfile', (req, res) => {
   });
 });
 
+//Eliminar perfil
 app.delete('/api/deleteProfile/:id', (req, res) => {
   const profileId = req.params.id;
-
-  const sqlGetUserProfile = `
-    SELECT u.dni, p.name 
-    FROM profiles p 
-    JOIN users u ON u.dni = p.id_user 
-    WHERE p.id_profile = ?
-  `;
+  const sqlGetUserProfile = `SELECT u.dni, p.name FROM profiles p JOIN users u ON u.dni = p.id_user WHERE p.id_profile = ?`;
 
   db.query(sqlGetUserProfile, [profileId], (err, results) => {
     if (err) return res.status(500).json({ error: 'Error al obtener datos del perfil' });
 
     const { dni, name } = results[0];
 
-    // 1. Eliminar likes
+    // Eliminar likes
     const sqlDeleteLikes = 'DELETE FROM likes WHERE id_profile = ?';
     db.query(sqlDeleteLikes, [profileId], (errLikes) => {
       if (errLikes) return res.status(500).json({ error: 'Error al eliminar likes' });
 
-      // 2. Eliminar favoritos
+      // Eliminar favoritos
       const sqlDeleteFavorites = 'DELETE FROM favorites WHERE id_profile = ?';
       db.query(sqlDeleteFavorites, [profileId], (errFav) => {
         if (errFav) return res.status(500).json({ error: 'Error al eliminar favoritos' });
 
-        // 3. Eliminar el perfil
+        // Eliminar el perfil
         const sqlDeleteProfile = 'DELETE FROM profiles WHERE id_profile = ?';
         db.query(sqlDeleteProfile, [profileId], (errProfile) => {
           if (errProfile) return res.status(500).json({ error: 'Error al eliminar perfil' });
 
-          // 4. Actualizar JSON del usuario
-          const sqlUpdateJson = `
-            UPDATE users 
-            SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) 
-            WHERE dni = ?
-          `;
+          // Actualizar JSON del usuario
+          const sqlUpdateJson = ` UPDATE users SET profile = JSON_REMOVE(profile, JSON_UNQUOTE(JSON_SEARCH(profile, 'one', ?))) WHERE dni = ?`;
           db.query(sqlUpdateJson, [name, dni], (errJson) => {
             if (errJson) console.error('Error al actualizar JSON:', errJson);
 
@@ -273,7 +262,6 @@ app.delete('/api/deleteProfile/:id', (req, res) => {
     });
   });
 });
-
 
 // ------------------------------------------------------- AÑADIR USUERS/ADMINS/MOVIES/SERIES DESDE ADMIN --------------------------------------------
 app.get("/api/create-admin", (req, res) => {
@@ -305,9 +293,8 @@ app.get("/api/create-admin", (req, res) => {
   });
 });
 
-
-// ---------------------------------------------------- OBTENER TODAS LAS TABLAS (ADMIN) -----------------------------------------------------
-// Endpoint principal de settings
+// ---------------------------------------------------- OBTENER TODAS LAS TABLAS EN SETTINGS (ADMIN) -----------------------------------------------------
+// Obtener las tablas
 app.get("/api/settings", (req, res) => {
   const role = req.headers["role"];
   if (role !== "admin") {
@@ -316,7 +303,6 @@ app.get("/api/settings", (req, res) => {
 
   const tab = req.query.tab;
   let sql;
-
   switch (tab) {
     case "users":
       sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'user'";
@@ -348,13 +334,11 @@ app.put("/api/movies/:id", (req, res) => {
   const { id } = req.params;
   const { title, description, genre, release_date, duration_minutes, minimum_age, image } = req.body;
 
-  // Validación mínima
   if (!title || !description || !genre || !release_date || !duration_minutes || minimum_age == null) {
     return res.status(400).json({ error: "Faltan campos obligatorios" });
   }
 
   const sql = `UPDATE movies SET title = ?, description = ?, genre = ?, release_date = ?, duration_minutes = ?, minimum_age = ?, image = ?WHERE id_movie = ?`;
-
   db.query(
     sql,
     [title, description, genre, release_date, duration_minutes, minimum_age, image, id],
@@ -363,7 +347,6 @@ app.put("/api/movies/:id", (req, res) => {
         console.error("Error al actualizar película:", err);
         return res.status(500).json({ error: "Error en la base de datos" });
       }
-
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: "Película no encontrada" });
       }
@@ -392,7 +375,6 @@ app.put("/api/series/:id", (req, res) => {
         console.error("Error al actualizar serie:", err);
         return res.status(500).json({ error: "Error en la base de datos" });
       }
-
       if (result.affectedRows === 0) {
         return res.status(404).json({ error: "Serie no encontrada" });
       }
@@ -402,93 +384,122 @@ app.put("/api/series/:id", (req, res) => {
   );
 });
 
-// Eliminar película 
-app.delete("/api/deleteMovieSelect/:id", (req, res) => {
-  const { id } = req.params;
+// Editar usuario
+app.put("/api/users/:dni", (req, res) => {
+    const { dni } = req.params;
+    const { name, username, birth_date, email } = req.body;
 
-  const sql = "DELETE FROM movies WHERE id_movie = ?";
-
-  db.query(sql, [id], (err, result) => {
-    if (err) {
-      console.error("Error al eliminar película:", err);
-      return res.status(500).json({ error: "Error al eliminar película" });
+    if (!name || !username || !birth_date || !email) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Película no encontrada" });
-    }
+    // Verificar que el usuario exista y sea de tipo 'user'
+    const checkUserSql = "SELECT dni FROM users WHERE dni = ? AND role = 'user'";
+    db.query(checkUserSql, [dni], (err, results) => {
+        if (err) {
+            console.error("Error al verificar usuario:", err);
+            return res.status(500).json({ error: "Error en la base de datos" });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Usuario no encontrado o no editable" });
+        }
 
-    res.json({ success: true, message: "Película eliminada correctamente" });
-  });
+        // Verificar duplicados
+        const checkDuplicatesSql = ` SELECT username, email FROM users WHERE (username = ? OR email = ?) AND dni != ?`;
+        db.query(checkDuplicatesSql, [username, email, dni], (err2, dupResults) => {
+            if (err2) {
+                console.error("Error al verificar duplicados:", err2);
+                return res.status(500).json({ error: "Error al verificar duplicados" });
+            }
+
+            if (dupResults.length > 0) {
+                const errors = {};
+                if (dupResults.some(u => u.username === username)) {
+                    errors.username = "El nombre de usuario ya está en uso";
+                }
+                if (dupResults.some(u => u.email === email)) {
+                    errors.email = "El correo electrónico ya está en uso";
+                }
+                return res.status(400).json({ errors });
+            }
+
+            // Actualizar el usuario
+            const updateSql = ` UPDATE users SET name = ?, username = ?, birth_date = ?, email = ? WHERE dni = ?`;
+            db.query(updateSql, [name, username, birth_date, email, dni], (err3, result) => {
+                if (err3) {
+                    console.error("Error al actualizar usuario:", err3);
+                    return res.status(500).json({ error: "Error al actualizar usuario" });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: "Usuario no encontrado" });
+                }
+                res.json({ success: true, message: "Usuario actualizado correctamente" });
+            });
+        });
+    });
 });
 
-// Eliminar serie 
-app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
-  const { id } = req.params;
+// Editar admininstrador
+app.put("/api/admins/:dni", (req, res) => {
+    const { dni } = req.params;
+    const { name, username, birth_date, email } = req.body;
 
-  const sql = "DELETE FROM series WHERE id_series = ?";
-
-  db.query(sql, [id], (err, result) => {
-    if (err) {
-      console.error("Error al eliminar serie:", err);
-      return res.status(500).json({ error: "Error al eliminar serie" });
+    // Validación básica
+    if (!name || !username || !birth_date || !email) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Serie no encontrada" });
-    }
+    // Verificar que el admin exista
+    const checkAdminSql = "SELECT dni FROM users WHERE dni = ? AND role = 'admin'";
+    db.query(checkAdminSql, [dni], (err, results) => {
+        if (err) {
+            console.error("Error al verificar administrador:", err);
+            return res.status(500).json({ error: "Error en la base de datos" });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ error: "Administrador no encontrado" });
+        }
 
-    res.json({ success: true, message: "Serie eliminada correctamente" });
-  });
+        // Verificar duplicados (username o email usados por otro usuario o admin)
+        const checkDuplicatesSql = ` SELECT username, email FROM users WHERE (username = ? OR email = ?) AND dni != ?`;
+        db.query(checkDuplicatesSql, [username, email, dni], (err2, dupResults) => {
+            if (err2) {
+                console.error("Error al verificar duplicados:", err2);
+                return res.status(500).json({ error: "Error al verificar duplicados" });
+            }
+
+            if (dupResults.length > 0) {
+                const errors = {};
+                if (dupResults.some(u => u.username === username)) {
+                    errors.username = "El nombre de usuario ya está en uso";
+                }
+                if (dupResults.some(u => u.email === email)) {
+                    errors.email = "El correo electrónico ya está en uso";
+                }
+                return res.status(400).json({ errors });
+            }
+
+            // Actualizar el administrador
+            const updateSql = ` UPDATE users SET name = ?, username = ?, birth_date = ?, email = ? WHERE dni = ? AND role = 'admin'`;
+            db.query(updateSql, [name, username, birth_date, email, dni], (err3, result) => {
+                if (err3) {
+                    console.error("Error al actualizar administrador:", err3);
+                    return res.status(500).json({ error: "Error al actualizar administrador" });
+                }
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: "Administrador no encontrado" });
+                }
+                res.json({ success: true, message: "Administrador actualizado correctamente" });
+            });
+        });
+    });
 });
 
-// Eliminar usuario 
+//Eliminar usuarios desde admin y usuario
 app.delete("/api/deleteUserSelect/:dni", (req, res) => {
   const { dni } = req.params;
 
-  const sql = "DELETE FROM users WHERE dni = ? AND role = 'user'";
-
-  db.query(sql, [dni], (err, result) => {
-    if (err) {
-      console.error("Error al eliminar usuario:", err);
-      return res.status(500).json({ error: "Error al eliminar usuario" });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Usuario no encontrado o ya eliminado" });
-    }
-
-    res.json({ success: true, message: "Usuario eliminado correctamente" });
-  });
-});
-
-// Eliminar administrador
-app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
-  const { dni } = req.params;
-
-  const sql = "DELETE FROM users WHERE dni = ? AND role = 'admin'";
-
-  db.query(sql, [dni], (err, result) => {
-    if (err) {
-      console.error("Error al eliminar administrador:", err);
-      return res.status(500).json({ error: "Error al eliminar administrador" });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Administrador no encontrado o ya eliminado" });
-    }
-
-    res.json({ success: true, message: "Administrador eliminado correctamente" });
-  });
-});
-
-
-// -------------------------------------------------------------------- ELIMINAR DATOS DE LAS TABLAS DESDE ADMIN ---------------------------------------------------------
-//Eliminar usuarios
-app.delete("/api/deleteUserSelect/:dni", (req, res) => {
-  const { dni } = req.params;
-
-  // 1. Borrar likes asociados a los perfiles del usuario
+  // Borrar likes asociados a los perfiles del usuario
   db.query(
     "DELETE FROM likes WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
     [dni],
@@ -498,7 +509,7 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
         return res.status(500).json({ success: false, error: "Error al eliminar likes" });
       }
 
-      // 2. Borrar favoritos asociados a los perfiles del usuario
+      // Borrar favoritos asociados a los perfiles del usuario
       db.query(
         "DELETE FROM favorites WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
         [dni],
@@ -508,20 +519,19 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
             return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
           }
 
-          // 3. Borrar perfiles del usuario
+          // Borrar perfiles del usuario
           db.query("DELETE FROM profiles WHERE id_user = ?", [dni], (err) => {
             if (err) {
               console.error("Error SQL (profiles):", err);
               return res.status(500).json({ success: false, error: "Error al eliminar perfiles" });
             }
 
-            // 4. Finalmente borrar el usuario
+            // Borrar el usuario
             db.query("DELETE FROM users WHERE dni = ?", [dni], (err, result) => {
               if (err) {
                 console.error("Error SQL (users):", err);
                 return res.status(500).json({ success: false, error: "Error al eliminar usuario" });
               }
-
               if (result.affectedRows > 0) {
                 res.json({ success: true });
               }
@@ -540,7 +550,7 @@ app.delete("/api/deleteUserSelect/:dni", (req, res) => {
 app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
   const { dni } = req.params;
 
-  // 1. Borrar likes asociados a los perfiles del usuario
+  // Borrar likes asociados a los perfiles del usuario
   db.query(
     "DELETE FROM likes WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
     [dni],
@@ -550,7 +560,7 @@ app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
         return res.status(500).json({ success: false, error: "Error al eliminar likes" });
       }
 
-      // 2. Borrar favoritos asociados a los perfiles del usuario
+      // Borrar favoritos asociados a los perfiles del usuario
       db.query(
         "DELETE FROM favorites WHERE id_profile IN (SELECT id_profile FROM profiles WHERE id_user = ?)",
         [dni],
@@ -560,20 +570,19 @@ app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
             return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
           }
 
-          // 3. Borrar perfiles del usuario
+          // Borrar perfiles del usuario
           db.query("DELETE FROM profiles WHERE id_user = ?", [dni], (err) => {
             if (err) {
               console.error("Error SQL (profiles):", err);
               return res.status(500).json({ success: false, error: "Error al eliminar perfiles" });
             }
 
-            // 4. Finalmente borrar el usuario
+            // Borrar el usuario
             db.query("DELETE FROM users WHERE dni = ?", [dni], (err, result) => {
               if (err) {
                 console.error("Error SQL (users):", err);
                 return res.status(500).json({ success: false, error: "Error al eliminar usuario" });
               }
-
               if (result.affectedRows > 0) {
                 res.json({ success: true });
               }
@@ -588,25 +597,25 @@ app.delete("/api/deleteAdminSelect/:dni", (req, res) => {
   );
 });
 
-// Eliminar película por ID (con dependencias)
+// Eliminar película 
 app.delete("/api/deleteMovieSelect/:id", (req, res) => {
   const { id } = req.params;
 
-  // 1. Borrar likes asociados a la película
+  // Borrar likes asociados a la película
   db.query("DELETE FROM likes WHERE id_movie = ?", [id], (err) => {
     if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
 
-    // 2. Borrar favoritos asociados a la película
+    // Borrar favoritos asociados a la película
     db.query("DELETE FROM favorites WHERE id_movie = ?", [id], (err) => {
       if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
 
-      // 3. Finalmente borrar la película
+      // Borrar la película
       db.query("DELETE FROM movies WHERE id_movie = ?", [id], (err, result) => {
         if (err) return res.status(500).json({ success: false, error: "Error al eliminar película" });
-
         if (result.affectedRows > 0) {
           res.json({ success: true });
-        } else {
+        } 
+        else {
           res.status(404).json({ success: false, error: "Película no encontrada" });
         }
       });
@@ -614,25 +623,25 @@ app.delete("/api/deleteMovieSelect/:id", (req, res) => {
   });
 });
 
-// Eliminar serie por ID (con dependencias)
+// Eliminar serie
 app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   const { id } = req.params;
 
-  // 1. Borrar likes asociados a la serie
+  // Borrar likes asociados a la serie
   db.query("DELETE FROM likes WHERE id_series = ?", [id], (err) => {
     if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
 
-    // 2. Borrar favoritos asociados a la serie
+    // Borrar favoritos asociados a la serie
     db.query("DELETE FROM favorites WHERE id_series = ?", [id], (err) => {
       if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
 
-      // 3. Finalmente borrar la serie
+      // Finalmente borrar la serie
       db.query("DELETE FROM series WHERE id_series = ?", [id], (err, result) => {
         if (err) return res.status(500).json({ success: false, error: "Error al eliminar serie" });
-
         if (result.affectedRows > 0) {
           res.json({ success: true });
-        } else {
+        } 
+        else {
           res.status(404).json({ success: false, error: "Serie no encontrada" });
         }
       });
@@ -640,13 +649,11 @@ app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   });
 });
 
-// ----------------------------------------------------------AÑADIR DESDE ADMIN ---------------------------------------------------
+// -------------------------------------------------AÑADIR PELICULAS/SERIES/USUARIOS/ASMINS DESDE ADMIN ----------------------------------------------
 //Añadir usuarios o admins
 app.post("/api/add-user-admin", (req, res) => {
   const { name, username, dni, birth_date, email, password, role } = req.body;
   let errors = {};
-
-  // Validaciones básicas
   if (!name) errors.name = "El nombre completo es obligatorio";
   if (!username) errors.username = "El nombre de usuario es obligatorio";
   if (!dni) errors.dni = "El DNI es obligatorio";
@@ -654,7 +661,6 @@ app.post("/api/add-user-admin", (req, res) => {
   if (!email) errors.email = "El correo electrónico es obligatorio";
   if (!password) errors.password = "La contraseña es obligatoria";
   if (!role) errors.role = "Debe seleccionar usuario o administrador";
-
   if (Object.keys(errors).length > 0) {
     return res.status(400).json({ errors });
   }
@@ -668,7 +674,6 @@ app.post("/api/add-user-admin", (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Error en el servidor" });
       }
-
       if (rows.length > 0) {
         let dupErrors = {};
         rows.forEach(row => {
@@ -699,8 +704,6 @@ app.post("/api/add-user-admin", (req, res) => {
 app.post("/api/add-movie-serie", (req, res) => {
   const { title, description, image, releaseDate, genre, minAge, type, duration, actors, seasons, episodes } = req.body;
   let errors = {};
-
-  // Validaciones básicas
   if (!title) errors.title = "El título es obligatorio";
   if (!description) errors.description = "La descripción es obligatoria";
   if (!image) errors.image = "La imagen es obligatoria";
@@ -708,7 +711,6 @@ app.post("/api/add-movie-serie", (req, res) => {
   if (!genre) errors.genre = "El género es obligatorio";
   if (!minAge) errors.minAge = "La edad mínima es obligatoria";
   if (!type) errors.type = "Debe seleccionar película o serie";
-
   if (type === "pelicula") {
     if (!duration) errors.duration = "La duración es obligatoria";
     if (!actors) errors.actors = "Debe indicar actores";
@@ -718,7 +720,6 @@ app.post("/api/add-movie-serie", (req, res) => {
     if (!episodes) errors.episodes = "El número de capítulos es obligatorio";
     if (!actors) errors.actors = "Debe indicar actores";
   }
-
   if (Object.keys(errors).length > 0) {
     return res.json({ errors });
   }
@@ -732,7 +733,6 @@ app.post("/api/add-movie-serie", (req, res) => {
         console.error(err);
         return res.json({ error: "Error en el servidor" });
       }
-
       if (rows.length > 0) {
         return res.json({ errors: { title: "El título ya existe en la base de datos" } });
       }
@@ -750,7 +750,8 @@ app.post("/api/add-movie-serie", (req, res) => {
             return res.json({ success: true });
           }
         );
-      } else {
+      } 
+      else {
         db.query(
           "INSERT INTO series (title, image, description, release_date, genre, minimum_age, seasons, actors) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
           [title, image, description, releaseDate, genre, minAge, seasons, JSON.stringify(actors.split(","))],
@@ -796,26 +797,14 @@ app.get("/api/movies/:id", (req, res) => {
   });
 });
 
-// -------------------------------------------------------------- EDITAR PELÍCULA SOLO ADMIN-----------------------------------------------------------------
+// Editar pelicula en el Detail (admin)
 app.put("/api/movies/:id", (req, res) => {
   const { id } = req.params;
   const { title, image, description, release_date, genre, minimum_age, duration_minutes, actors } = req.body;
 
   db.query(
-    `UPDATE movies 
-     SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, duration_minutes = ?, actors = ?
-     WHERE id_movie = ?`,
-    [
-      title,
-      image,
-      description,
-      release_date,
-      genre,
-      minimum_age,
-      duration_minutes,
-      JSON.stringify(actors || []),
-      id
-    ],
+    `UPDATE movies SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, duration_minutes = ?, actors = ? WHERE id_movie = ?`,
+    [title, image, description, release_date, genre, minimum_age, duration_minutes, JSON.stringify(actors || []), id],
     (err) => {
       if (err) {
         console.error("Error al actualizar película:", err);
@@ -839,10 +828,9 @@ app.get("/api/series", (req, res) => {
   });
 });
 
-// Detalle de una serie + temporadas
+// Detalle de una serie y sus temporadas
 app.get("/api/series/:id", (req, res) => {
   const { id } = req.params;
-
   const sqlSeries = "SELECT * FROM series WHERE id_series = ?";
   const sqlSeasons = "SELECT * FROM seasons WHERE id_series = ? ORDER BY season_number ASC";
 
@@ -892,27 +880,14 @@ app.get("/api/series/:id/season/:seasonNumber/chapters", (req, res) => {
   });
 });
 
-
-// -------------------------------------------------------------- EDITAR SERIE SOLO ADMIN----------------------------------------------------------------
+// Editar serie en Detail (admin)
 app.put("/api/series/:id", (req, res) => {
   const { id } = req.params;
   const { title, image, description, release_date, genre, minimum_age, seasons, actors } = req.body;
 
   db.query(
-    `UPDATE series 
-     SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, seasons = ?, actors = ?
-     WHERE id_series = ?`,
-    [
-      title,
-      image,
-      description,
-      release_date,
-      genre,
-      minimum_age,
-      seasons,
-      JSON.stringify(actors || []), // se guarda como JSON
-      id
-    ],
+    `UPDATE series SET title = ?, image = ?, description = ?, release_date = ?, genre = ?, minimum_age = ?, seasons = ?, actors = ? WHERE id_series = ?`,
+    [ title, image, description, release_date, genre, minimum_age, seasons, JSON.stringify(actors || []), id],
     (err, result) => {
       if (err) {
         console.error("Error al actualizar serie:", err);
@@ -922,30 +897,14 @@ app.put("/api/series/:id", (req, res) => {
     }
   );
 });
-// -------------------------------------------------------------- TOP 10 PELICULAS -----------------------------------------------------------------
+
+// -------------------------------------------------------------- HOME SERIES / PELICULAS -----------------------------------------------------------------
+// Top 10 peliculas
 app.get('/api/top-movies', (req, res) => {
   const sql = `
-    SELECT 
-      m.id_movie,
-      m.title,
-      m.image,
-      m.genre,
-      m.release_date,
-      m.minimum_age,
-      m.duration_minutes,
-      COUNT(l.id_movie) AS total_likes
-    FROM movies m
-    LEFT JOIN likes l ON m.id_movie = l.id_movie
-    GROUP BY 
-      m.id_movie,
-      m.title,
-      m.image,
-      m.genre,
-      m.release_date,
-      m.minimum_age,
-      m.duration_minutes
-    ORDER BY total_likes DESC
-    LIMIT 10
+    SELECT m.id_movie, m.title, m.image, m.genre, m.release_date, m.minimum_age, m.duration_minutes, COUNT(l.id_movie) AS total_likes
+    FROM movies m LEFT JOIN likes l ON m.id_movie = l.id_movie
+    GROUP BY  m.id_movie, m.title, m.image, m.genre, m.release_date, m.minimum_age, m.duration_minutes ORDER BY total_likes DESC LIMIT 10
   `;
 
   db.query(sql, (err, results) => {
@@ -957,36 +916,17 @@ app.get('/api/top-movies', (req, res) => {
   });
 });
 
-// -------------------------------------------------------------- TOP 10 SERIES -----------------------------------------------------------------
+// Top 10 series
 app.get('/api/top-series', (req, res) => {
   const sql = `
-    SELECT 
-      s.id_series,
-      s.title,
-      s.image,
-      s.genre,
-      s.release_date,
-      s.minimum_age,
-      s.seasons,
-      COUNT(l.id_series) AS total_likes
-    FROM series s
-    LEFT JOIN likes l ON s.id_series = l.id_series
-    GROUP BY 
-      s.id_series,
-      s.title,
-      s.image,
-      s.genre,
-      s.release_date,
-      s.minimum_age,
-      s.seasons
-    ORDER BY total_likes DESC
-    LIMIT 10
+    SELECT s.id_series, s.title, s.image, s.genre, s.release_date, s.minimum_age, s.seasons, COUNT(l.id_series) AS total_likes
+    FROM series s LEFT JOIN likes l ON s.id_series = l.id_series
+    GROUP BY s.id_series, s.title, s.image, s.genre, s.release_date, s.minimum_age, s.seasons ORDER BY total_likes DESC LIMIT 10
   `;
 
   db.query(sql, (err, results) => {
     if (err) {
       console.error('Error Top Series:', err);
-     
       return res.status(500).json({ error: err.message });
     }
        
@@ -994,28 +934,14 @@ app.get('/api/top-series', (req, res) => {
   });
 });
 
-// ------------------------------------------------------------ RECOMENDADOS ------------------------------------------------------------------
+// Recomendados
 app.get("/api/recommended/:id_profile", (req, res) => { 
   const { id_profile } = req.params;
 
   const sql = `
-    SELECT 
-      l.id_like,
-      l.id_movie,
-      l.id_series,
+    SELECT  l.id_like, l.id_movie, l.id_series, m.title AS movie_title, m.genre AS movie_genre, m.image AS movie_image, s.title AS series_title,s.genre AS series_genre, s.image AS series_image
 
-      m.title AS movie_title,
-      m.genre AS movie_genre,
-      m.image AS movie_image,
-
-      s.title AS series_title,
-      s.genre AS series_genre,
-      s.image AS series_image
-
-    FROM likes l
-    LEFT JOIN movies m ON l.id_movie = m.id_movie
-    LEFT JOIN series s ON l.id_series = s.id_series
-    WHERE l.id_profile = ?
+    FROM likes l LEFT JOIN movies m ON l.id_movie = m.id_movie LEFT JOIN series s ON l.id_series = s.id_series WHERE l.id_profile = ?
   `;
 
   db.query(sql, [id_profile], (err, results) => {
@@ -1024,30 +950,13 @@ app.get("/api/recommended/:id_profile", (req, res) => {
       return res.status(500).json({ error: "Error obteniendo likes" });
     }
 
-    // Normalizar resultados
     const formatted = results.map(row => {
       if (row.id_movie) {
-        return {
-          id_like: row.id_like,
-          type: "movie",
-          id_movie: row.id_movie,
-          title: row.movie_title,
-          genre: row.movie_genre,
-          image: row.movie_image
-        };
+        return { id_like: row.id_like, type: "movie", id_movie: row.id_movie, title: row.movie_title, genre: row.movie_genre, image: row.movie_image};
       }
-
       if (row.id_series) {
-        return {
-          id_like: row.id_like,
-          type: "series",
-          id_series: row.id_series,
-          title: row.series_title,
-          genre: row.series_genre,
-          image: row.series_image
-        };
+        return { id_like: row.id_like, type: "series", id_series: row.id_series, title: row.series_title, genre: row.series_genre, image: row.series_image};
       }
-
       return null;
     }).filter(Boolean);
 
@@ -1055,10 +964,9 @@ app.get("/api/recommended/:id_profile", (req, res) => {
   });
 });
 
-//---------------------------------------------------FUTUROS ESTRENOS --------------------------------------------------
-// Obtener próximas películas
+// Obtener futuros estrenos de peliculas
 app.get("/api/upcoming-movies", (req, res) => {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0]; 
   db.query(
     `SELECT * FROM movies WHERE release_date > ? ORDER BY release_date ASC`,
     [today],
@@ -1069,9 +977,9 @@ app.get("/api/upcoming-movies", (req, res) => {
   );
 });
 
-// Obtener próximas series
+// Obtener futuros estrenos de series
 app.get("/api/upcoming-series", (req, res) => {
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
   db.query(
     `SELECT * FROM series WHERE release_date > ? ORDER BY release_date ASC`,
     [today],
@@ -1084,7 +992,7 @@ app.get("/api/upcoming-series", (req, res) => {
 
 
 
-// -------------------------------------------------------------- FAVORITES -----------------------------------------------------------------
+// -------------------------------------------------------------- FAVORITOS -----------------------------------------------------------------
 // Añadir favorito (película o serie)
 app.post("/api/favorites", (req, res) => {
   const { id_profile, id_movie, id_series } = req.body;
@@ -1152,7 +1060,7 @@ app.delete("/api/favorites/series/:id_profile/:id_series", (req, res) => {
 });
 
 // -------------------------------------------------------------- LIKES -----------------------------------------------------------------
-// Añadir like
+// Añadir like de pelicula o serie
 app.post("/api/likes", (req, res) => {
   const { id_profile, id_movie, id_series } = req.body;
 
@@ -1189,7 +1097,7 @@ app.get("/api/likes/:id_profile", (req, res) => {
   );
 });
 
-// Eliminar like peli
+// Eliminar like pelicula
 app.delete("/api/likes/movies/:id_profile/:id_movie", (req, res) => {
   const { id_profile, id_movie } = req.params;
   db.query(
@@ -1248,12 +1156,10 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
 
           const id_season = seasonResult.insertId;
 
-          // 3️⃣ Insertar capítulos
+          // Insertar capítulos
           let index = 0;
-
           const insertChapter = () => {
             if (index >= chapters.length) {
-              // 4️⃣ Actualizar contador de temporadas
               db.query(
                 'UPDATE series SET seasons = ? WHERE id_series = ?',
                 [currentSeasons + 1, id],
@@ -1265,16 +1171,8 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
             const chap = chapters[index];
 
             db.query(
-              `INSERT INTO chapters 
-               (id_season, chapter_number, title, duration_minutes, image)
-               VALUES (?, ?, ?, ?, ?)`,
-              [
-                id_season,
-                chap.chapter_number,
-                chap.title,
-                chap.duration_minutes || null,
-                chap.image || null
-              ],
+              `INSERT INTO chapters (id_season, chapter_number, title, duration_minutes, image) VALUES (?, ?, ?, ?, ?)`,
+              [id_season, chap.chapter_number, chap.title, chap.duration_minutes || null, chap.image || null],
               (err) => {
                 if (err) {
                   if (err.code === 'ER_DUP_ENTRY') {
@@ -1284,13 +1182,11 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
                   }
                   return res.status(500).json({ error: 'Error al crear capítulo' });
                 }
-
                 index++;
                 insertChapter();
               }
             );
           };
-
           insertChapter();
         }
       );
@@ -1301,13 +1197,7 @@ app.post('/api/series/:id/season-with-chapters', (req, res) => {
 // Obtener temporadas de una serie
 app.get('/api/seasons/:id_series', (req, res) => {
   const { id_series } = req.params;
-
-  const sql = `
-    SELECT id_season, season_number 
-    FROM seasons 
-    WHERE id_series = ?
-    ORDER BY season_number ASC
-  `;
+  const sql = ` SELECT id_season, season_number FROM seasons WHERE id_series = ? ORDER BY season_number ASC`;
 
   db.query(sql, [id_series], (err, results) => {
     if (err) {
@@ -1323,12 +1213,7 @@ app.get('/api/seasons/:id_series', (req, res) => {
 app.get('/api/chapters/:id_season', (req, res) => {
   const { id_season } = req.params;
 
-  const sql = `
-    SELECT id_chapter, chapter_number, title, duration_minutes, image
-    FROM chapters
-    WHERE id_season = ?
-    ORDER BY chapter_number ASC
-  `;
+  const sql = `SELECT id_chapter, chapter_number, title, duration_minutes, image FROM chapters WHERE id_season = ? ORDER BY chapter_number ASC`;
 
   db.query(sql, [id_season], (err, results) => {
     if (err) {
@@ -1339,16 +1224,11 @@ app.get('/api/chapters/:id_season', (req, res) => {
   });
 });
 
-// Editar temporada (solo season_number)
+// Editar temporada
 app.put('/api/seasons/:id_season', (req, res) => {
   const { id_season } = req.params;
   const { season_number } = req.body;
-
-  const sql = `
-    UPDATE seasons
-    SET season_number = ?
-    WHERE id_season = ?
-  `;
+  const sql = `UPDATE seasons SET season_number = ? WHERE id_season = ?`;
 
   db.query(sql, [season_number, id_season], (err, result) => {
     if (err) {
@@ -1364,11 +1244,7 @@ app.put('/api/chapters/:id_chapter', (req, res) => {
   const { id_chapter } = req.params;
   const { chapter_number, title, duration_minutes, image } = req.body;
 
-  const sql = `
-    UPDATE chapters
-    SET chapter_number = ?, title = ?, duration_minutes = ?, image = ?
-    WHERE id_chapter = ?
-  `;
+  const sql = `UPDATE chapters SET chapter_number = ?, title = ?, duration_minutes = ?, image = ? WHERE id_chapter = ?`;
 
   db.query(sql, [chapter_number, title, duration_minutes, image, id_chapter], (err, result) => {
     if (err) {
@@ -1379,20 +1255,19 @@ app.put('/api/chapters/:id_chapter', (req, res) => {
   });
 });
 
-// -------------------------------------------------------------- ELIMINAR UN CAPÍTULO (solo admin) -----------------------------------------------
+// Eliminar capitulo
 app.delete('/api/chapters/:id', (req, res) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
     return res.status(401).json({ message: "Token no proporcionado" });
   }
-
   let decoded;
   try {
     decoded = jwt.verify(token, 'mi_secreto_para_dev_1234567890');
-  } catch (err) {
+  } 
+  catch (err) {
     return res.status(403).json({ message: "Token inválido" });
   }
-
   if (decoded.role !== 'admin') {
     return res.status(403).json({ message: "Acceso denegado: solo administradores" });
   }
@@ -1410,7 +1285,7 @@ app.delete('/api/chapters/:id', (req, res) => {
   });
 });
 
-// -------------------------------------------------------------- ELIMINAR UNA TEMPORADA (con sus capítulos, solo admin) -------------------------
+// Eliminar temporada
 app.delete('/api/seasons/:id', (req, res) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) {
@@ -1419,7 +1294,8 @@ app.delete('/api/seasons/:id', (req, res) => {
   let decoded;
   try {
     decoded = jwt.verify(token, 'mi_secreto_para_dev_1234567890');
-  } catch {
+  } 
+  catch {
     return res.status(403).json({ message: "Token inválido" });
   }
   if (decoded.role !== 'admin') {
@@ -1428,28 +1304,28 @@ app.delete('/api/seasons/:id', (req, res) => {
 
   const { id } = req.params;
 
-  // 1. Obtener id_series
+  // Obtener id_series
   db.query('SELECT id_series FROM seasons WHERE id_season = ?', [id], (err, rows) => {
     if (err || rows.length === 0) {
       return res.status(404).json({ message: "Temporada no encontrada" });
     }
     const idSeries = rows[0].id_series;
 
-    // 2. Eliminar capítulos
+    // Eliminar capítulos
     db.query('DELETE FROM chapters WHERE id_season = ?', [id], (err2) => {
       if (err2) {
         console.error("Error al eliminar capítulos:", err2);
         return res.status(500).json({ message: "Error al eliminar capítulos" });
       }
 
-      // 3. Eliminar temporada
+      //  Eliminar temporada
       db.query('DELETE FROM seasons WHERE id_season = ?', [id], (err3) => {
         if (err3) {
           console.error("Error al eliminar temporada:", err3);
           return res.status(500).json({ message: "Error al eliminar temporada" });
         }
 
-        // 4. ✅ ACTUALIZAR EL CONTADOR REAL EN LA TABLA series
+        // Actualizar series
         db.query(
           'UPDATE series SET seasons = (SELECT COUNT(*) FROM seasons WHERE id_series = ?) WHERE id_series = ?',
           [idSeries, idSeries],

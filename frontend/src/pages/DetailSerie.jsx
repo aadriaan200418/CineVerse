@@ -33,6 +33,8 @@ export default function DetailSerie() {
   const [editingSeasonChapters, setEditingSeasonChapters] = useState([]);
   const [editSeasonMessage, setEditSeasonMessage] = useState("");
   const [editingSeasonErrors, setEditingSeasonErrors] = useState([]);
+  const editingSeasonData = editingSeasonId ? seasonsList.find(s => Number(s.id_season) === Number(editingSeasonId)) : null;
+  const nextSeasonNumber = seasonsList.length + 1;
 
   // Estados para añadir temporada avanzada
   const [showAddSeasonForm, setShowAddSeasonForm] = useState(false);
@@ -41,12 +43,6 @@ export default function DetailSerie() {
   const [formMessage, setFormMessage] = useState("");
   const [seasonError, setSeasonError] = useState("");
   const [chapterErrors, setChapterErrors] = useState([]);
-
-  const editingSeasonData = editingSeasonId
-    ? seasonsList.find(s => Number(s.id_season) === Number(editingSeasonId))
-    : null;
-
-  const nextSeasonNumber = seasonsList.length + 1;
 
   // Validadores
   const validators = {
@@ -84,7 +80,7 @@ export default function DetailSerie() {
     }
   };
 
-  // ✅ NUEVA FUNCIÓN: recargar serie y temporadas
+  // recargar serie y temporadas
   const reloadSerieAndSeasons = async () => {
     try {
       // Recargar serie
@@ -163,11 +159,11 @@ export default function DetailSerie() {
   }, [id]);
 
   // Función para cargar capítulos de una temporada
-  const loadChapters = (id_season) => {
+  const loadChaptersBySeasonId = (id_season) => {
     fetch(`http://localhost:3001/api/chapters/${id_season}`)
-      .then(res => res.json())
-      .then(data => setChaptersList(data.chapters || []))
-      .catch(err => console.error("Error cargando capítulos:", err));
+    .then(res => res.json())
+    .then(data => setChaptersList(data.chapters || []))
+    .catch(err => console.error("Error cargando capítulos:", err));
   };
 
   //editar temporada
@@ -180,12 +176,14 @@ export default function DetailSerie() {
       const res = await fetch(`http://localhost:3001/api/chapters/${id_season}`);
       const data = await res.json();
       setEditingSeasonChapters(data.chapters || []);
-    } catch (err) {
+    } 
+    catch (err) {
       console.error("Error cargando capítulos:", err);
       setEditSeasonMessage("Error al cargar capítulos de la temporada");
     }
   };
 
+  /*Editar capitulo */
   const handleEditSeasonChapterChange = (index, field, value) => {
     setEditingSeasonChapters(prev => {
       const updated = [...prev];
@@ -202,6 +200,7 @@ export default function DetailSerie() {
     });
   };
 
+  /*Guardar temporada editada */
   const saveEditedSeason = async () => {
     let hasError = false;
     const errors = [];
@@ -224,14 +223,14 @@ export default function DetailSerie() {
       if (!chap.image?.trim()) {
         err.image = "La imagen es obligatoria";
         hasError = true;
-      } else {
+      } 
+      else {
         const validExt = /\.(jpg|jpeg|png|gif|webp)$/i;
         if (!validExt.test(chap.image.trim().toLowerCase())) {
           err.image = "La imagen debe terminar en .jpg, .jpeg, .png, .gif o .webp";
           hasError = true;
         }
       }
-
       errors[index] = err;
     });
 
@@ -240,7 +239,6 @@ export default function DetailSerie() {
       setEditSeasonMessage("Hay errores en el formulario");
       return;
     }
-
     try {
       for (const chap of editingSeasonChapters) {
         await fetch(`http://localhost:3001/api/chapters/${chap.id_chapter}`, {
@@ -276,7 +274,8 @@ export default function DetailSerie() {
       })
         .then(() => setIsLiked(true))
         .catch(err => console.error("Error al dar like:", err));
-    } else {
+    } 
+    else {
       fetch(`http://localhost:3001/api/likes/series/${id_profile}/${serie.id_series}`, {
         method: "DELETE"
       })
@@ -307,11 +306,13 @@ export default function DetailSerie() {
     }
   };
 
+  //Manejo de cambios en el formulairo de la serie
   const handleChange = e => {
     const { name, value } = e.target;
     setSerie(prev => ({ ...prev, [name]: value }));
   };
 
+  //Editar la serie
   const startEditing = () => {
     setOriginalSerie({ ...serie });
     setIsEditing(true);
@@ -319,6 +320,7 @@ export default function DetailSerie() {
     setError("");
   };
 
+  //Cancelar edicion de la serie
   const handleCancel = () => {
     if (originalSerie) {
       setSerie(originalSerie);
@@ -328,17 +330,16 @@ export default function DetailSerie() {
     setFieldErrors({});
   };
 
+  //Enviar cambios de la serie al backend
   const handleSubmit = e => {
     e.preventDefault();
     if (!serie) return;
-
     const errors = {};
     for (const field in validators) {
       const value = serie[field];
       const errorMsg = validators[field](value);
       if (errorMsg) errors[field] = errorMsg;
     }
-
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -346,7 +347,6 @@ export default function DetailSerie() {
 
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-
     if (!token) {
       setError("No estás autenticado. Por favor, inicia sesión.");
       return;
@@ -387,17 +387,19 @@ export default function DetailSerie() {
       });
   };
 
-  // === Funciones para añadir temporada ===
+  // añadir temporada
   const addChapterField = () => {
     setChapters([...chapters, { chapter_number: "", title: "", duration_minutes: "", image: "" }]);
   };
 
+  //eliminar capitulo
   const removeChapterField = (index) => {
     if (chapters.length > 1) {
       setChapters(chapters.filter((_, i) => i !== index));
     }
   };
 
+  // cambios del capitulo
   const handleChapterChange = (index, field, value) => {
     const newChapters = [...chapters];
     newChapters[index][field] = value;
@@ -412,9 +414,9 @@ export default function DetailSerie() {
     });
   };
 
+  // guardar temporada
   const handleSaveSeason = async (e) => {
     e.preventDefault();
-
     let hasError = false;
     const errors = [];
 
@@ -486,7 +488,7 @@ export default function DetailSerie() {
       if (data.success) {
         setFormMessage("Temporada y capítulos creados");
 
-        // ✅ Recargar temporadas tras crear una nueva
+        //  Recargar temporadas tras crear una nueva
         reloadSerieAndSeasons();
 
         setShowAddSeasonForm(false);
@@ -565,7 +567,7 @@ export default function DetailSerie() {
         throw new Error(errorData.message || "Error eliminando temporada");
       }
 
-      // ✅ Recargar toda la serie y temporadas tras eliminar
+      // Recargar toda la serie y temporadas tras eliminar
       await reloadSerieAndSeasons();
 
       setChaptersList([]);
@@ -585,10 +587,14 @@ export default function DetailSerie() {
   if (!serie) return <Loading />;
   if (error) return <p className="error-message">{error}</p>;
 
+  //Valor de fecha
   const releaseDateValue =
     typeof serie.release_date === "string"
       ? serie.release_date.slice(0, 10)
       : new Date(serie.release_date).toISOString().slice(0, 10);
+
+  //Futuros estrenos
+  const isFutureRelease = new Date(serie.release_date) > new Date();
 
   return (
     <div className="detail-page">
@@ -646,7 +652,11 @@ export default function DetailSerie() {
               <p>{serie.description || "Sin descripción disponible"}</p>
 
               <div className="detail-buttons">
-                <button className="detail-btn-play">▶ Reproducir</button>
+                {isFutureRelease ? (
+                  <button className="detail-btn-soon" disabled>Próximamente</button>
+                ) : (
+                  <button className="detail-btn-play">▶ Reproducir</button>
+                )}
 
                 <div className="detail-images">
                   <button onClick={toggleLike} aria-label={isLiked ? "Quitar like" : "Dar like"}>
@@ -666,13 +676,14 @@ export default function DetailSerie() {
               </div>
 
               {/* Ver temporadas y capítulos */}
+              {!isFutureRelease && (
               <div className="detailSerie-view-seasons">
                 <select className="detailSerie-select-seasons" value={selectedSeasonId}
                   onChange={(e) => {
                     const value = e.target.value;
                     setSelectedSeasonId(value);
                     if (value) {
-                      loadChapters(value);
+                      loadChaptersBySeasonId(value);
                     }
                     else {
                       setChaptersList([]);
@@ -685,6 +696,7 @@ export default function DetailSerie() {
                   ))}
                 </select>
               </div>
+              )}
 
               {/* Solo para ADMIN */}
               {localStorage.getItem("role") === "admin" && (
