@@ -1342,7 +1342,6 @@ app.delete('/api/seasons/:id', (req, res) => {
 });
 
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
-const path = require('path');
 const frontendBuildPath = path.join(__dirname, 'build');
  
 app.use(express.static(frontendBuildPath));
