@@ -1342,12 +1342,13 @@ app.delete('/api/seasons/:id', (req, res) => {
 });
 
 // ------------------------------------------------------------ SERVIR FRONTEND -----------------------------------------------------------
-const frontendBuildPath = path.join(__dirname, 'build');
+const path = require('path');
+const frontendBuildPath = path.join(__dirname, '../build');
  
 app.use(express.static(frontendBuildPath));
  
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendBuildPath, 'build', 'index.html'));
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 // ------------------------------------------------------------- ARRANCAR SERVIDOR -----------------------------------------------------------
