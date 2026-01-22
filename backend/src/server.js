@@ -18,7 +18,7 @@ const db = mysql.createPool({
   port: process.env.DB_PORT || 20319,
   user: process.env.DB_USER || 'avnadmin',
   password: process.env.DB_PASS || 'AVNS_RPJs2yDtZTJGT-9mzWA',
-  database: process.env.DB_NAME || 'cineVerse',
+  database: process.env.DB_NAME || 'cineverse',
   ssl: { ca: fs.readFileSync('./certs/ca.pem') },
   connectionLimit: 10
 });
