@@ -176,7 +176,7 @@ export default function AddContent() {
     e.preventDefault();
     if (!validateAll1()) return;
     try {
-      const res = await fetch("http://localhost:3001/api/add-movie-serie", {
+      const res = await fetch("/api/add-movie-serie", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData1)
@@ -205,7 +205,7 @@ export default function AddContent() {
     e.preventDefault();
     if (!validateAll2()) return;
     try {
-      const res = await fetch("http://localhost:3001/api/add-user-admin", {
+      const res = await fetch("/api/add-user-admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData2)

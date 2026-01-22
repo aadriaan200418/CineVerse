@@ -79,7 +79,7 @@ export default function Register() {
     if (!validateAll()) return;
 
     try {
-      const res = await fetch("http://localhost:3001/api/register", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

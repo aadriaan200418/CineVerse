@@ -33,7 +33,7 @@ export default function Profiles() {
 
         const fetchProfiles = async () => {
             try {
-                const res = await fetch(`http://localhost:3001/api/profiles?username=${username}`);
+                const res = await fetch(`/api/profiles?username=${username}`);
                 if (!res.ok) {
                     setError("Error en el servidor: " + res.status);
                     return;
@@ -78,7 +78,7 @@ export default function Profiles() {
 
         try {
             const username = localStorage.getItem("username");
-            const res = await fetch("http://localhost:3001/api/addProfile", {
+            const res = await fetch("/api/addProfile", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, nombre: newProfile.nombre.trim() })
@@ -105,7 +105,7 @@ export default function Profiles() {
         if (!confirmDelete) return;
 
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteProfile/${id}`, {method: "DELETE"});
+            const res = await fetch(`/api/deleteProfile/${id}`, {method: "DELETE"});
             const data = await res.json();
             if (data.success) {
                 setProfiles((prev) => prev.filter((p) => p.id !== id));

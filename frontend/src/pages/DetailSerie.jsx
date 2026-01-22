@@ -84,14 +84,14 @@ export default function DetailSerie() {
   const reloadSerieAndSeasons = async () => {
     try {
       // Recargar serie
-      const serieRes = await fetch(`http://localhost:3001/api/series/${id}`);
+      const serieRes = await fetch(`/api/series/${id}`);
       if (!serieRes.ok) throw new Error("No se pudo recargar la serie");
       const serieData = await serieRes.json();
       setSerie(serieData.series);
       setOriginalSerie(serieData.series);
 
       // Recargar temporadas
-      const seasonsRes = await fetch(`http://localhost:3001/api/seasons/${id}`);
+      const seasonsRes = await fetch(`/api/seasons/${id}`);
       const seasonsData = await seasonsRes.json();
       setSeasonsList(seasonsData.seasons || []);
     } catch (err) {
@@ -110,7 +110,7 @@ export default function DetailSerie() {
     setChaptersList([]);
 
     // Cargar serie
-    fetch(`http://localhost:3001/api/series/${id}`)
+    fetch(`/api/series/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("No se pudo cargar la serie");
         return res.json();
@@ -132,7 +132,7 @@ export default function DetailSerie() {
     if (id_profile) {
       const numericId = Number(id);
 
-      fetch(`http://localhost:3001/api/likes/${id_profile}`)
+      fetch(`/api/likes/${id_profile}`)
         .then(res => res.json())
         .then(data => {
           const liked = data.likes?.some(l => Number(l.id_series) === numericId);
@@ -140,7 +140,7 @@ export default function DetailSerie() {
         })
         .catch(err => console.error("Error cargando likes:", err));
 
-      fetch(`http://localhost:3001/api/favorites/${id_profile}`)
+      fetch(`/api/favorites/${id_profile}`)
         .then(res => res.json())
         .then(data => {
           const fav = data.favorites?.some(f => Number(f.id_series) === numericId);
@@ -150,7 +150,7 @@ export default function DetailSerie() {
     }
 
     // Cargar temporadas (para todos los usuarios)
-    fetch(`http://localhost:3001/api/seasons/${id}`)
+    fetch(`/api/seasons/${id}`)
       .then(res => res.json())
       .then(data => {
         setSeasonsList(data.seasons || []);
@@ -160,7 +160,7 @@ export default function DetailSerie() {
 
   // Función para cargar capítulos de una temporada
   const loadChaptersBySeasonId = (id_season) => {
-    fetch(`http://localhost:3001/api/chapters/${id_season}`)
+    fetch(`/api/chapters/${id_season}`)
     .then(res => res.json())
     .then(data => setChaptersList(data.chapters || []))
     .catch(err => console.error("Error cargando capítulos:", err));
@@ -173,7 +173,7 @@ export default function DetailSerie() {
     setEditingSeasonErrors([]);
 
     try {
-      const res = await fetch(`http://localhost:3001/api/chapters/${id_season}`);
+      const res = await fetch(`/api/chapters/${id_season}`);
       const data = await res.json();
       setEditingSeasonChapters(data.chapters || []);
     } 
@@ -241,7 +241,7 @@ export default function DetailSerie() {
     }
     try {
       for (const chap of editingSeasonChapters) {
-        await fetch(`http://localhost:3001/api/chapters/${chap.id_chapter}`, {
+        await fetch(`/api/chapters/${chap.id_chapter}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -267,7 +267,7 @@ export default function DetailSerie() {
     if (!id_profile || !serie?.id_series) return;
 
     if (!isLiked) {
-      fetch("http://localhost:3001/api/likes", {
+      fetch("/api/likes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_profile, id_series: serie.id_series })
@@ -276,7 +276,7 @@ export default function DetailSerie() {
         .catch(err => console.error("Error al dar like:", err));
     } 
     else {
-      fetch(`http://localhost:3001/api/likes/series/${id_profile}/${serie.id_series}`, {
+      fetch(`/api/likes/series/${id_profile}/${serie.id_series}`, {
         method: "DELETE"
       })
         .then(() => setIsLiked(false))
@@ -290,7 +290,7 @@ export default function DetailSerie() {
     if (!id_profile || !serie?.id_series) return;
 
     if (!isFavorite) {
-      fetch("http://localhost:3001/api/favorites", {
+      fetch("/api/favorites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_profile, id_series: serie.id_series })
@@ -298,7 +298,7 @@ export default function DetailSerie() {
         .then(() => setIsFavorite(true))
         .catch(err => console.error("Error al añadir favorito:", err));
     } else {
-      fetch(`http://localhost:3001/api/favorites/series/${id_profile}/${serie.id_series}`, {
+      fetch(`/api/favorites/series/${id_profile}/${serie.id_series}`, {
         method: "DELETE"
       })
         .then(() => setIsFavorite(false))
@@ -364,7 +364,7 @@ export default function DetailSerie() {
           : new Date(serie.release_date).toISOString().slice(0, 10)
     };
 
-    fetch(`http://localhost:3001/api/series/${serie.id_series}`, {
+    fetch(`/api/series/${serie.id_series}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -471,7 +471,7 @@ export default function DetailSerie() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/api/series/${id}/season-with-chapters`, {
+      const res = await fetch(`/api/series/${id}/season-with-chapters`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -515,7 +515,7 @@ export default function DetailSerie() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/api/chapters/${chapterId}`, {
+      const res = await fetch(`/api/chapters/${chapterId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`
@@ -555,7 +555,7 @@ export default function DetailSerie() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3001/api/seasons/${editingSeasonId}`, {
+      const res = await fetch(`/api/seasons/${editingSeasonId}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`

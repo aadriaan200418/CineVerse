@@ -139,7 +139,7 @@ export default function Settings() {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar tu cuenta?");
         if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteUserSelect/${dni}`, {
+            const res = await fetch(`/api/deleteUserSelect/${dni}`, {
                 method: "DELETE"
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -160,7 +160,7 @@ export default function Settings() {
     // Cargar datos (admin)
     const fetchData = async (tab) => {
         try {
-            const res = await fetch(`http://localhost:3001/api/settings?tab=${tab}`, {
+            const res = await fetch(`/api/settings?tab=${tab}`, {
                 headers: { role: "admin" },
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -189,7 +189,7 @@ export default function Settings() {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
         if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteUserSelect/${dni}`, {
+            const res = await fetch(`/api/deleteUserSelect/${dni}`, {
                 method: "DELETE"
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -241,7 +241,7 @@ export default function Settings() {
         }
 
         const payload = {...editingAdmin, birth_date: editingAdmin.birth_date.slice(0, 10)};
-        fetch(`http://localhost:3001/api/admins/${editingAdmin.dni}`, {
+        fetch(`/api/admins/${editingAdmin.dni}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -269,7 +269,7 @@ export default function Settings() {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar este perfil?");
         if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteAdminSelect/${dni}`, {
+            const res = await fetch(`/api/deleteAdminSelect/${dni}`, {
                 method: "DELETE"
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -291,7 +291,7 @@ export default function Settings() {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar esta película?");
         if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteMovieSelect/${id_movie}`, {
+            const res = await fetch(`/api/deleteMovieSelect/${id_movie}`, {
                 method: "DELETE"
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -313,7 +313,7 @@ export default function Settings() {
         const confirmDelete = window.confirm("¿Seguro que quieres eliminar esta serie?");
         if (!confirmDelete) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/deleteSeriesSelect/${id_series}`, {
+            const res = await fetch(`/api/deleteSeriesSelect/${id_series}`, {
                 method: "DELETE"
             });
             if (!res.ok) throw new Error("Respuesta no OK del servidor");
@@ -427,7 +427,7 @@ export default function Settings() {
                     : new Date(editingSeries.release_date).toISOString().slice(0, 10),
         };
 
-        fetch(`http://localhost:3001/api/series/${editingSeries.id_series}`, {
+        fetch(`/api/series/${editingSeries.id_series}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -491,7 +491,7 @@ export default function Settings() {
                     : new Date(editingMovie.release_date).toISOString().slice(0, 10),
         };
 
-        fetch(`http://localhost:3001/api/movies/${editingMovie.id_movie}`, {
+        fetch(`/api/movies/${editingMovie.id_movie}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -546,7 +546,7 @@ export default function Settings() {
             birth_date: editingUser.birth_date.slice(0, 10)
         };
 
-        fetch(`http://localhost:3001/api/users/${editingUser.dni}`, {
+        fetch(`/api/users/${editingUser.dni}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

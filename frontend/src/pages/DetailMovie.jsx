@@ -68,7 +68,7 @@ export default function DetailMovie() {
     setIsFavorite(false);
 
     // Petición para obtener la película
-    fetch(`http://localhost:3001/api/movies/${id}`)
+    fetch(`/api/movies/${id}`)
       .then(res => {
         if (!res.ok) throw new Error("No se pudo cargar la película");
         return res.json();
@@ -92,7 +92,7 @@ export default function DetailMovie() {
     if (id_profile) {
       const numericId = Number(id);
 
-      fetch(`http://localhost:3001/api/likes/${id_profile}`)
+      fetch(`/api/likes/${id_profile}`)
         .then(res => res.json())
         .then(data => {
           const liked = data.likes?.some(l => Number(l.id_movie) === numericId);
@@ -100,7 +100,7 @@ export default function DetailMovie() {
         })
         .catch(err => console.error("Error cargando likes:", err));
 
-      fetch(`http://localhost:3001/api/favorites/${id_profile}`)
+      fetch(`/api/favorites/${id_profile}`)
         .then(res => res.json())
         .then(data => {
           const fav = data.favorites?.some(f => Number(f.id_movie) === numericId);
@@ -116,7 +116,7 @@ export default function DetailMovie() {
     if (!id_profile || !movie?.id_movie) return;
 
     if (!isLiked) {
-      fetch("http://localhost:3001/api/likes", {
+      fetch("/api/likes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_profile, id_movie: movie.id_movie })
@@ -125,7 +125,7 @@ export default function DetailMovie() {
         .catch(err => console.error("Error al dar like:", err));
     }
     else {
-      fetch(`http://localhost:3001/api/likes/movies/${id_profile}/${movie.id_movie}`, {
+      fetch(`/api/likes/movies/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
         .then(() => setIsLiked(false))
@@ -139,7 +139,7 @@ export default function DetailMovie() {
     if (!id_profile || !movie?.id_movie) return;
 
     if (!isFavorite) {
-      fetch("http://localhost:3001/api/favorites", {
+      fetch("/api/favorites", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id_profile, id_movie: movie.id_movie })
@@ -148,7 +148,7 @@ export default function DetailMovie() {
         .catch(err => console.error("Error al añadir favorito:", err));
     }
     else {
-      fetch(`http://localhost:3001/api/favorites/movies/${id_profile}/${movie.id_movie}`, {
+      fetch(`/api/favorites/movies/${id_profile}/${movie.id_movie}`, {
         method: "DELETE"
       })
         .then(() => setIsFavorite(false))
@@ -218,7 +218,7 @@ export default function DetailMovie() {
           : new Date(movie.release_date).toISOString().slice(0, 10)
     };
 
-    fetch(`http://localhost:3001/api/movies/${movie.id_movie}`, {
+    fetch(`/api/movies/${movie.id_movie}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

@@ -34,7 +34,7 @@ export default function Home({ view: initialView = "inicio" }) {
     setRole(storedRole);
 
     // Cargar películas
-    fetch("http://localhost:3001/api/movies")
+    fetch("/api/movies")
       .then(res => res.json())
       .then(data => {
         setMovies(data.movies);
@@ -47,7 +47,7 @@ export default function Home({ view: initialView = "inicio" }) {
     );
 
     // Cargar series
-    fetch("http://localhost:3001/api/series")
+    fetch("/api/series")
       .then(res => res.json())
       .then(data => {
         setSeries(data.series);
@@ -61,8 +61,8 @@ export default function Home({ view: initialView = "inicio" }) {
 
     // Cargar Top 10 
     Promise.all([
-      fetch("http://localhost:3001/api/top-movies").then(res => res.json()),
-      fetch("http://localhost:3001/api/top-series").then(res => res.json())
+      fetch("/api/top-movies").then(res => res.json()),
+      fetch("/api/top-series").then(res => res.json())
     ])
       .then(([moviesRes, seriesRes]) => {
         setTopMovies(moviesRes.top_movies || []);
@@ -77,13 +77,13 @@ export default function Home({ view: initialView = "inicio" }) {
     if (!id_profile) return;
 
     // Cargar favoritos
-    fetch(`http://localhost:3001/api/favorites/${id_profile}`)
+    fetch(`/api/favorites/${id_profile}`)
       .then(res => res.json())
       .then(data => setFavorites(data.favorites))
       .catch(err => console.error("Error cargando favoritos:", err));
 
     // Cargar likes
-    fetch(`http://localhost:3001/api/likes/${id_profile}`)
+    fetch(`/api/likes/${id_profile}`)
       .then(res => res.json())
       .then(data => setLikes(data.likes))
       .catch(err => console.error("Error cargando likes:", err));
