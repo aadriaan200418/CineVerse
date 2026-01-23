@@ -643,48 +643,22 @@ export default function Settings() {
                                     <h3>Editar usuario: {editingUser.name}</h3>
 
                                     <label className="settings-label-sett">DNI</label>
-                                    <input
-                                        name="dni"
-                                        value={editingUser.dni ?? ""}
-                                        readOnly
-                                        className="settings-input-readonly"
-                                    />
+                                    <input name="dni" value={editingUser.dni ?? ""} readOnly className="settings-input-readonly"/>
 
                                     <label className="settings-label-sett">Nombre</label>
-                                    <input
-                                        name="name"
-                                        value={editingUser.name ?? ""}
-                                        onChange={handleUserChange}
-                                        placeholder="Nombre completo"
-                                    />
+                                    <input name="name" value={editingUser.name ?? ""} onChange={handleUserChange} placeholder="Nombre completo"/>
                                     {userFieldErrors.name && <span className="error">{userFieldErrors.name}</span>}
 
                                     <label className="settings-label-sett">Usuario</label>
-                                    <input
-                                        name="username"
-                                        value={editingUser.username ?? ""}
-                                        onChange={handleUserChange}
-                                        placeholder="Nombre de usuario"
-                                    />
+                                    <input name="username" value={editingUser.username ?? ""} onChange={handleUserChange} placeholder="Nombre de usuario"/>
                                     {userFieldErrors.username && <span className="error">{userFieldErrors.username}</span>}
 
                                     <label className="settings-label-sett">Email</label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        value={editingUser.email ?? ""}
-                                        onChange={handleUserChange}
-                                        placeholder="Correo electrónico"
-                                    />
+                                    <input name="email" type="email" value={editingUser.email ?? ""} onChange={handleUserChange} placeholder="Correo electrónico"/>
                                     {userFieldErrors.email && <span className="error">{userFieldErrors.email}</span>}
 
                                     <label className="settings-label-sett">Fecha de nacimiento</label>
-                                    <input
-                                        name="birth_date"
-                                        type="date"
-                                        value={editingUser.birth_date ? editingUser.birth_date.slice(0, 10) : ''}
-                                        onChange={handleUserChange}
-                                    />
+                                    <input name="birth_date" type="date" value={editingUser.birth_date ? editingUser.birth_date.slice(0, 10) : ''} onChange={handleUserChange}/>
                                     {userFieldErrors.birth_date && <span className="error">{userFieldErrors.birth_date}</span>}
 
                                     <div className="settings-btns">
@@ -725,20 +699,10 @@ export default function Settings() {
                                                 <td>{a.email}</td>
                                                 <td>{a.password}</td>
                                                 <td>
-                                                    <img
-                                                        src={pen}
-                                                        alt="Editar administrador"
-                                                        className="settings-actions-icon"
-                                                        onClick={() => startEditingAdmin(a)}
-                                                    />
+                                                    <img src={pen} alt="Editar administrador" className="settings-actions-icon" onClick={() => startEditingAdmin(a)}/>
                                                 </td>
                                                 <td>
-                                                    <img
-                                                        src={binIcon}
-                                                        alt="Eliminar administrador"
-                                                        className="settings-delete-icon"
-                                                        onClick={() => handleDeleteAdminSelect(a.dni)}
-                                                    />
+                                                    <img src={binIcon} alt="Eliminar administrador" className="settings-delete-icon" onClick={() => handleDeleteAdminSelect(a.dni)}/>
                                                 </td>
                                             </tr>
                                         ))}
@@ -752,48 +716,22 @@ export default function Settings() {
                                     <h3>Editar administrador: {editingAdmin.name}</h3>
 
                                     <label className="settings-label-sett">DNI</label>
-                                    <input
-                                        name="dni"
-                                        value={editingAdmin.dni ?? ""}
-                                        readOnly
-                                        className="settings-input-readonly"
-                                    />
+                                    <input name="dni" value={editingAdmin.dni ?? ""} readOnly className="settings-input-readonly"/>
 
                                     <label className="settings-label-sett">Nombre</label>
-                                    <input
-                                        name="name"
-                                        value={editingAdmin.name ?? ""}
-                                        onChange={handleAdminChange}
-                                        placeholder="Nombre completo"
-                                    />
+                                    <input name="name" value={editingAdmin.name ?? ""} onChange={handleAdminChange} placeholder="Nombre completo"/>
                                     {adminFieldErrors.name && <span className="error">{adminFieldErrors.name}</span>}
 
                                     <label className="settings-label-sett">Usuario</label>
-                                    <input
-                                        name="username"
-                                        value={editingAdmin.username ?? ""}
-                                        onChange={handleAdminChange}
-                                        placeholder="Nombre de usuario"
-                                    />
+                                    <input name="username" value={editingAdmin.username ?? ""} onChange={handleAdminChange} placeholder="Nombre de usuario"/>
                                     {adminFieldErrors.username && <span className="error">{adminFieldErrors.username}</span>}
 
                                     <label className="settings-label-sett">Email</label>
-                                    <input
-                                        name="email"
-                                        type="email"
-                                        value={editingAdmin.email ?? ""}
-                                        onChange={handleAdminChange}
-                                        placeholder="Correo electrónico"
-                                    />
+                                    <input name="email" type="email" value={editingAdmin.email ?? ""} onChange={handleAdminChange} placeholder="Correo electrónico"/>
                                     {adminFieldErrors.email && <span className="error">{adminFieldErrors.email}</span>}
 
                                     <label className="settings-label-sett">Fecha de nacimiento</label>
-                                    <input
-                                        name="birth_date"
-                                        type="date"
-                                        value={editingAdmin.birth_date ? editingAdmin.birth_date.slice(0, 10) : ''}
-                                        onChange={handleAdminChange}
-                                    />
+                                    <input name="birth_date" type="date" value={editingAdmin.birth_date ? editingAdmin.birth_date.slice(0, 10) : ''} onChange={handleAdminChange}/>
                                     {adminFieldErrors.birth_date && <span className="error">{adminFieldErrors.birth_date}</span>}
 
                                     <div className="settings-btns">
