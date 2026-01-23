@@ -623,31 +623,66 @@ app.delete("/api/deleteMovieSelect/:id", (req, res) => {
   });
 });
 
-// Eliminar serie
 app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
   const { id } = req.params;
 
-  // Borrar likes asociados a la serie
-  db.query("DELETE FROM likes WHERE id_series = ?", [id], (err) => {
-    if (err) return res.status(500).json({ success: false, error: "Error al eliminar likes" });
+  // Borrar capítulos
+  db.query(
+    `DELETE c FROM chapters c JOIN seasons s ON c.id_season = s.id_season WHERE s.id_series = ?`,
+    [id],
+    (err) => {
+      if (err) {
+        console.error("Error capítulos:", err);
+        return res.status(500).json({ error: "Error al eliminar capítulos" });
+      }
 
-    // Borrar favoritos asociados a la serie
-    db.query("DELETE FROM favorites WHERE id_series = ?", [id], (err) => {
-      if (err) return res.status(500).json({ success: false, error: "Error al eliminar favoritos" });
+      // Borrar temporadas
+      db.query(
+        "DELETE FROM seasons WHERE id_series = ?",
+        [id],
+        (err) => {
+          if (err) {
+            console.error("Error temporadas:", err);
+            return res.status(500).json({ error: "Error al eliminar temporadas" });
+          }
 
-      // Finalmente borrar la serie
-      db.query("DELETE FROM series WHERE id_series = ?", [id], (err, result) => {
-        if (err) return res.status(500).json({ success: false, error: "Error al eliminar serie" });
-        if (result.affectedRows > 0) {
-          res.json({ success: true });
-        } 
-        else {
-          res.status(404).json({ success: false, error: "Serie no encontrada" });
+          // Eliminar likes
+          db.query(
+            "DELETE FROM likes WHERE id_series = ?",
+            [id],
+            (err) => {
+              if (err) return res.status(500).json({ error: "Error al eliminar likes" });
+
+              // Eliminar favoritos
+              db.query(
+                "DELETE FROM favorites WHERE id_series = ?",
+                [id],
+                (err) => {
+                  if (err) return res.status(500).json({ error: "Error al eliminar favoritos" });
+
+                  // Eliminar la serie
+                  db.query(
+                    "DELETE FROM series WHERE id_series = ?",
+                    [id],
+                    (err, result) => {
+                      if (err) return res.status(500).json({ error: "Error al eliminar serie" });
+                      if (result.affectedRows === 0) {
+                        return res.status(404).json({ error: "Serie no encontrada" });
+                      }
+
+                      res.json({ success: true });
+                    }
+                  );
+                }
+              );
+            }
+          );
         }
-      });
-    });
-  });
+      );
+    }
+  );
 });
+
 
 // -------------------------------------------------AÑADIR PELICULAS/SERIES/USUARIOS/ASMINS DESDE ADMIN ----------------------------------------------
 //Añadir usuarios o admins

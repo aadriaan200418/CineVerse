@@ -280,7 +280,8 @@ export default function Settings() {
             } else {
                 setError(data.error || "No se pudo eliminar el administrador");
             }
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
         }
@@ -302,7 +303,8 @@ export default function Settings() {
             } else {
                 setError(data.error || "No se pudo eliminar la película");
             }
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
         }
@@ -324,7 +326,8 @@ export default function Settings() {
             } else {
                 setError(data.error || "No se pudo eliminar la serie");
             }
-        } catch (err) {
+        } 
+        catch (err) {
             console.error("Error en fetch:", err);
             alert("Error de conexión con el servidor");
         }
