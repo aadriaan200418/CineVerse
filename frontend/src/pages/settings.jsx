@@ -611,7 +611,6 @@ export default function Settings() {
                                             <th>Usuario</th>
                                             <th>Fecha nacimiento</th>
                                             <th>Email</th>
-                                            <th>Contraseña</th>
                                             <th>Editar</th>
                                             <th>Eliminar</th>
                                         </tr>
@@ -624,7 +623,6 @@ export default function Settings() {
                                                 <td>{u.username}</td>
                                                 <td>{new Date(u.birth_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{u.email}</td>
-                                                <td>{u.password}</td>
                                                 <td>
                                                     <img src={pen} alt="Editar usuario" className="settings-actions-icon" onClick={() => startEditingUser(u)}/>
                                                 </td>
@@ -684,7 +682,6 @@ export default function Settings() {
                                             <th>Usuario</th>
                                             <th>Fecha nacimiento</th>
                                             <th>Email</th>
-                                            <th>Password</th>
                                             <th>Editar</th>
                                             <th>Eliminar</th>
                                         </tr>
@@ -697,7 +694,6 @@ export default function Settings() {
                                                 <td>{a.username}</td>
                                                 <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{a.email}</td>
-                                                <td>{a.password}</td>
                                                 <td>
                                                     <img src={pen} alt="Editar administrador" className="settings-actions-icon" onClick={() => startEditingAdmin(a)}/>
                                                 </td>

@@ -305,10 +305,10 @@ app.get("/api/settings", (req, res) => {
   let sql;
   switch (tab) {
     case "users":
-      sql = "SELECT dni, name, username, birth_date, email, password, role FROM users WHERE role = 'user'";
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'user'";
       break;
     case "admins":
-      sql = "SELECT dni, name, username, birth_date, email, password, role FROM users WHERE role = 'admin'";
+      sql = "SELECT dni, name, username, birth_date, email, role FROM users WHERE role = 'admin'";
       break;
     case "movies":
       sql = "SELECT id_movie, title, image, description, release_date, genre, duration_minutes, minimum_age FROM movies";
