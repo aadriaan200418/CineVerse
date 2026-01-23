@@ -611,6 +611,7 @@ export default function Settings() {
                                             <th>Usuario</th>
                                             <th>Fecha nacimiento</th>
                                             <th>Email</th>
+                                            <th>Contraseña</th>
                                             <th>Editar</th>
                                             <th>Eliminar</th>
                                         </tr>
@@ -623,21 +624,12 @@ export default function Settings() {
                                                 <td>{u.username}</td>
                                                 <td>{new Date(u.birth_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{u.email}</td>
+                                                <td>{u.password}</td>
                                                 <td>
-                                                    <img
-                                                        src={pen}
-                                                        alt="Editar usuario"
-                                                        className="settings-actions-icon"
-                                                        onClick={() => startEditingUser(u)}
-                                                    />
+                                                    <img src={pen} alt="Editar usuario" className="settings-actions-icon" onClick={() => startEditingUser(u)}/>
                                                 </td>
                                                 <td>
-                                                    <img
-                                                        src={binIcon}
-                                                        alt="Eliminar perfil"
-                                                        className="settings-delete-icon"
-                                                        onClick={() => handleDeleteUserSelect(u.dni)}
-                                                    />
+                                                    <img src={binIcon} alt="Eliminar perfil" className="settings-delete-icon" onClick={() => handleDeleteUserSelect(u.dni)}/>
                                                 </td>
                                             </tr>
                                         ))}
@@ -718,6 +710,7 @@ export default function Settings() {
                                             <th>Usuario</th>
                                             <th>Fecha nacimiento</th>
                                             <th>Email</th>
+                                            <th>Paswword</th>
                                             <th>Editar</th>
                                             <th>Eliminar</th>
                                         </tr>
@@ -730,6 +723,7 @@ export default function Settings() {
                                                 <td>{a.username}</td>
                                                 <td>{new Date(a.birth_date).toLocaleDateString("es-ES")}</td>
                                                 <td>{a.email}</td>
+                                                <td>{a.password}</td>
                                                 <td>
                                                     <img
                                                         src={pen}
