@@ -18,11 +18,11 @@ export default function Settings() {
     const [allSeries, setAllSeries] = useState([]);
     const [editingMovie, setEditingMovie] = useState(null);
     const [editingSeries, setEditingSeries] = useState(null);
-    const [editingUser, setEditingUser] = useState(null); // ← Nuevo estado
+    const [editingUser, setEditingUser] = useState(null);
     const [error, setError] = useState(null);
     const [searchParams] = useSearchParams();
     const [fieldErrors, setFieldErrors] = useState({});
-    const [userFieldErrors, setUserFieldErrors] = useState({}); // ← Errores específicos de usuario
+    const [userFieldErrors, setUserFieldErrors] = useState({}); 
     const [loading, setLoading] = useState(true);
     const [editingAdmin, setEditingAdmin] = useState(null);
     const [adminFieldErrors, setAdminFieldErrors] = useState({});
@@ -684,7 +684,7 @@ export default function Settings() {
                                             <th>Usuario</th>
                                             <th>Fecha nacimiento</th>
                                             <th>Email</th>
-                                            <th>Paswword</th>
+                                            <th>Password</th>
                                             <th>Editar</th>
                                             <th>Eliminar</th>
                                         </tr>
