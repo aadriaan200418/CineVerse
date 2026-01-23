@@ -685,7 +685,7 @@ app.delete("/api/deleteSeriesSelect/:id", (req, res) => {
 
 
 // -------------------------------------------------AÑADIR PELICULAS/SERIES/USUARIOS/ASMINS DESDE ADMIN ----------------------------------------------
-//Añadir usuarios o admins
+// Añadir usuarios o admins
 app.post("/api/add-user-admin", (req, res) => {
   const { name, username, dni, birth_date, email, password, role } = req.body;
   let errors = {};
@@ -700,7 +700,7 @@ app.post("/api/add-user-admin", (req, res) => {
     return res.status(400).json({ errors });
   }
 
-  // Comprobar duplicados en la tabla users (por username, dni o email)
+  // Comprobar duplicados
   db.query(
     "SELECT * FROM users WHERE username = ? OR dni = ? OR email = ?",
     [username, dni, email],
@@ -709,6 +709,7 @@ app.post("/api/add-user-admin", (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Error en el servidor" });
       }
+
       if (rows.length > 0) {
         let dupErrors = {};
         rows.forEach(row => {
@@ -728,12 +729,33 @@ app.post("/api/add-user-admin", (req, res) => {
             console.error(err2);
             return res.status(500).json({ error: "Error en el servidor" });
           }
-          return res.json({ success: true });
+
+          // Si es admin, crea un perfil automaticamente
+          if (role === "admin") {
+            db.query(
+              "INSERT INTO profiles (name, id_user) VALUES (?, ?)",
+              [name, dni],
+              (err3) => {
+                if (err3) {
+                  console.error("Error creando perfil de admin:", err3);
+                  return res.status(500).json({
+                    error: "Admin creado, pero error al crear perfil"
+                  });
+                }
+
+                return res.json({ success: true });
+              }
+            );
+          } 
+          else {
+            return res.json({ success: true });
+          }
         }
       );
     }
   );
 });
+
 
 //Añadir peliculas o series
 app.post("/api/add-movie-serie", (req, res) => {

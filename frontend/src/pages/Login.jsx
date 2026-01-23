@@ -47,7 +47,6 @@ export default function Login() {
         localStorage.setItem("role", data.role);
         localStorage.setItem("token", data.token);
         localStorage.setItem("dni", data.id_profile);
-        localStorage.setItem("id_profile", data.id_profile); 
         if (data.role === "admin") {
           navigate("/home");
         }
